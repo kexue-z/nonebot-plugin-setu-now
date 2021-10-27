@@ -37,7 +37,7 @@ setu_dav_password=
 ## bot.py
 
 ```
-nonebot.load_plugin("nonebot-plugin-setu-now")
+nonebot.load_plugin("nonebot_plugin_setu_now")
 ```
 
 # 使用
