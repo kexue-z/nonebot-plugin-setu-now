@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "nonebot-plugin-setu-now"
+version = "0.0.1"
+description = "另一个色图插件"
+authors = ["kexue"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+httpx = "^0.20.0"
+webdav4 = "^0.9.3"
+
+[tool.poetry.dev-dependencies]
+nonebot2 = "2.0.0a16"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
