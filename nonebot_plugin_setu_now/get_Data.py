@@ -55,7 +55,7 @@ async def get_setu(keyword="", r18=False) -> list:
             save_img(content, pid=setu_pid, p=p, r18=r18)
 
             if type(base64) == str:
-                pic = MessageSegment.image(base64)
+                pic = pic = "[CQ:image,file=base64://" + base64 + "]"
                 data = (
                     "标题:"
                     + setu_title
