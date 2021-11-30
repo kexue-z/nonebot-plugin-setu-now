@@ -40,7 +40,7 @@ async def _(bot: Bot, event: Event, state: T_State):
     data = readJson()
     try:
         cd = event.time - data[qid][0]
-    except:
+    except Exception: 
         cd = cdTime + 1
 
     r18 = True if (isinstance(event, PrivateMessageEvent) and r18) else False

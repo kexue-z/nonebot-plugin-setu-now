@@ -15,9 +15,11 @@ proxies = (
 
 save = get_driver().config.setu_save
 if save == "webdav":
-    from .save_to_WebDAV import *
+    from .save_to_WebDAV import save_img
 else:
-    from .save_to_Local import *
+    from .save_to_Local import save_img
+
+error = "Error:"
 
 
 async def get_setu(keyword="", r18=False) -> list:
@@ -40,11 +42,11 @@ async def get_setu(keyword="", r18=False) -> list:
             logger.info(res.json())
         except httpx.HTTPError as e:
             logger.warning(e)
-            return "Error:", f"API异常{e}", False
+            return [error, f"API异常{e}", False]
         try:
             setu_title = res.json()["data"][0]["title"]
             setu_url = res.json()["data"][0]["urls"]["regular"]
-            content = await downPic(setu_url)
+            content = await down_pic(setu_url)
             setu_pid = res.json()["data"][0]["pid"]
             setu_author = res.json()["data"][0]["author"]
             p = res.json()["data"][0]["p"]
@@ -64,19 +66,19 @@ async def get_setu(keyword="", r18=False) -> list:
                     + "\n画师:"
                     + setu_author
                 )
-            return pic, data, True, setu_url
+            return [pic, data, True, setu_url]
         except httpx.ProxyError as e:
             logger.warning(e)
-            return "Error:", f"代理错误: {e}", False
+            return [error, f"代理错误: {e}", False]
         except IndexError as e:
             logger.warning(e)
-            return "Error:", f"图库中没有搜到关于{keyword}的图。", False
+            return [error, f"图库中没有搜到关于{keyword}的图。", False]
         except:
             logger.warning(f"{exc_info()[0]}, {exc_info()[1]}")
-            return "Error:", f"{exc_info()[0]} {exc_info()[1]}。", False
+            return [error, f"{exc_info()[0]} {exc_info()[1]}。", False]
 
 
-async def downPic(url):
+async def down_pic(url):
     async with AsyncClient(proxies=proxies) as client:
         headers = {
             "Referer": "https://accounts.pixiv.net/login?lang=zh&source=pc&view_type=page&ref=wwwtop_accounts_index",
