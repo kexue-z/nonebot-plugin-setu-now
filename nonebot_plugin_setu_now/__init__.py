@@ -28,7 +28,6 @@ cdTime = (
 )
 
 
-
 @setu.handle()
 async def _(bot: Bot, event: Event, state: T_State):
     global mid
@@ -40,14 +39,18 @@ async def _(bot: Bot, event: Event, state: T_State):
     data = readJson()
     try:
         cd = event.time - data[qid][0]
-    except Exception: 
+    except Exception:
         cd = cdTime + 1
 
     r18 = True if (isinstance(event, PrivateMessageEvent) and r18) else False
 
     logger.info(f"key={key},r18={r18}")
 
-    if cd > cdTime or event.get_user_id() in nonebot.get_driver().config.superusers:
+    if (
+        cd > cdTime
+        or event.get_user_id() in nonebot.get_driver().config.superusers
+        or isinstance(event, PrivateMessageEvent)
+    ):
         writeJson(qid, event.time, mid, data)
         pic = await get_setu(key, r18)
         if pic[2]:
@@ -70,6 +73,13 @@ async def _(bot: Bot, event: Event, state: T_State):
             await setu.finish(pic[0] + pic[1])
 
     else:
-        await setu.send(
-            f"{random.choice(setu_SendCD)} 你的CD还有{cdTime - cd}秒", at_sender=True
-        )
+        time_last = cdTime - cd
+        hours, minutes, seconds = 0, 0, 0
+        if time_last >= 60:
+            minutes, seconds = divmod(time_last, 60)
+            hours, minutes = divmod(minutes, 60)
+        else:
+            minutes = time_last
+        cd_msg = f"{str(hours) + '小时' if hours else ''}{str(minutes) + '分钟' if minutes else ''}{str(seconds) + '秒' if seconds else ''}"
+
+        await setu.send(f"{random.choice(setu_SendCD)} 你的CD还有{cd_msg}", at_sender=True)

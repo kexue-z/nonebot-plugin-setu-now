@@ -54,7 +54,10 @@ async def get_setu(keyword="", r18=False) -> list:
             base64 = convert_b64(content)
 
             # 保存图片
-            save_img(content, pid=setu_pid, p=p, r18=r18)
+            try:
+                save_img(content, pid=setu_pid, p=p, r18=r18)
+            except:
+                logger.warning(f"{exc_info()[0]}, {exc_info()[1]}")
 
             if type(base64) == str:
                 pic = pic = "[CQ:image,file=base64://" + base64 + "]"
