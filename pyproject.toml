@@ -9,6 +9,7 @@ license = "MIT"
 python = "^3.9"
 httpx = "^0.20.0"
 webdav4 = "^0.9.3"
+nonebot-adapter-cqhttp = "^2.0.0-alpha.16"
 
 [tool.poetry.dev-dependencies]
 nonebot2 = "2.0.0a16"

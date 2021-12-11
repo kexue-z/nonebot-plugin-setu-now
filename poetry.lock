@@ -19,7 +19,7 @@ trio = ["trio (>=0.16)"]
 name = "asgiref"
 version = "3.4.1"
 description = "ASGI specs, helper code, and adapters"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 
@@ -49,7 +49,7 @@ unicode_backport = ["unicodedata2"]
 name = "click"
 version = "8.0.3"
 description = "Composable command line interface toolkit"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 
@@ -60,7 +60,7 @@ colorama = {version = "*", markers = "platform_system == \"Windows\""}
 name = "colorama"
 version = "0.4.4"
 description = "Cross-platform colored terminal text."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
@@ -68,7 +68,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 name = "fastapi"
 version = "0.68.2"
 description = "FastAPI framework, high performance, easy to learn, fast to code, ready for production"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6.1"
 
@@ -94,7 +94,7 @@ python-versions = ">=3.6"
 name = "h2"
 version = "4.1.0"
 description = "HTTP/2 State-Machine based protocol implementation"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6.1"
 
@@ -106,7 +106,7 @@ hyperframe = ">=6.0,<7"
 name = "hpack"
 version = "4.0.0"
 description = "Pure-Python HPACK header compression"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6.1"
 
@@ -130,7 +130,7 @@ http2 = ["h2 (>=3,<5)"]
 name = "httptools"
 version = "0.2.0"
 description = "A collection of framework independent HTTP protocol utils."
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -162,7 +162,7 @@ http2 = ["h2 (>=3,<5)"]
 name = "hyperframe"
 version = "6.0.1"
 description = "HTTP/2 framing layer for Python"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6.1"
 
@@ -178,7 +178,7 @@ python-versions = ">=3.5"
 name = "loguru"
 version = "0.5.3"
 description = "Python logging made (stupidly) simple"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.5"
 
@@ -190,10 +190,22 @@ win32-setctime = {version = ">=1.0.0", markers = "sys_platform == \"win32\""}
 dev = ["codecov (>=2.0.15)", "colorama (>=0.3.4)", "flake8 (>=3.7.7)", "tox (>=3.9.0)", "tox-travis (>=0.12)", "pytest (>=4.6.2)", "pytest-cov (>=2.7.1)", "Sphinx (>=2.2.1)", "sphinx-autobuild (>=0.7.1)", "sphinx-rtd-theme (>=0.4.3)", "black (>=19.10b0)", "isort (>=5.1.1)"]
 
 [[package]]
+name = "nonebot-adapter-cqhttp"
+version = "2.0.0a16"
+description = "OneBot(CQHTTP) adapter for nonebot2"
+category = "main"
+optional = false
+python-versions = ">=3.7.3,<4.0.0"
+
+[package.dependencies]
+httpx = ">=0.18.0,<1.0.0"
+nonebot2 = ">=2.0.0-alpha.14,<3.0.0"
+
+[[package]]
 name = "nonebot2"
 version = "2.0.0a16"
 description = "An asynchronous python bot framework."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.7.3,<4.0.0"
 
@@ -216,7 +228,7 @@ aiohttp = ["aiohttp[speedups] (>=3.7.4,<4.0.0)"]
 name = "pydantic"
 version = "1.8.2"
 description = "Data validation and settings management using python 3.6 type hinting"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6.1"
 
@@ -232,7 +244,7 @@ email = ["email-validator (>=1.0.3)"]
 name = "pygtrie"
 version = "2.4.2"
 description = "A pure Python trie data structure implementation."
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -251,7 +263,7 @@ six = ">=1.5"
 name = "python-dotenv"
 version = "0.19.2"
 description = "Read key-value pairs from a .env file and set them as environment variables"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.5"
 
@@ -262,7 +274,7 @@ cli = ["click (>=5.0)"]
 name = "pyyaml"
 version = "6.0"
 description = "YAML parser and emitter for Python"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 
@@ -300,7 +312,7 @@ python-versions = ">=3.5"
 name = "starlette"
 version = "0.14.2"
 description = "The little ASGI library that shines."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 
@@ -311,7 +323,7 @@ full = ["aiofiles", "graphene", "itsdangerous", "jinja2", "python-multipart", "p
 name = "tomlkit"
 version = "0.7.2"
 description = "Style preserving TOML library"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
@@ -319,7 +331,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 name = "typing-extensions"
 version = "4.0.1"
 description = "Backported and Experimental Type Hints for Python 3.6+"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 
@@ -327,7 +339,7 @@ python-versions = ">=3.6"
 name = "uvicorn"
 version = "0.15.0"
 description = "The lightning-fast ASGI server."
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -350,7 +362,7 @@ standard = ["websockets (>=9.1)", "httptools (>=0.2.0,<0.3.0)", "watchgod (>=0.6
 name = "uvloop"
 version = "0.16.0"
 description = "Fast implementation of asyncio event loop on top of libuv"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.7"
 
@@ -363,7 +375,7 @@ test = ["aiohttp", "flake8 (>=3.9.2,<3.10.0)", "psutil", "pycodestyle (>=2.7.0,<
 name = "watchgod"
 version = "0.7"
 description = "Simple, modern file watching and code reload in python."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.5"
 
@@ -392,7 +404,7 @@ tests = ["typing-extensions (==3.10.0.2)", "pytest (==6.2.5)", "pytest-cov (==3.
 name = "websockets"
 version = "10.1"
 description = "An implementation of the WebSocket Protocol (RFC 6455 & 7692)"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.7"
 
@@ -400,7 +412,7 @@ python-versions = ">=3.7"
 name = "win32-setctime"
 version = "1.0.4"
 description = "A small Python utility to set file creation time on Windows"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.5"
 
@@ -410,7 +422,7 @@ dev = ["pytest (>=4.6.2)", "black (>=19.3b0)"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "94047a54fa5afe2c14697b5f74ad9eff48616599abdf58d41ed071a75419254a"
+content-hash = "1ba95270a06813fd5aae50ff3086af677392d7f0314cc0ee83ffafad44d2caaa"
 
 [metadata.files]
 anyio = [
@@ -489,6 +501,10 @@ idna = [
 loguru = [
     {file = "loguru-0.5.3-py3-none-any.whl", hash = "sha256:f8087ac396b5ee5f67c963b495d615ebbceac2796379599820e324419d53667c"},
     {file = "loguru-0.5.3.tar.gz", hash = "sha256:b28e72ac7a98be3d28ad28570299a393dfcd32e5e3f6a353dec94675767b6319"},
+]
+nonebot-adapter-cqhttp = [
+    {file = "nonebot-adapter-cqhttp-2.0.0a16.tar.gz", hash = "sha256:9de270291b98c41a45e5b629c02f16e3b25cafb3867b8161851f49c84145d8aa"},
+    {file = "nonebot_adapter_cqhttp-2.0.0a16-py3-none-any.whl", hash = "sha256:831747c55c9c1a660215225f84784a4ca275a84bffa8d1312524367066b68bbe"},
 ]
 nonebot2 = [
     {file = "nonebot2-2.0.0a16-py3-none-any.whl", hash = "sha256:88596c154143fc2203a50d224bacf4e2e5be1b4142fd92e645c40258e5819924"},
