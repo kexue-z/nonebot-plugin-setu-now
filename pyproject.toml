@@ -13,6 +13,7 @@ nonebot-adapter-cqhttp = "^2.0.0-alpha.16"
 
 [tool.poetry.dev-dependencies]
 nonebot2 = "2.0.0a16"
+black = {version = "^21.12b0", allow-prereleases = true}
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
