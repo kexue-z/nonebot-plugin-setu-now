@@ -27,6 +27,8 @@ cdTime = (
     nonebot.get_driver().config.setu_cd if nonebot.get_driver().config.setu_cd else 60
 )
 
+if not nonebot.get_driver().config.setu_porxy:
+    logger.warning("将会使用 i.pixiv.cat 获取图片, 请检查是否正常访问.")
 
 @setu.handle()
 async def _(bot: Bot, event: Event, state: T_State):

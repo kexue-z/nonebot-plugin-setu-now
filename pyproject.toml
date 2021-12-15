@@ -1,13 +1,13 @@
 [tool.poetry]
 name = "nonebot-plugin-setu-now"
-version = "0.0.4"
+version = "0.0.4.1"
 description = "另一个色图插件"
 authors = ["kexue"]
 license = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-httpx = "^0.20.0"
+httpx = ">=0.18.0,<1.0.0"
 webdav4 = "^0.9.3"
 nonebot-adapter-cqhttp = "^2.0.0-alpha.16"
 
