@@ -6,12 +6,13 @@ import httpx
 from httpx import AsyncClient
 from nonebot import logger
 from nonebot import get_driver
+from nonebot.log import logger
 
-proxies = (
-    "http://127.0.0.1:7890"
-    if not get_driver().config.setu_porxy
-    else get_driver().config.setu_porxy
-)
+proxies = get_driver().config.setu_porxy
+if proxies:
+    logger.info(f"使用自定代理 {proxies}")
+else:
+    proxies = None
 
 save = get_driver().config.setu_save
 if save == "webdav":
@@ -19,6 +20,11 @@ if save == "webdav":
 else:
     from .save_to_Local import save_img
 
+reverse_proxy = get_driver().config.setu_reverse_proxy
+if reverse_proxy:
+    logger.info(f"使用自定反向代理 {reverse_proxy}")
+else:
+    reverse_proxy = "i.pixiv.re"
 error = "Error:"
 
 
@@ -36,7 +42,12 @@ async def get_setu(keyword="", r18=False) -> list:
     """
     async with AsyncClient() as client:
         req_url = "https://api.lolicon.app/setu/v2"
-        params = {"keyword": keyword, "r18": 1 if r18 else 0, "size": "regular"}
+        params = {
+            "keyword": keyword,
+            "r18": 1 if r18 else 0,
+            "size": "regular",
+            "proxy": reverse_proxy,
+        }
         try:
             res = await client.get(req_url, params=params, timeout=120)
             logger.info(res.json())
@@ -72,7 +83,7 @@ async def get_setu(keyword="", r18=False) -> list:
             return [pic, data, True, setu_url]
         except httpx.ProxyError as e:
             logger.warning(e)
-            return [error, f"代理错误: {e}", False]
+            return [error, f"代理错误: {e} {exc_info()[0]}, {exc_info()[1]}", False]
         except IndexError as e:
             logger.warning(e)
             return [error, f"图库中没有搜到关于{keyword}的图。", False]

@@ -18,6 +18,7 @@ setu_cd=60
 setu_save=
 setu_path=
 setu_porxy=
+setu_reverse_proxy=
 setu_dav_url=
 setu_dav_username=
 setu_dav_password=
@@ -29,6 +30,7 @@ setu_dav_password=
   - webdav 默认 `/setu` `/setur18`  
   - 本地  `./data/setu` `./data/setur18`
 - `setu_porxy` 代理地址
+- `setu_reverse_proxy` pixiv代理 默认 `i.pixiv.re`
 - webdav 设置
   - `setu_dav_username` 用户名
   - `setu_dav_password` 密码
