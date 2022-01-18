@@ -8,7 +8,7 @@
 
 # 安装配置
 ```
-pip install -U nonebot-plugin-setu-webdav
+pip install -U nonebot-plugin-setu-now
 ```
 
 ## .env
