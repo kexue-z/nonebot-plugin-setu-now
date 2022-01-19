@@ -3,19 +3,15 @@ from re import I
 
 import nonebot
 from nonebot import on_command, on_regex
-from nonebot.adapters.cqhttp import (
-    Bot,
-    Event,
-    Message,
-    PrivateMessageEvent,
-)
-from nonebot.adapters.cqhttp.permission import GROUP, PRIVATE_FRIEND
+from nonebot.adapters.onebot.v11 import (GROUP, PRIVATE_FRIEND, Bot, Event,
+                                         Message, PrivateMessageEvent)
 from nonebot.log import logger
+from nonebot.params import State
 from nonebot.typing import T_State
-from .get_Data import get_setu
-from .setu_Message import *
-from .json_Manager import *
 
+from .get_Data import get_setu
+from .json_Manager import *
+from .setu_Message import *
 
 setu = on_regex(
     r"^(setu|色图|涩图|来点色色|色色)\s?(r18)?\s?(.*)?",
@@ -29,7 +25,7 @@ cdTime = (
 
 
 @setu.handle()
-async def _(bot: Bot, event: Event, state: T_State):
+async def _(bot: Bot, event: Event, state: T_State = State()):
     global mid
     args = list(state["_matched_groups"])
     r18 = args[1]

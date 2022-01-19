@@ -1,7 +1,6 @@
 import base64
 from re import findall
 from sys import exc_info
-from nonebot.adapters.cqhttp import MessageSegment
 import httpx
 from httpx import AsyncClient
 from nonebot import logger
