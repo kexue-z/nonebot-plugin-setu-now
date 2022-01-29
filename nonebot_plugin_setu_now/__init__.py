@@ -75,7 +75,7 @@ async def _(bot: Bot, event: Event, state: T_State = State()):
             minutes, seconds = divmod(time_last, 60)
             hours, minutes = divmod(minutes, 60)
         else:
-            minutes = time_last
+            seconds = time_last
         cd_msg = f"{str(hours) + '小时' if hours else ''}{str(minutes) + '分钟' if minutes else ''}{str(seconds) + '秒' if seconds else ''}"
 
         await setu.send(f"{random.choice(setu_SendCD)} 你的CD还有{cd_msg}", at_sender=True)
