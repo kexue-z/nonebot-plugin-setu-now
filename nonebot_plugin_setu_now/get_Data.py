@@ -1,11 +1,12 @@
 import base64
 from re import findall
 from sys import exc_info
+
 import httpx
 from httpx import AsyncClient
-from nonebot import logger
-from nonebot import get_driver
+from nonebot import get_driver, logger
 from nonebot.log import logger
+
 
 proxies = get_driver().config.setu_porxy
 if proxies:
@@ -13,11 +14,15 @@ if proxies:
 else:
     proxies = None
 
+
 save = get_driver().config.setu_save
 if save == "webdav":
-    from .save_to_WebDAV import save_img
+    from .save_to_webdav import save_img
+elif save == "local":
+    from .save_to_local import save_img
 else:
-    from .save_to_Local import save_img
+    save = None
+
 
 reverse_proxy = get_driver().config.setu_reverse_proxy
 if reverse_proxy:
@@ -64,13 +69,14 @@ async def get_setu(keyword="", r18=False) -> list:
             base64 = convert_b64(content)
 
             # 保存图片
-            try:
-                save_img(content, pid=setu_pid, p=p, r18=r18)
-            except:
-                logger.warning(f"{exc_info()[0]}, {exc_info()[1]}")
+            if save:
+                try:
+                    save_img(content, pid=setu_pid, p=p, r18=r18)
+                except:
+                    logger.warning(f"{exc_info()[0]}, {exc_info()[1]}")
 
             if type(base64) == str:
-                pic = pic = "[CQ:image,file=base64://" + base64 + "]"
+                pic = "[CQ:image,file=base64://" + base64 + "]"
                 data = (
                     "标题:"
                     + setu_title
@@ -86,9 +92,6 @@ async def get_setu(keyword="", r18=False) -> list:
         except IndexError as e:
             logger.warning(e)
             return [error, f"图库中没有搜到关于{keyword}的图。", False]
-        except:
-            logger.warning(f"{exc_info()[0]}, {exc_info()[1]}")
-            return [error, f"{exc_info()[0]} {exc_info()[1]}。", False]
 
 
 async def down_pic(url):

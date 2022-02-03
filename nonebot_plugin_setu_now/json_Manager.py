@@ -2,7 +2,8 @@ import json
 
 data_dir = "./data/setuCD"
 
-def readJson():
+
+def read_json():
     try:
         with open(data_dir + "usercd.json", "r") as f_in:
             data = json.load(f_in)
@@ -19,14 +20,14 @@ def readJson():
             json.dump({}, f_out)
 
 
-def writeJson(qid: str, time: int, mid: int, data: dict):
+def write_json(qid: str, time: int, mid: int, data: dict):
     data[qid] = [time, mid]
     with open(data_dir + "usercd.json", "w") as f_out:
         json.dump(data, f_out)
         f_out.close()
 
 
-def removeJson(qid: str):
+def remove_json(qid: str):
     with open(data_dir + "usercd.json", "r") as f_in:
         data = json.load(f_in)
         f_in.close()
