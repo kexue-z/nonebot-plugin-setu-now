@@ -3,10 +3,14 @@ from io import BytesIO
 from nonebot import get_driver, logger
 from webdav4.client import Client as dav_client
 
-setu_dav_url = get_driver().config.setu_dav_url
-setu_dav_username = get_driver().config.setu_dav_username
-setu_dav_password = get_driver().config.setu_dav_password
-setu_path = get_driver().config.setu_path
+from .config import Config
+
+plugin_config = Config.parse_obj(get_driver().config.dict())
+
+setu_dav_url = plugin_config.setu_dav_url
+setu_dav_username = plugin_config.setu_dav_username
+setu_dav_password = plugin_config.setu_dav_password
+setu_path = plugin_config.setu_path
 
 logger.info(
     "setu将会保存在 WebDAV 服务器中, URL: {}, UserName: {}, Path: {}".format(

@@ -1,8 +1,7 @@
 import random
 from re import I
 
-import nonebot
-from nonebot import on_command, on_regex
+from nonebot import get_driver, on_regex
 from nonebot.adapters.onebot.v11 import (
     GROUP,
     PRIVATE_FRIEND,
@@ -10,25 +9,27 @@ from nonebot.adapters.onebot.v11 import (
     Message,
     MessageEvent,
     PrivateMessageEvent,
+    Event,
 )
 from nonebot.exception import ActionFailed
 from nonebot.log import logger
 from nonebot.params import State
 from nonebot.typing import T_State
 
+from .config import Config
 from .get_data import get_setu
 from .json_manager import read_json, remove_json, write_json
 from .setu_message import setu_sendcd, setu_sendmessage
+
+plugin_config = Config.parse_obj(get_driver().config.dict())
 
 setu = on_regex(
     r"^(setu|色图|涩图|来点色色|色色|涩涩)\s?(r18)?\s?(.*)?",
     flags=I,
     permission=PRIVATE_FRIEND | GROUP,
 )
-withdraw = on_command("撤回")
-cdTime = (
-    nonebot.get_driver().config.setu_cd if nonebot.get_driver().config.setu_cd else 60
-)
+
+cdTime = plugin_config.setu_cd
 
 
 @setu.handle()
@@ -51,7 +52,7 @@ async def _(bot: Bot, event: MessageEvent, state: T_State = State()):
 
     if (
         cd > cdTime
-        or event.get_user_id() in nonebot.get_driver().config.superusers
+        or event.get_user_id() in plugin_config.superusers
         or isinstance(event, PrivateMessageEvent)
     ):
         write_json(qid, event.time, mid, data)

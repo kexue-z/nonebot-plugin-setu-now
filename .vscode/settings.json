@@ -1,0 +1,26 @@
+{
+    "python.analysis.completeFunctionParens": true,
+    "python.analysis.typeCheckingMode": "basic",
+    "python.formatting.provider": "black",
+    "python.languageServer": "Pylance",
+    "python.linting.flake8Enabled": true,
+    "editor.formatOnSave": true,
+    "files.watcherExclude": {
+        "**/.git/objects/**": true,
+        "**/.git/subtree-cache/**": true,
+        "**/node_modules/**": true,
+        "**/.hg/store/**": true,
+        "**/.venv/**": true,
+        "**/.mypy_cache/**": true,
+    },
+    "files.encoding": "utf8",
+    "git.autofetch": true,
+    "git.enableSmartCommit": true,
+    "files.exclude": {
+        "**/__pycache__": true,
+        ".venv": true,
+        ".mypy_cache": true,
+        "poetry.lock": true,
+        "LICENSE": true,
+    },
+}

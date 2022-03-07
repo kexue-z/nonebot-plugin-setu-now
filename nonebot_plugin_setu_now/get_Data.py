@@ -6,16 +6,18 @@ import httpx
 from httpx import AsyncClient
 from nonebot import get_driver, logger
 from nonebot.log import logger
+from .config import Config
 
+plugin_config = Config.parse_obj(get_driver().config.dict())
 
-proxies = get_driver().config.setu_porxy
+proxies = plugin_config.setu_proxy
 if proxies:
     logger.info(f"使用自定代理 {proxies}")
 else:
     proxies = None
 
 
-save = get_driver().config.setu_save
+save = plugin_config.setu_save
 if save == "webdav":
     from .save_to_webdav import save_img
 elif save == "local":
@@ -24,7 +26,7 @@ else:
     save = None
 
 
-reverse_proxy = get_driver().config.setu_reverse_proxy
+reverse_proxy = plugin_config.setu_reverse_proxy
 if reverse_proxy:
     logger.info(f"使用自定反向代理 {reverse_proxy}")
 else:

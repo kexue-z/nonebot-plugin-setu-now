@@ -3,7 +3,7 @@ import json
 data_dir = "./data/setuCD"
 
 
-def read_json():
+def read_json() -> dict:
     try:
         with open(data_dir + "usercd.json", "r") as f_in:
             data = json.load(f_in)
@@ -18,6 +18,8 @@ def read_json():
             pass
         with open(data_dir + "usercd.json", mode="w") as f_out:
             json.dump({}, f_out)
+
+        return {}
 
 
 def write_json(qid: str, time: int, mid: int, data: dict):

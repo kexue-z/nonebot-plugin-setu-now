@@ -1,7 +1,12 @@
 import os
+
 from nonebot import get_driver, logger
 
-setu_path = get_driver().config.setu_path
+from .config import Config
+
+plugin_config = Config.parse_obj(get_driver().config.dict())
+
+setu_path = plugin_config.setu_path
 
 if not setu_path:
     setu_path = os.path.abspath("data/setu")
