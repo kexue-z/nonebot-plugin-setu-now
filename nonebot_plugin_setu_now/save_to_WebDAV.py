@@ -1,6 +1,7 @@
 from io import BytesIO
 
-from nonebot import get_driver, logger
+from nonebot import get_driver
+from nonebot.log import logger
 from webdav4.client import Client as dav_client
 
 from .config import Config
@@ -21,8 +22,8 @@ logger.info(
 
 def upload_file(file_obj, pid: str, p: str, r18: bool = False):
     client = dav_client(
-        setu_dav_url,
-        auth=(setu_dav_username, setu_dav_password),
+        setu_dav_url,  # type: ignore
+        auth=(setu_dav_username, setu_dav_password),  # type: ignore
     )
     path = (
         f"{'setu' if not setu_path else setu_path}{'r18' if r18 else '' }/{pid}_{p}.jpg"

@@ -4,7 +4,7 @@ from sys import exc_info
 
 import httpx
 from httpx import AsyncClient
-from nonebot import get_driver, logger
+from nonebot import get_driver
 from nonebot.log import logger
 from .config import Config
 
@@ -69,24 +69,20 @@ async def get_setu(keyword="", r18=False) -> list:
             p = res.json()["data"][0]["p"]
 
             base64 = convert_b64(content)
-
+            data, pic = ""
             # 保存图片
             if save:
                 try:
                     save_img(content, pid=setu_pid, p=p, r18=r18)
-                except:
+                except Exception:
                     logger.warning(f"{exc_info()[0]}, {exc_info()[1]}")
 
             if type(base64) == str:
                 pic = "[CQ:image,file=base64://" + base64 + "]"
-                data = (
-                    "标题:"
-                    + setu_title
-                    + "\npid:"
-                    + str(setu_pid)
-                    + "\n画师:"
-                    + setu_author
-                )
+                data = f"标题: {setu_title}"
+                f"pic: {setu_pid}"
+                f"画师: {setu_author}"
+
             return [pic, data, True, setu_url]
         except httpx.ProxyError as e:
             logger.warning(e)
@@ -97,7 +93,7 @@ async def get_setu(keyword="", r18=False) -> list:
 
 
 async def down_pic(url):
-    async with AsyncClient(proxies=proxies) as client:
+    async with AsyncClient(proxies=proxies) as client:  # type: ignore
         headers = {
             "Referer": "https://accounts.pixiv.net/login?lang=zh&source=pc&view_type=page&ref=wwwtop_accounts_index",
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64) "

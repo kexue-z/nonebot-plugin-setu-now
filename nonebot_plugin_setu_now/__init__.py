@@ -9,7 +9,6 @@ from nonebot.adapters.onebot.v11 import (
     Message,
     MessageEvent,
     PrivateMessageEvent,
-    Event,
 )
 from nonebot.exception import ActionFailed
 from nonebot.log import logger
