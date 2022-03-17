@@ -69,7 +69,7 @@ async def get_setu(keyword="", r18=False) -> list:
             p = res.json()["data"][0]["p"]
 
             base64 = convert_b64(content)
-            data, pic = ""
+            data, pic = "", ""
             # 保存图片
             if save:
                 try:
