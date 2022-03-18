@@ -13,7 +13,7 @@
 pip install -U nonebot-plugin-setu-now
 ```
 
-### .env 默认配置 (不写应该也可以正常工作)
+### .env 默认配置 (爱看不看，不看也能用)
 
 ```ini
 setu_cd=60
