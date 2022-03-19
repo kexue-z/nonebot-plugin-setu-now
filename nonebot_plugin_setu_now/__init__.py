@@ -1,4 +1,5 @@
 import random
+from asyncio import sleep
 from re import I
 
 from nonebot import get_driver, on_regex
@@ -70,6 +71,7 @@ async def _(bot: Bot, event: MessageEvent, state: T_State = State()):
 
                 await setu.send(message=Message(pic[0]))
                 # 是非需要发送图片消息
+                await sleep(2)
                 if plugin_config.setu_send_info_message:
                     await setu.send(
                         message=f"{random.choice(SETU_MSG['setu_message_send'])}\n"  # 发送一些消息

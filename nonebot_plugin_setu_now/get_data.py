@@ -80,9 +80,7 @@ async def get_setu(keyword="", r18=False) -> list:
 
             if type(base64) == str:
                 pic = "[CQ:image,file=base64://" + base64 + "]"
-                data = f"标题: {setu_title}"
-                f"pic: {setu_pid}"
-                f"画师: {setu_author}"
+                data = f"\n标题: {setu_title}\n" f"pic: {setu_pid}\n" f"画师: {setu_author}"
 
             return [pic, data, True, setu_url]
         except httpx.ProxyError as e:

@@ -4,7 +4,7 @@ from anyio import open_file
 from nonebot import get_driver
 from nonebot.log import logger
 
-from config import Config
+from .config import Config
 
 plugin_config = Config.parse_obj(get_driver().config.dict())
 msg_path = plugin_config.setu_send_custom_message_path
