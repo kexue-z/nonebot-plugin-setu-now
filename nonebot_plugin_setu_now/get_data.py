@@ -6,6 +6,7 @@ import httpx
 from httpx import AsyncClient
 from nonebot import get_driver
 from nonebot.log import logger
+
 from .config import Config
 
 plugin_config = Config.parse_obj(get_driver().config.dict())
