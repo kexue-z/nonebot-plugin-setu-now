@@ -26,6 +26,7 @@ setu_dav_username=
 setu_dav_password=
 setu_send_info_message=
 setu_send_custom_message_path=
+setu_withdraw=
 ```
 
 - `setu_cd` CD(单位秒) 可选 默认`60`秒
@@ -49,6 +50,7 @@ setu_send_custom_message_path=
     "setu_message_cd": ["cba cd: {cd_msg}"]
   }
   ```
+- `setu_withdraw` 撤回发送的色图消息的时间, 单位: 秒 可选 默认`关闭` 填入数字来启用, 建议 `10` ~ `120` 
 
 
 ~~所有配置都可选了,还能出问题吗?~~
