@@ -24,6 +24,8 @@ setu_reverse_proxy=
 setu_dav_url=
 setu_dav_username=
 setu_dav_password=
+setu_send_info_message=
+setu_send_custom_message_path=
 ```
 
 - `setu_cd` CD(单位秒) 可选 默认`60`秒
@@ -37,6 +39,17 @@ setu_dav_password=
   - `setu_dav_username` 用户名
   - `setu_dav_password` 密码
   - `setu_dav_url` webdav 服务器地址
+- `setu_send_info_message` 是否发送图片信息 可选 默认 `ture` 填写 `false` 可关闭
+- `setu_send_custom_message_path` 自定义发送消息路径 可选 当填写路径时候开启 可以为相对路径
+  - 文件应该为 `json` 格式如下
+  - 可在 `setu_message_cd` 中添加 `{cd_msg}` 提示CD时间
+  ```json
+  {
+    "setu_message_send": ["abc"],
+    "setu_message_cd": ["cba cd: {cd_msg}"]
+  }
+  ```
+
 
 ~~所有配置都可选了,还能出问题吗?~~
 
