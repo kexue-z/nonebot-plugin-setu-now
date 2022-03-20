@@ -8,7 +8,10 @@ from nonebot.log import logger
 from .config import Config
 
 plugin_config = Config.parse_obj(get_driver().config.dict())
-MSG_PATH = Path(str(plugin_config.setu_send_custom_message_path)).absolute()
+if plugin_config.setu_send_custom_message_path:
+    MSG_PATH = Path(str(plugin_config.setu_send_custom_message_path)).absolute()
+else:
+    MSG_PATH = None
 
 
 async def load_setu_message():
