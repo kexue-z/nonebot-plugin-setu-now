@@ -49,7 +49,7 @@ async def _(bot: Bot, event: MessageEvent, state: T_State = State()):
     key = args[2]
     qid = event.get_user_id()
     mid = event.message_id
-    data = read_json()
+    data = await read_json()
     try:
         cd = event.time - data[qid][0]
     except Exception:
@@ -64,7 +64,7 @@ async def _(bot: Bot, event: MessageEvent, state: T_State = State()):
         or event.get_user_id() in plugin_config.superusers
         or isinstance(event, PrivateMessageEvent)
     ):
-        write_json(qid, event.time, mid, data)
+        await write_json(qid, event.time, mid, data)
         pic = await get_setu(key, r18)
         if pic[2]:
             try:
@@ -80,14 +80,14 @@ async def _(bot: Bot, event: MessageEvent, state: T_State = State()):
                     )
             except ActionFailed as e:
                 logger.warning(e)
-                remove_json(qid)
+                await remove_json(qid)
                 await setu.finish(
                     message=Message(f"消息被风控，图发不出来\n{pic[1]}\n这是链接\n{pic[3]}"),
                     at_sender=True,
                 )
 
         else:
-            remove_json(qid)
+            await remove_json(qid)
             await setu.finish(pic[0] + pic[1])
 
     else:
@@ -101,6 +101,6 @@ async def _(bot: Bot, event: MessageEvent, state: T_State = State()):
         cd_msg = f"{str(hours) + '小时' if hours else ''}{str(minutes) + '分钟' if minutes else ''}{str(seconds) + '秒' if seconds else ''}"
 
         await setu.send(
-            random.choice(SETU_MSG["setu_message_cd"]).format(cd_msg),
+            random.choice(SETU_MSG["setu_message_cd"]).format(cd_msg=cd_msg),
             at_sender=True,
         )

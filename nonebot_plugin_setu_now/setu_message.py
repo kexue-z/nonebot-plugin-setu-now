@@ -1,4 +1,5 @@
 from json import loads
+from pathlib import Path
 
 from anyio import open_file
 from nonebot import get_driver
@@ -7,13 +8,13 @@ from nonebot.log import logger
 from .config import Config
 
 plugin_config = Config.parse_obj(get_driver().config.dict())
-msg_path = plugin_config.setu_send_custom_message_path
+MSG_PATH = Path(str(plugin_config.setu_send_custom_message_path)).absolute()
 
 
 async def load_setu_message():
-    if msg_path:
-        logger.info(f"加载自定义色图消息 路径: {msg_path}")
-        async with await open_file(msg_path) as f:  # type: ignore
+    if MSG_PATH:
+        logger.info(f"加载自定义色图消息 路径: {MSG_PATH}")
+        async with await open_file(MSG_PATH) as f:  # type: ignore
             f = await f.read()
         return loads(f)
     else:

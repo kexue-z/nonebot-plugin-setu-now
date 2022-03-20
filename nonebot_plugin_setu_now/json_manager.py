@@ -1,39 +1,46 @@
 import json
+from pathlib import Path
 
-data_dir = "./data/setuCD"
+from anyio import open_file
+from nonebot.log import logger
+
+DATA_DIR = Path("./data/setu_now/").absolute()
+CD_DIR = DATA_DIR / "cd.json"
+
+logger.debug(f"SETU DATA: {DATA_DIR}")
+logger.debug(f"SETU CD DATA: {CD_DIR}")
 
 
-def read_json() -> dict:
+async def read_json():
     try:
-        with open(data_dir + "usercd.json", "r") as f_in:
-            data = json.load(f_in)
-            f_in.close()
-            return data
+        async with await open_file(CD_DIR, "r") as f:
+            f = await f.read()
+            return json.loads(f)
     except FileNotFoundError:
         try:
             import os
 
-            os.makedirs(data_dir)
+            os.makedirs(DATA_DIR)
         except FileExistsError:
             pass
-        with open(data_dir + "usercd.json", mode="w") as f_out:
-            json.dump({}, f_out)
-
+        async with await open_file(CD_DIR, "w") as f:
+            data = json.dumps({})
+            await f.write(data)
         return {}
 
 
-def write_json(qid: str, time: int, mid: int, data: dict):
+async def write_json(qid: str, time: int, mid: int, data: dict):
     data[qid] = [time, mid]
-    with open(data_dir + "usercd.json", "w") as f_out:
-        json.dump(data, f_out)
-        f_out.close()
+    async with await open_file(CD_DIR, "w") as f:
+        f_data = json.dumps(data)
+        await f.write(f_data)
 
 
-def remove_json(qid: str):
-    with open(data_dir + "usercd.json", "r") as f_in:
-        data = json.load(f_in)
-        f_in.close()
+async def remove_json(qid: str):
+    async with await open_file(CD_DIR, "r") as f:
+        f = await f.read()
+        data = json.loads(f)
     data.pop(qid)
-    with open(data_dir + "usercd.json", "w") as f_out:
-        json.dump(data, f_out)
-        f_out.close()
+    async with await open_file(CD_DIR, "w") as f:
+        data = json.dumps(data)
+        await f.write(data)
