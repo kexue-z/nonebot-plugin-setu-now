@@ -20,6 +20,7 @@ from .config import Config
 from .get_data import get_setu
 from .json_manager import read_json, remove_json, write_json
 from .setu_message import load_setu_message
+from .withdraw import add_withdraw_job
 
 driver = get_driver()
 plugin_config = Config.parse_obj(get_driver().config.dict())
@@ -43,13 +44,13 @@ setu = on_regex(
 
 @setu.handle()
 async def _(bot: Bot, event: MessageEvent, state: T_State = State()):
-    global mid
     args = list(state["_matched_groups"])
     r18 = args[1]
     key = args[2]
     qid = event.get_user_id()
     mid = event.message_id
     data = await read_json()
+
     try:
         cd = event.time - data[qid][0]
     except Exception:
@@ -68,16 +69,19 @@ async def _(bot: Bot, event: MessageEvent, state: T_State = State()):
         pic = await get_setu(key, r18)
         if pic[2]:
             try:
+                msg_info = await setu.send(message=Message(pic[0]))
+                add_withdraw_job(bot, **msg_info)
 
-                await setu.send(message=Message(pic[0]))
-                # 是非需要发送图片消息
-                await sleep(2)
+                # 是否需要发送图片消息
                 if plugin_config.setu_send_info_message:
-                    await setu.send(
+                    await sleep(2)
+                    msg_info = await setu.send(
                         message=f"{random.choice(SETU_MSG['setu_message_send'])}\n"  # 发送一些消息
                         + Message(pic[1]),
                         at_sender=True,
                     )
+                    add_withdraw_job(bot, **msg_info)
+
             except ActionFailed as e:
                 logger.warning(e)
                 await remove_json(qid)

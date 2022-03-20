@@ -15,6 +15,7 @@ nonebot2 = "^2.0.0-beta.1"
 nonebot-adapter-onebot = "^2.0.0-beta.1"
 pydantic = "^1.5.0"
 anyio = "^3.5.0"
+nonebot-plugin-apscheduler = "^0.1.2"
 
 [tool.poetry.dev-dependencies]
 black = {version = "^21.12b0", allow-prereleases = true}

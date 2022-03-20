@@ -16,3 +16,4 @@ class Config(BaseModel, extra=Extra.ignore):
     setu_dav_url: Optional[str] = None
     setu_dav_username: Optional[str] = None
     setu_dav_password: Optional[str] = None
+    setu_withdraw: Optional[int] = None
