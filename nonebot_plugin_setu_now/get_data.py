@@ -57,7 +57,7 @@ async def get_setu(keyword="", r18=False) -> list:
         }
         try:
             res = await client.get(req_url, params=params, timeout=120)
-            logger.info(res.json())
+            logger.debug(res.json())
         except httpx.HTTPError as e:
             logger.warning(e)
             return [error, f"API异常{e}", False]
@@ -100,7 +100,7 @@ async def down_pic(url):
         }
         re = await client.get(url=url, headers=headers, timeout=120)
         if re.status_code == 200:
-            logger.success("成功获取图片")
+            logger.debug("成功获取图片")
             return re.content
         else:
             logger.error(f"获取图片失败: {re.status_code}")

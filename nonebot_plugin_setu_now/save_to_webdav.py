@@ -29,7 +29,7 @@ def upload_file(file_obj, pid: str, p: str, r18: bool = False):
         f"{'setu' if not setu_path else setu_path}{'r18' if r18 else '' }/{pid}_{p}.jpg"
     )
     client.upload_fileobj(file_obj, to_path=path, overwrite=True)
-    logger.success(f"WebDAV: {setu_dav_url} 图片已保存{path}")
+    logger.debug(f"WebDAV: {setu_dav_url} 图片已保存{path}")
 
 
 def convert_file(bytes_file):
