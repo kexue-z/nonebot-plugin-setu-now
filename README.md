@@ -71,3 +71,7 @@ nonebot.load_plugin("nonebot_plugin_setu_now")
 - 例子
   - `来点色色 妹妹`
   - `setur18`
+- 在吗？ 
+  - 这个是 `on_regex` 而不是 `on_commend` 
+  - 本插件一般都经过测试后才发版，如果遇到了任何问题，请先自行解决
+  - 任何`不正确使用插件`的issue将会直接关闭
