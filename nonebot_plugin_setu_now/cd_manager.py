@@ -4,6 +4,7 @@ from nonebot import get_driver
 from nonebot.adapters.onebot.v11 import MessageEvent, PrivateMessageEvent
 from .setu_message import load_setu_message
 from .config import Config
+from .setu_message import SETU_MSG
 
 driver = get_driver()
 plugin_config = Config.parse_obj(get_driver().config.dict())
@@ -43,13 +44,6 @@ def remove_cd(event: MessageEvent):
     cd_data.pop(event.get_user_id())
 
 
-@driver.on_startup
-async def init():
-    """启动时加载 SETU_MSG"""
-    global SETU_MSG
-    SETU_MSG = await load_setu_message()
-
-
 def cd_msg(cd) -> str:
     """获取CD提示信息"""
     time_last = CDTIME - cd
@@ -61,4 +55,4 @@ def cd_msg(cd) -> str:
         seconds = time_last
     cd_msg = f"{str(hours) + '小时' if hours else ''}{str(minutes) + '分钟' if minutes else ''}{str(seconds) + '秒' if seconds else ''}"
 
-    return choice(SETU_MSG["setu_message_cd"]).format(cd_msg=cd_msg)
+    return choice(SETU_MSG.cd).format(cd_msg=cd_msg)

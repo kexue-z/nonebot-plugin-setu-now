@@ -4,7 +4,7 @@ from nonebot import get_driver
 from nonebot.log import logger
 from webdav4.client import Client as dav_client
 
-from nonebot_plugin_setu_now.setu_class import SetuData
+from nonebot_plugin_setu_now.models import SetuData
 
 from .config import Config
 

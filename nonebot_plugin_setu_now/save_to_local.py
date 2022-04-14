@@ -4,7 +4,7 @@ from nonebot import get_driver
 from nonebot.log import logger
 from PIL import Image
 from io import BytesIO
-from .setu_class import SetuData
+from .models import SetuData
 
 from .config import Config
 

@@ -1,12 +1,13 @@
 from asyncio import gather
-from typing import Optional
+from typing import Optional, List
 
 from httpx import AsyncClient
 from nonebot import get_driver
 
 from .config import Config
-from .setu_class import SetuApiData
+from .models import SetuApiData, Setu, SetuData
 from .utils import download_pic
+from .setu_message import SetuMessage
 
 plugin_config = Config.parse_obj(get_driver().config.dict())
 SETU_SIZE = plugin_config.setu_size
@@ -16,7 +17,7 @@ REVERSE_PROXY = plugin_config.setu_reverse_proxy
 PROXY = plugin_config.setu_proxy
 
 
-class Setu:
+class SetuLoader:
     def __init__(
         self,
         size: str = SETU_SIZE,
@@ -46,10 +47,10 @@ class Setu:
         tags: Optional[list] = None,
         r18: bool = False,
         num: int = 1,
-    ) -> "SetuApiData":
-        data = await self._get_info_from_setu_api(keyword, tags, r18, num)
-
-        return await self._download_img_from_reverse_proxy(data)
+    ) -> "Setu":
+        api_data = await self._get_info_from_setu_api(keyword, tags, r18, num)
+        setu_data = Setu(data=api_data.data)
+        data = await self._download_img_from_reverse_proxy(setu_data)
 
     async def _get_info_from_setu_api(
         self,
@@ -77,14 +78,27 @@ class Setu:
 
     async def _download_img_from_reverse_proxy(
         self,
-        data: SetuApiData,
-    ) -> "SetuApiData":
+        data: Setu,
+    ) -> Setu:
+
+        # data = Setu(data=data.data)
         tasks = []
         for setu in data.data:
             tasks.append(download_pic(setu.urls[self.size]))
         results = await gather(*tasks)
+        data.img = []
         for i in range(len(data.data)):
-            data.data[i].img = results[i]
+            data.img.append(results[i])
+        return data
+
+    def _setu_info_msg(self, data: Setu) -> Setu:
+        data.msg = []
+        for i in range(len(data.data)):
+            data.msg.append(
+                f"标题{data.data[i].title}\n"
+                f"画师:{data.data[i].author}\n"
+                f"pid:{data.data[i].pid}"
+            )
         return data
 
     def save_img(self):
