@@ -2,19 +2,28 @@ from asyncio import gather
 from typing import Optional
 
 from httpx import AsyncClient
+from nonebot import get_driver
 
+from .config import Config
 from .setu_class import SetuApiData
 from .utils import download_pic
+
+plugin_config = Config.parse_obj(get_driver().config.dict())
+SETU_SIZE = plugin_config.setu_size
+API_URL = plugin_config.setu_api_url
+SAVE = plugin_config.setu_save
+REVERSE_PROXY = plugin_config.setu_reverse_proxy
+PROXY = plugin_config.setu_proxy
 
 
 class Setu:
     def __init__(
         self,
-        size: str = "regular",
-        api_url: str = "https://api.lolicon.app/setu/v2",
-        reverse_proxy_url: str = "i.pixiv.re",
-        save: Optional[str] = None,
-        proxy: Optional[str] = None,
+        size: str = SETU_SIZE,
+        api_url: str = API_URL,
+        reverse_proxy_url: Optional[str] = REVERSE_PROXY,
+        save: Optional[str] = SAVE,
+        proxy: Optional[str] = PROXY,
     ):
         """初始化
 

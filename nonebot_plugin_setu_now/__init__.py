@@ -16,11 +16,10 @@ from nonebot.log import logger
 from nonebot.params import State
 from nonebot.typing import T_State
 
-from .cd_manager import check_cd, add_cd, remove_cd, cd_msg
+from .cd_manager import add_cd, cd_msg, check_cd, remove_cd
 from .config import Config
 from .setu_data import Setu
 from .withdraw import add_withdraw_job
-
 
 setu_matcher = on_regex(
     r"^(setu|色图|涩图|来点色色|色色|涩涩)\s?(r18)?\s?(tag)?\s?(.*)?",
@@ -33,7 +32,7 @@ setu_matcher = on_regex(
 async def _(bot: Bot, event: MessageEvent, state: T_State = State()):
     args = list(state["_matched_groups"])
     r18 = args[1]
-    tag = args[2]
+    tags = args[2]
     key = args[3]
 
     if cd := check_cd(event):
@@ -45,6 +44,7 @@ async def _(bot: Bot, event: MessageEvent, state: T_State = State()):
     add_cd(event)
 
     setu = Setu()
+    await setu.get_setu(key, tags, r18)
 
     if pic[2]:
         try:

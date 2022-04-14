@@ -8,7 +8,7 @@ readme = "README.md"
 homepage = "https://github.com/kexue-z/nonebot-plugin-setu-now"
 
 [tool.poetry.dependencies]
-python = "^3.7.3"
+python = "^3.8"
 httpx = ">=0.18.0,<1.0.0"
 webdav4 = "^0.9.3"
 nonebot2 = "^2.0.0-beta.1"
