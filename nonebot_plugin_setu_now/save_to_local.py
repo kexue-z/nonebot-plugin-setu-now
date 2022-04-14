@@ -1,7 +1,10 @@
 import os
-
+from anyio import open_file
 from nonebot import get_driver
 from nonebot.log import logger
+from PIL import Image
+from io import BytesIO
+from .setu_class import SetuData
 
 from .config import Config
 
@@ -14,13 +17,13 @@ if not setu_path:
 if os.path.exists(setu_path):
     logger.success(f"setu将保存到 {setu_path}")
 else:
-    os.makedirs(setu_path)
+    os.makedirs(setu_path, exist_ok=True)
     logger.success(f"创建文件夹 {setu_path}")
     logger.info(f"setu将保存到 {setu_path}")
 
 
-def save_img(content, pid: str, p: str, r18: bool = False):
-    path = f"{setu_path}{'r18' if r18 else '' }/{pid}_{p}.jpg"
-    with open(path, "wb") as f:
-        f.write(content)
+async def save_img(setu: SetuData):
+    path = f"{setu_path}{'r18' if setu.r18 else '' }/{setu.pid}_{setu.p}_{setu.title}_{setu.author}.jpg"
+    async with await open_file(path, "wb") as f:
+        await f.write(setu.img)  # type: ignore
     logger.info(f"图片已保存{path}")

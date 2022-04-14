@@ -4,6 +4,8 @@ from nonebot import get_driver
 from nonebot.log import logger
 from webdav4.client import Client as dav_client
 
+from nonebot_plugin_setu_now.setu_class import SetuData
+
 from .config import Config
 
 plugin_config = Config.parse_obj(get_driver().config.dict())
@@ -20,15 +22,13 @@ logger.info(
 )
 
 
-def upload_file(file_obj, pid: str, p: str, r18: bool = False):
+def upload_file(setu: SetuData):
     client = dav_client(
         setu_dav_url,  # type: ignore
         auth=(setu_dav_username, setu_dav_password),  # type: ignore
     )
-    path = (
-        f"{'setu' if not setu_path else setu_path}{'r18' if r18 else '' }/{pid}_{p}.jpg"
-    )
-    client.upload_fileobj(file_obj, to_path=path, overwrite=True)
+    path = f"{setu_path}{'r18' if setu.r18 else '' }/{setu.pid}_{setu.p}_{setu.title}_{setu.author}.jpg"
+    client.upload_fileobj(setu.img, to_path=path, overwrite=True)  # type: ignore
     logger.debug(f"WebDAV: {setu_dav_url} 图片已保存{path}")
 
 
