@@ -80,7 +80,7 @@ async def _(bot: Bot, event: MessageEvent, state: T_State = State()):
         remove_cd(event)
         await setu_matcher.finish(f"没有找到关于 {tags or key} 的色图呢～", at_sender=True)
 
-    failure_setu: list[Setu] = []
+    failure_msg: list[Message] = []
     msg_list: list[Message] = []
 
     for setu in data:
@@ -104,20 +104,18 @@ async def _(bot: Bot, event: MessageEvent, state: T_State = State()):
 
             except ActionFailed as e:
                 logger.warning(e)
-                await setu_matcher.send("发送失败 可能被风控", at_sender=True)
+                failure_msg.append(msg)
 
     # 群聊中 > 3 图, 合并转发
     elif isinstance(event, GroupMessageEvent):
 
         await send_forward_msg(bot, event, "好东西", bot.self_id, msg_list)
 
-    if len(failure_setu) >= num / 2:
-        remove_cd(event)
-        msg = ""
-        for setu in failure_setu:
-            msg += setu.urls[SETU_SIZE] + "\n"
+    if failure_msg:
+        if len(failure_msg) >= num / 2:
+            remove_cd(event)
 
         await setu_matcher.finish(
-            message=Message("消息被风控，图发不出来\n这是链接\n" + msg),
+            message=Message(f"消息被风控，{len(failure_msg)} 个图发不出来了\n"),
             at_sender=True,
         )
