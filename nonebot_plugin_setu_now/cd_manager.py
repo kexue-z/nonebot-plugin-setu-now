@@ -1,17 +1,18 @@
 from random import choice
 
 from nonebot import get_driver
+from nonebot.log import logger
 from nonebot.adapters.onebot.v11 import MessageEvent, PrivateMessageEvent
 
 from .config import Config
-from .setu_message import SETU_MSG, load_setu_message
+from .setu_message import SETU_MSG
 
 driver = get_driver()
 plugin_config = Config.parse_obj(get_driver().config.dict())
 SUPERUSERS = plugin_config.superusers
 CDTIME = plugin_config.setu_cd
 
-cd_data = {}
+cd_data: dict[str, int] = {}
 
 
 def check_cd(event: MessageEvent) -> int:
@@ -31,6 +32,7 @@ def check_cd(event: MessageEvent) -> int:
     # cd =  当前时间 - 上一次记录的时间
     try:
         cd: int = event.time - cd_data[event.get_user_id()]
+        logger.debug(f"{event.get_user_id()} cd: {cd} 还剩: {CDTIME - cd}")
     except KeyError:
         cd = CDTIME + 1
     if (
@@ -45,12 +47,14 @@ def check_cd(event: MessageEvent) -> int:
 
 def add_cd(event: MessageEvent):
     """添加CD"""
-    cd_data[event.get_user_id()] = [event.time, event.message_id]
+    cd_data[event.get_user_id()] = event.time
+    logger.debug("色图CD: {}".format(cd_data))
 
 
 def remove_cd(event: MessageEvent):
     """移除CD"""
     cd_data.pop(event.get_user_id())
+    logger.debug("色图CD: {}".format(cd_data))
 
 
 def cd_msg(cd) -> str:

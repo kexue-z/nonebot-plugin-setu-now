@@ -1,12 +1,11 @@
-from json import loads
+from json import load
 from pathlib import Path
 
 from nonebot import get_driver
 from nonebot.log import logger
 
-from models import SetuMessage
-
 from .config import Config
+from .models import SetuMessage
 
 plugin_config = Config.parse_obj(get_driver().config.dict())
 if plugin_config.setu_send_custom_message_path:
@@ -15,27 +14,7 @@ else:
     MSG_PATH = None
 
 
-driver = get_driver()
-
-
-@driver.on_startup
-def init():
-    """启动时加载 SETU_MSG"""
-    global SETU_MSG
-    SETU_MSG = load_setu_message()
-
-
-def load_setu_message():
-    if MSG_PATH:
-        logger.info(f"加载自定义色图消息 路径: {MSG_PATH}")
-        with open(MSG_PATH) as f:
-            f = f.read()
-        return SetuMessage(**loads(f))
-    else:
-        return SetuMessage(**msg)
-
-
-msg = {
+DEFAULT_MSG = {
     "send": [
         "给大佬递图",
         "这是你的🐍图",
@@ -78,3 +57,16 @@ msg = {
         "你这么喜欢色图，{cd_msg}后再给你看哦",
     ],
 }
+
+
+def load_setu_message():
+    if MSG_PATH:
+        logger.info(f"加载自定义色图消息 路径: {MSG_PATH}")
+        with MSG_PATH.open("r") as f:
+            msg = load(f)
+        return SetuMessage(**msg)
+    else:
+        return SetuMessage(**DEFAULT_MSG)
+
+
+SETU_MSG: SetuMessage = load_setu_message()

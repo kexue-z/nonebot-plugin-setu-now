@@ -18,7 +18,7 @@ from nonebot.adapters.onebot.v11 import (
 )
 
 from .config import Config
-from .models import Setu
+from .models import Setu, SetuNotFindError
 from .withdraw import add_withdraw_job
 from .cd_manager import add_cd, cd_msg, check_cd, remove_cd
 from .data_source import SetuLoader
@@ -26,14 +26,11 @@ from .data_source import SetuLoader
 plugin_config = Config.parse_obj(get_driver().config.dict())
 SAVE = plugin_config.setu_save
 SETU_SIZE = plugin_config.setu_size
+
 if SAVE == "webdav":
     from .save_to_webdav import save_img
 elif SAVE == "local":
     from .save_to_local import save_img
-else:
-
-    async def save_img(setu: Setu):
-        return None
 
 
 plugin_config = Config.parse_obj(get_driver().config.dict())
@@ -59,25 +56,28 @@ async def _(bot: Bot, event: MessageEvent, state: T_State = State()):
 
     r18 = True if (isinstance(event, PrivateMessageEvent) and r18) else False
 
+    logger.debug(f"Setu: r18:{r18}, tag:{tags}, key:{key}, num:{num}")
     add_cd(event)
 
     setu_obj = SetuLoader()
-    data = await setu_obj.get_setu(key, tags, r18, num)
-
+    try:
+        data = await setu_obj.get_setu(key, tags, r18, num)
+    except SetuNotFindError:
+        remove_cd(event)
+        await setu_matcher.finish(f"没有找到关于 {tags or key} 的色图呢～", at_sender=True)
     # failure = 0
     failure_setu: list[Setu] = []
 
     for setu in data:
         try:
-            msg_info = await setu.send(message=MessageSegment.image(setu.img))  # type: ignore
-            add_withdraw_job(bot, **msg_info)
+            msg = Message(MessageSegment.image(setu.img))  # type: ignore
 
-            # 是否需要发送图片消息
             if plugin_config.setu_send_info_message:
-                await sleep(2)
-                msg_info = await setu_matcher.send(Message(setu.msg), at_sender=True)
+                msg.append(MessageSegment.text(setu.msg))  # type: ignore
 
-                add_withdraw_job(bot, **msg_info)
+            msg_info = await setu_matcher.send(msg, at_sender=True)
+
+            add_withdraw_job(bot, **msg_info)
 
             await sleep(2)
 
@@ -85,12 +85,15 @@ async def _(bot: Bot, event: MessageEvent, state: T_State = State()):
             logger.warning(e)
             failure_setu.append(setu)
 
+        if SAVE:
+            await save_img(setu)
+
     if len(failure_setu) >= num / 2:
         remove_cd(event)
         msg = ""
         for setu in failure_setu:
             msg += setu.urls[SETU_SIZE] + "\n"
-        # msg = [setu. for setu in failure_setu]
+
         await setu_matcher.finish(
             message=Message("消息被风控，图发不出来\n这是链接\n" + msg),
             at_sender=True,

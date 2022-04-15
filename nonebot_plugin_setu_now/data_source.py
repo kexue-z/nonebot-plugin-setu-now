@@ -9,7 +9,7 @@ from nonebot.log import logger
 
 from .utils import download_pic
 from .config import Config
-from .models import Setu, SetuApiData
+from .models import Setu, SetuApiData, SetuNotFindError
 from .setu_message import SETU_MSG
 
 plugin_config = Config.parse_obj(get_driver().config.dict())
@@ -64,6 +64,9 @@ class SetuLoader:
         """
         setu_list = []
         api_data = await self._get_info_from_setu_api(keyword, tags, r18, num)
+        if len(api_data.data) == 0:
+            raise SetuNotFindError()
+
         for setu in api_data.data:
             setu_list.append(Setu(data=setu))
         data = await self._download_img_from_reverse_proxy(setu_list)
@@ -102,10 +105,12 @@ class SetuLoader:
 
         async with AsyncClient(proxies=self.proxy) as client:  # type: ignore
             res = await client.post(
-                self.api_url, data=data, headers=headers, timeout=60
+                self.api_url, json=data, headers=headers, timeout=60
             )
+        data = res.json()
+        logger.debug(f"API返回结果: {data}")
 
-        return SetuApiData(**res.json())
+        return SetuApiData(**data)
 
     async def _download_img_from_reverse_proxy(
         self,
@@ -123,6 +128,7 @@ class SetuLoader:
         """
         tasks = []
         for setu in data:
+            logger.debug(f"添加下载任务 {setu.urls}")
             tasks.append(download_pic(setu.urls[self.size]))
         results = await gather(*tasks)
         i = 0
@@ -147,7 +153,7 @@ class SetuLoader:
         """
         for setu in data:
             setu.msg = (
-                choice(SETU_MSG.send) + f"\n\n标题{setu.title}\n"
+                "\n" + choice(SETU_MSG.send) + f"\n标题{setu.title}\n"
                 f"画师:{setu.author}\n"
                 f"pid:{setu.pid}"
             )

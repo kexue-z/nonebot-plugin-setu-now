@@ -34,3 +34,7 @@ class Setu:
 class SetuMessage(BaseModel):
     send: list[str]
     cd: list[str]
+
+
+class SetuNotFindError(Exception):
+    pass
