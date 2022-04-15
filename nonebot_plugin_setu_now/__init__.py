@@ -117,7 +117,7 @@ async def _(bot: Bot, event: MessageEvent, state: T_State = State()):
     if failure_msg >= num / 2:
         remove_cd(event)
 
-    await setu_matcher.finish(
-        message=Message(f"消息被风控，{failure_msg} 个图发不出来了\n"),
-        at_sender=True,
-    )
+        await setu_matcher.finish(
+            message=Message(f"消息被风控，{failure_msg} 个图发不出来了\n"),
+            at_sender=True,
+        )
