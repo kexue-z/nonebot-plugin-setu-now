@@ -39,7 +39,7 @@ elif SAVE == "local":
 plugin_config = Config.parse_obj(get_driver().config.dict())
 
 setu_matcher = on_regex(
-    r"^(setu|色图|涩图|来点色色|色色|涩涩|来点色图)\s?([x]?\d+[张|个|份]?)\s?(r18)?\s?\s?(tag)?\s?(.*)?",
+    r"^(setu|色图|涩图|来点色色|色色|涩涩|来点色图)\s?([x]?\d+[张|个|份]?)?\s?(r18)?\s?\s?(tag)?\s?(.*)?",
     flags=I,
     permission=PRIVATE_FRIEND | GROUP,
 )
