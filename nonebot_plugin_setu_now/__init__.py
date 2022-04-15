@@ -28,6 +28,7 @@ from .data_source import SetuLoader
 plugin_config = Config.parse_obj(get_driver().config.dict())
 SAVE = plugin_config.setu_save
 SETU_SIZE = plugin_config.setu_size
+MAX = plugin_config.setu_max
 
 if SAVE == "webdav":
     from .save_to_webdav import save_img
@@ -53,6 +54,8 @@ async def _(bot: Bot, event: MessageEvent, state: T_State = State()):
     key = args[4]
 
     num = int(sub(r"[张|个|份|x]", "", num)) if num else 1
+    if num > MAX:
+        num = MAX
 
     # 如果存在 tag 关键字, 则将 key 视为tag
     if tags:
@@ -76,7 +79,7 @@ async def _(bot: Bot, event: MessageEvent, state: T_State = State()):
         remove_cd(event)
         await setu_matcher.finish(f"没有找到关于 {tags or key} 的色图呢～", at_sender=True)
 
-    failure_msg: list[Message] = []
+    failure_msg: int = 0
     msg_list: list[Message] = []
 
     for setu in data:
@@ -100,18 +103,21 @@ async def _(bot: Bot, event: MessageEvent, state: T_State = State()):
 
             except ActionFailed as e:
                 logger.warning(e)
-                failure_msg.append(msg)
+                failure_msg += 1
 
     # 群聊中 > 3 图, 合并转发
     elif isinstance(event, GroupMessageEvent):
 
-        await send_forward_msg(bot, event, "好东西", bot.self_id, msg_list)
+        try:
+            await send_forward_msg(bot, event, "好东西", bot.self_id, msg_list)
+        except ActionFailed as e:
+            logger.warning(e)
+            failure_msg = num
 
-    if failure_msg:
-        if len(failure_msg) >= num / 2:
-            remove_cd(event)
+    if failure_msg >= num / 2:
+        remove_cd(event)
 
-        await setu_matcher.finish(
-            message=Message(f"消息被风控，{len(failure_msg)} 个图发不出来了\n"),
-            at_sender=True,
-        )
+    await setu_matcher.finish(
+        message=Message(f"消息被风控，{failure_msg} 个图发不出来了\n"),
+        at_sender=True,
+    )
