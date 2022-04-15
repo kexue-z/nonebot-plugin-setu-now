@@ -153,8 +153,8 @@ class SetuLoader:
         """
         for setu in data:
             setu.msg = (
-                "\n" + choice(SETU_MSG.send) + f"\n标题{setu.title}\n"
-                f"画师:{setu.author}\n"
-                f"pid:{setu.pid}"
+                "\n" + choice(SETU_MSG.send) + f"\n标题: {setu.title}\n"
+                f"画师: {setu.author}\n"
+                f"pid: {setu.pid}"
             )
         return data

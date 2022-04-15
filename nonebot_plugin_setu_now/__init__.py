@@ -52,10 +52,6 @@ async def _(bot: Bot, event: MessageEvent, state: T_State = State()):
     tags = args[3]
     key = args[4]
 
-    # 防止出现 setu 10 被认为 num = 10
-    if (not key) and num:
-        key = num
-        num = ""
     num = int(sub(r"[张|个|份|x]", "", num)) if num else 1
 
     # 如果存在 tag 关键字, 则将 key 视为tag
