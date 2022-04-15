@@ -1,110 +1,123 @@
-import random
+from re import I, sub
+from typing import Optional
 from asyncio import sleep
-from re import I
 
-from nonebot import get_driver, on_regex
+from nonebot import on_regex, get_driver
+from nonebot.log import logger
+from nonebot.params import State
+from nonebot.typing import T_State
+from nonebot.exception import ActionFailed
 from nonebot.adapters.onebot.v11 import (
     GROUP,
     PRIVATE_FRIEND,
     Bot,
     Message,
     MessageEvent,
+    MessageSegment,
+    GroupMessageEvent,
     PrivateMessageEvent,
 )
-from nonebot.exception import ActionFailed
-from nonebot.log import logger
-from nonebot.params import State
-from nonebot.typing import T_State
 
+from .utils import send_forward_msg
 from .config import Config
-from .get_data import get_setu
-from .json_manager import read_json, remove_json, write_json
-from .setu_message import load_setu_message
+from .models import Setu, SetuNotFindError
 from .withdraw import add_withdraw_job
+from .cd_manager import add_cd, cd_msg, check_cd, remove_cd
+from .data_source import SetuLoader
 
-driver = get_driver()
 plugin_config = Config.parse_obj(get_driver().config.dict())
-CDTIME = plugin_config.setu_cd
+SAVE = plugin_config.setu_save
+SETU_SIZE = plugin_config.setu_size
+MAX = plugin_config.setu_max
+
+if SAVE == "webdav":
+    from .save_to_webdav import save_img
+elif SAVE == "local":
+    from .save_to_local import save_img
 
 
-@driver.on_startup
-async def init():
-    """启动时加载setumsg"""
-    global SETU_MSG
-    SETU_MSG = await load_setu_message()
-    return SETU_MSG
+plugin_config = Config.parse_obj(get_driver().config.dict())
 
-
-setu = on_regex(
-    r"^(setu|色图|涩图|来点色色|色色|涩涩)\s?(r18)?\s?(.*)?",
+setu_matcher = on_regex(
+    r"^(setu|色图|涩图|来点色色|色色|涩涩|来点色图)\s?([x]?\d+[张|个|份]?)\s?(r18)?\s?\s?(tag)?\s?(.*)?",
     flags=I,
     permission=PRIVATE_FRIEND | GROUP,
 )
 
 
-@setu.handle()
+@setu_matcher.handle()
 async def _(bot: Bot, event: MessageEvent, state: T_State = State()):
     args = list(state["_matched_groups"])
-    r18 = args[1]
-    key = args[2]
-    qid = event.get_user_id()
-    mid = event.message_id
-    data = await read_json()
+    num = args[1]
+    r18 = args[2]
+    tags = args[3]
+    key = args[4]
 
-    try:
-        cd = event.time - data[qid][0]
-    except Exception:
-        cd = CDTIME + 1
+    num = int(sub(r"[张|个|份|x]", "", num)) if num else 1
+    if num > MAX:
+        num = MAX
 
+    # 如果存在 tag 关键字, 则将 key 视为tag
+    if tags:
+        tags = key.split()
+        key = ""
+
+    # 仅在私聊中开启
     r18 = True if (isinstance(event, PrivateMessageEvent) and r18) else False
 
-    logger.debug(f"key={key},r18={r18}")
+    if cd := check_cd(event):
+        # 如果 CD 还没到 则直接结束
+        await setu_matcher.finish(cd_msg(cd), at_sender=True)
 
-    if (
-        cd > CDTIME
-        or event.get_user_id() in plugin_config.superusers
-        or isinstance(event, PrivateMessageEvent)
-    ):
-        await write_json(qid, event.time, mid, data)
-        pic = await get_setu(key, r18)
-        if pic[2]:
+    logger.debug(f"Setu: r18:{r18}, tag:{tags}, key:{key}, num:{num}")
+    add_cd(event)
+
+    setu_obj = SetuLoader()
+    try:
+        data = await setu_obj.get_setu(key, tags, r18, num)
+    except SetuNotFindError:
+        remove_cd(event)
+        await setu_matcher.finish(f"没有找到关于 {tags or key} 的色图呢～", at_sender=True)
+
+    failure_msg: int = 0
+    msg_list: list[Message] = []
+
+    for setu in data:
+        msg = Message(MessageSegment.image(setu.img))  # type: ignore
+
+        if plugin_config.setu_send_info_message:
+            msg.append(MessageSegment.text(setu.msg))  # type: ignore
+
+        msg_list.append(msg)  # type: ignore
+
+        if SAVE:
+            await save_img(setu)
+
+        # 私聊 或者 群聊中 <= 3 图, 直接发送
+    if isinstance(event, PrivateMessageEvent) or len(data) <= 3:
+        for msg in msg_list:
             try:
-                msg_info = await setu.send(message=Message(pic[0]))
+                msg_info = await setu_matcher.send(msg, at_sender=True)
                 add_withdraw_job(bot, **msg_info)
-
-                # 是否需要发送图片消息
-                if plugin_config.setu_send_info_message:
-                    await sleep(2)
-                    msg_info = await setu.send(
-                        message=f"{random.choice(SETU_MSG['setu_message_send'])}\n"  # 发送一些消息
-                        + Message(pic[1]),
-                        at_sender=True,
-                    )
-                    add_withdraw_job(bot, **msg_info)
+                await sleep(2)
 
             except ActionFailed as e:
                 logger.warning(e)
-                await remove_json(qid)
-                await setu.finish(
-                    message=Message(f"消息被风控，图发不出来\n{pic[1]}\n这是链接\n{pic[3]}"),
-                    at_sender=True,
-                )
+                failure_msg += 1
 
-        else:
-            await remove_json(qid)
-            await setu.finish(pic[0] + pic[1])
+    # 群聊中 > 3 图, 合并转发
+    elif isinstance(event, GroupMessageEvent):
 
-    else:
-        time_last = CDTIME - cd
-        hours, minutes, seconds = 0, 0, 0
-        if time_last >= 60:
-            minutes, seconds = divmod(time_last, 60)
-            hours, minutes = divmod(minutes, 60)
-        else:
-            seconds = time_last
-        cd_msg = f"{str(hours) + '小时' if hours else ''}{str(minutes) + '分钟' if minutes else ''}{str(seconds) + '秒' if seconds else ''}"
+        try:
+            await send_forward_msg(bot, event, "好东西", bot.self_id, msg_list)
+        except ActionFailed as e:
+            logger.warning(e)
+            failure_msg = num
 
-        await setu.send(
-            random.choice(SETU_MSG["setu_message_cd"]).format(cd_msg=cd_msg),
+    if failure_msg >= num / 2:
+        remove_cd(event)
+
+        await setu_matcher.finish(
+            message=Message(f"消息被风控，{failure_msg} 个图发不出来了\n"),
             at_sender=True,
         )
