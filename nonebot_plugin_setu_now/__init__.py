@@ -1,4 +1,4 @@
-from re import I
+from re import I, sub
 from typing import Optional
 from asyncio import sleep
 
@@ -14,9 +14,11 @@ from nonebot.adapters.onebot.v11 import (
     Message,
     MessageEvent,
     MessageSegment,
+    GroupMessageEvent,
     PrivateMessageEvent,
 )
 
+from .utils import send_forward_msg
 from .config import Config
 from .models import Setu, SetuNotFindError
 from .withdraw import add_withdraw_job
@@ -36,7 +38,7 @@ elif SAVE == "local":
 plugin_config = Config.parse_obj(get_driver().config.dict())
 
 setu_matcher = on_regex(
-    r"^(setu|色图|涩图|来点色色|色色|涩涩)\s?(r18)?\s?(tag)?\s?(.*)?",
+    r"^(setu|色图|涩图|来点色色|色色|涩涩|来点色图)\s?([x]?\d+[张|个|份]?)\s?(r18)?\s?\s?(tag)?\s?(.*)?",
     flags=I,
     permission=PRIVATE_FRIEND | GROUP,
 )
@@ -45,16 +47,28 @@ setu_matcher = on_regex(
 @setu_matcher.handle()
 async def _(bot: Bot, event: MessageEvent, state: T_State = State()):
     args = list(state["_matched_groups"])
-    r18 = args[1]
-    tags = args[2]
-    key = args[3]
-    num = 1
+    num = args[1]
+    r18 = args[2]
+    tags = args[3]
+    key = args[4]
+
+    # 防止出现 setu 10 被认为 num = 10
+    if (not key) and num:
+        key = num
+        num = ""
+    num = int(sub(r"[张|个|份|x]", "", num)) if num else 1
+
+    # 如果存在 tag 关键字, 则将 key 视为tag
+    if tags:
+        tags = key.split()
+        key = ""
+
+    # 仅在私聊中开启
+    r18 = True if (isinstance(event, PrivateMessageEvent) and r18) else False
 
     if cd := check_cd(event):
         # 如果 CD 还没到 则直接结束
         await setu_matcher.finish(cd_msg(cd), at_sender=True)
-
-    r18 = True if (isinstance(event, PrivateMessageEvent) and r18) else False
 
     logger.debug(f"Setu: r18:{r18}, tag:{tags}, key:{key}, num:{num}")
     add_cd(event)
@@ -65,28 +79,37 @@ async def _(bot: Bot, event: MessageEvent, state: T_State = State()):
     except SetuNotFindError:
         remove_cd(event)
         await setu_matcher.finish(f"没有找到关于 {tags or key} 的色图呢～", at_sender=True)
-    # failure = 0
+
     failure_setu: list[Setu] = []
+    msg_list: list[Message] = []
 
     for setu in data:
-        try:
-            msg = Message(MessageSegment.image(setu.img))  # type: ignore
+        msg = Message(MessageSegment.image(setu.img))  # type: ignore
 
-            if plugin_config.setu_send_info_message:
-                msg.append(MessageSegment.text(setu.msg))  # type: ignore
+        if plugin_config.setu_send_info_message:
+            msg.append(MessageSegment.text(setu.msg))  # type: ignore
 
-            msg_info = await setu_matcher.send(msg, at_sender=True)
-
-            add_withdraw_job(bot, **msg_info)
-
-            await sleep(2)
-
-        except ActionFailed as e:
-            logger.warning(e)
-            failure_setu.append(setu)
+        msg_list.append(msg)  # type: ignore
 
         if SAVE:
             await save_img(setu)
+
+        # 私聊 或者 群聊中 <= 3 图, 直接发送
+    if isinstance(event, PrivateMessageEvent) or len(data) <= 3:
+        for msg in msg_list:
+            try:
+                msg_info = await setu_matcher.send(msg, at_sender=True)
+                add_withdraw_job(bot, **msg_info)
+                await sleep(2)
+
+            except ActionFailed as e:
+                logger.warning(e)
+                await setu_matcher.send("发送失败 可能被风控", at_sender=True)
+
+    # 群聊中 > 3 图, 合并转发
+    elif isinstance(event, GroupMessageEvent):
+
+        await send_forward_msg(bot, event, "好东西", bot.self_id, msg_list)
 
     if len(failure_setu) >= num / 2:
         remove_cd(event)
