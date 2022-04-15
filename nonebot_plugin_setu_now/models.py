@@ -1,5 +1,6 @@
+from typing import List, Optional
+
 from pydantic import BaseModel
-from typing import Optional, List
 
 
 class SetuData(BaseModel):
@@ -18,10 +19,16 @@ class SetuApiData(BaseModel):
 
 
 class Setu:
-    def __init__(self, data: List[SetuData]):
-        self.data: List[SetuData] = data
-        self.img: Optional[List[bytes]] = []
-        self.msg: Optional[List[str]] = []
+    def __init__(self, data: SetuData):
+        self.title: str = data.title
+        self.urls: dict[str, str] = data.urls
+        self.author: str = data.author
+        self.tags: list[str] = data.tags
+        self.pid: int = data.pid
+        self.p: int = data.p
+        self.r18: bool = data.r18
+        self.img: Optional[bytes] = None
+        self.msg: Optional[str] = None
 
 
 class SetuMessage(BaseModel):

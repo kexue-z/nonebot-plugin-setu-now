@@ -1,12 +1,13 @@
 import os
+from io import BytesIO
+
+from PIL import Image
 from anyio import open_file
 from nonebot import get_driver
 from nonebot.log import logger
-from PIL import Image
-from io import BytesIO
-from .models import SetuData
 
 from .config import Config
+from .models import Setu
 
 plugin_config = Config.parse_obj(get_driver().config.dict())
 
@@ -22,8 +23,8 @@ else:
     logger.info(f"setu将保存到 {setu_path}")
 
 
-async def save_img(setu: SetuData):
+async def save_img(setu: Setu):
     path = f"{setu_path}{'r18' if setu.r18 else '' }/{setu.pid}_{setu.p}_{setu.title}_{setu.author}.jpg"
     async with await open_file(path, "wb") as f:
         await f.write(setu.img)  # type: ignore
-    logger.info(f"图片已保存{path}")
+    logger.info(f"图片已保存 {path}")

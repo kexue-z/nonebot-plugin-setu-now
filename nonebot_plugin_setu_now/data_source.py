@@ -1,18 +1,20 @@
+import re
+from random import choice
+from typing import List, Optional
 from asyncio import gather
-from typing import Optional, List
 
 from httpx import AsyncClient
 from nonebot import get_driver
+from nonebot.log import logger
 
-from .config import Config
-from .models import SetuApiData, Setu, SetuData
 from .utils import download_pic
-from .setu_message import SetuMessage
+from .config import Config
+from .models import Setu, SetuApiData
+from .setu_message import SETU_MSG
 
 plugin_config = Config.parse_obj(get_driver().config.dict())
 SETU_SIZE = plugin_config.setu_size
 API_URL = plugin_config.setu_api_url
-SAVE = plugin_config.setu_save
 REVERSE_PROXY = plugin_config.setu_reverse_proxy
 PROXY = plugin_config.setu_proxy
 
@@ -23,22 +25,21 @@ class SetuLoader:
         size: str = SETU_SIZE,
         api_url: str = API_URL,
         reverse_proxy_url: Optional[str] = REVERSE_PROXY,
-        save: Optional[str] = SAVE,
         proxy: Optional[str] = PROXY,
     ):
-        """初始化
+        """
+        :说明: `__init__`
+        > 初始化
 
-        Args:
-            size (str, optional): 图像大小. Defaults to "regular".
-            api_url (str, optional): api地址. Defaults to "https://api.lolicon.app/setu/v2".
-            reverse_proxy_url (str, optional): 图片反向代理地址. Defaults to "i.pixiv.re".
-            save (Optional[str], optional): 是否保存. None 表示不保存 WebDAV 表示保存到WebDAV服务器, local 表示保存到本地. 默认 None 不保存.
-            proxy (Optional[str], optional): 代理地址. 是否使用代理, 用于 api 请求和图片下载. Defaults to None.
+        :可选参数:
+          * `size: str = SETU_SIZE`: 图像大小
+          * `api_url: str = API_URL`: api地址
+          * `reverse_proxy_url: Optional[str] = REVERSE_PROXY`: 图片反向代理地址
+          * `proxy: Optional[str] = PROXY`: 代理地址
         """
         self.size = size
         self.api_url = api_url
         self.reverse_proxy_url = reverse_proxy_url
-        self.save = save
         self.proxy = proxy
 
     async def get_setu(
@@ -47,10 +48,27 @@ class SetuLoader:
         tags: Optional[list] = None,
         r18: bool = False,
         num: int = 1,
-    ) -> "Setu":
+    ) -> list[Setu]:
+        """
+        :说明: `get_setu`
+        >
+
+        :可选参数:
+          * `keyword: Optional[str] = None`: 关键词
+          * `tags: Optional[list] = None`: 标签
+          * `r18: bool = False`: r18
+          * `num: int = 1`: 数量
+
+        :返回:
+          - `list[Setu]`: Setu 对象列表
+        """
+        setu_list = []
         api_data = await self._get_info_from_setu_api(keyword, tags, r18, num)
-        setu_data = Setu(data=api_data.data)
-        data = await self._download_img_from_reverse_proxy(setu_data)
+        for setu in api_data.data:
+            setu_list.append(Setu(data=setu))
+        data = await self._download_img_from_reverse_proxy(setu_list)
+        data = self._setu_info_msg(data)
+        return data
 
     async def _get_info_from_setu_api(
         self,
@@ -58,7 +76,20 @@ class SetuLoader:
         tags: Optional[list] = None,
         r18: bool = False,
         num: int = 1,
-    ) -> "SetuApiData":
+    ) -> SetuApiData:
+        """
+        :说明: `_get_info_from_setu_api`
+        > 从API中获取数据
+
+        :可选参数:
+          * `keyword: Optional[str] = None`: 关键词
+          * `tags: Optional[list] = None`: 标签列表
+          * `r18: bool = False`: r18
+          * `num: int = 1`: 数量
+
+        :返回:
+          - `SetuApiData`: API数据
+        """
         data = {
             "keyword": keyword,
             "tags": tags,
@@ -78,28 +109,46 @@ class SetuLoader:
 
     async def _download_img_from_reverse_proxy(
         self,
-        data: Setu,
-    ) -> Setu:
+        data: list[Setu],
+    ) -> list[Setu]:
+        """
+        :说明: `_download_img_from_reverse_proxy`
+        > 下载图片到 `Setu.img` 中
 
-        # data = Setu(data=data.data)
+        :参数:
+          * `data: list[Setu]`: Setu 对象列表
+
+        :返回:
+          - `list[Setu]`: Setu 对象列表
+        """
         tasks = []
-        for setu in data.data:
+        for setu in data:
             tasks.append(download_pic(setu.urls[self.size]))
         results = await gather(*tasks)
-        data.img = []
-        for i in range(len(data.data)):
-            data.img.append(results[i])
+        i = 0
+        for setu in data:
+            setu.img = results[i]
+            i += 1
         return data
 
-    def _setu_info_msg(self, data: Setu) -> Setu:
-        data.msg = []
-        for i in range(len(data.data)):
-            data.msg.append(
-                f"标题{data.data[i].title}\n"
-                f"画师:{data.data[i].author}\n"
-                f"pid:{data.data[i].pid}"
+    def _setu_info_msg(
+        self,
+        data: list[Setu],
+    ) -> list[Setu]:
+        """
+        :说明: `_setu_info_msg`
+        > 添加信息到 `Setu.msg` 中
+
+        :参数:
+          * `data: list[Setu]`: Setu 对象列表
+
+        :返回:
+          - `list[Setu]`: Setu 对象列表
+        """
+        for setu in data:
+            setu.msg = (
+                choice(SETU_MSG.send) + f"\n\n标题{setu.title}\n"
+                f"画师:{setu.author}\n"
+                f"pid:{setu.pid}"
             )
         return data
-
-    def save_img(self):
-        pass

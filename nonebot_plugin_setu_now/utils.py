@@ -1,11 +1,7 @@
-from httpx import AsyncClient, HTTPError
-from nonebot.log import logger
 from typing import Optional
-from .models import SetuApiData
 
-
-def check_cd(id: str) -> bool:
-    pass
+from httpx import AsyncClient
+from nonebot.log import logger
 
 
 async def download_pic(url: str, proxies: Optional[str] = None) -> Optional[bytes]:
@@ -23,10 +19,3 @@ async def download_pic(url: str, proxies: Optional[str] = None) -> Optional[byte
         else:
             logger.error(f"获取图片失败: {re.status_code}")
             return
-
-
-def setu_info_msg(self, data: SetuApiData):
-    for i in data.data:
-        if data.error:
-            i.msg = data.error
-        i.msg = f"标题{i.title}\n" f"画师:{i.author}\n" f"pid:{i.pid}"

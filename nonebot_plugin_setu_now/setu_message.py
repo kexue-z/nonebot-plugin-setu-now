@@ -4,8 +4,9 @@ from pathlib import Path
 from nonebot import get_driver
 from nonebot.log import logger
 
-from .config import Config
 from models import SetuMessage
+
+from .config import Config
 
 plugin_config = Config.parse_obj(get_driver().config.dict())
 if plugin_config.setu_send_custom_message_path:

@@ -4,6 +4,9 @@
     "python.formatting.provider": "black",
     "python.languageServer": "Pylance",
     "python.linting.flake8Enabled": true,
+    "python.sortImports.args": [
+        "--ls"
+    ],
     "editor.formatOnSave": true,
     "files.watcherExclude": {
         "**/.git/objects/**": true,
@@ -13,6 +16,13 @@
         "**/.venv/**": true,
         "**/.mypy_cache/**": true,
     },
+    "[python]": {
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": true,
+            "source.fixAll": true
+        }
+    },
+    "autoDocstring.customTemplatePath": ".vscode/docstring.mustache",
     "files.encoding": "utf8",
     "git.autofetch": true,
     "git.enableSmartCommit": true,

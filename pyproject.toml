@@ -18,8 +18,8 @@ nonebot-plugin-apscheduler = "^0.1.2"
 Pillow = ">=8"
 
 [tool.poetry.dev-dependencies]
-black = {version = "^21.12b0", allow-prereleases = true}
 flake8 = "^4.0.1"
+black = "^22.3.0"
 
 
 [build-system]

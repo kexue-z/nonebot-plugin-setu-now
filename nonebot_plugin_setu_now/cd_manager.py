@@ -2,9 +2,9 @@ from random import choice
 
 from nonebot import get_driver
 from nonebot.adapters.onebot.v11 import MessageEvent, PrivateMessageEvent
-from .setu_message import load_setu_message
+
 from .config import Config
-from .setu_message import SETU_MSG
+from .setu_message import SETU_MSG, load_setu_message
 
 driver = get_driver()
 plugin_config = Config.parse_obj(get_driver().config.dict())
@@ -15,9 +15,18 @@ cd_data = {}
 
 
 def check_cd(event: MessageEvent) -> int:
-    """检测是否达到CD
-    如果未达到CD 则返回剩余时间
-    如果达到CD或满足条件 则为 0
+    """
+    :说明: `check_cd`
+        * 检查是否达到CD时间\n
+        * 如果达到则返回 `0`\n
+        * 如果未达到则返回 `剩余CD时间`
+
+
+    :参数:
+      * `event: MessageEvent`: 事件对象
+
+    :返回:
+      - `int`: 时间差
     """
     # cd =  当前时间 - 上一次记录的时间
     try:
