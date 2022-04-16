@@ -48,7 +48,7 @@ class SetuLoader:
         tags: Optional[list] = None,
         r18: bool = False,
         num: int = 1,
-    ) -> list[Setu]:
+    ) -> List[Setu]:
         """
         :说明: `get_setu`
         >
@@ -60,7 +60,7 @@ class SetuLoader:
           * `num: int = 1`: 数量
 
         :返回:
-          - `list[Setu]`: Setu 对象列表
+          - `List[Setu]`: Setu 对象列表
         """
         setu_list = []
         api_data = await self._get_info_from_setu_api(keyword, tags, r18, num)
@@ -114,17 +114,17 @@ class SetuLoader:
 
     async def _download_img_from_reverse_proxy(
         self,
-        data: list[Setu],
-    ) -> list[Setu]:
+        data: List[Setu],
+    ) -> List[Setu]:
         """
         :说明: `_download_img_from_reverse_proxy`
         > 下载图片到 `Setu.img` 中
 
         :参数:
-          * `data: list[Setu]`: Setu 对象列表
+          * `data: List[Setu]`: Setu 对象列表
 
         :返回:
-          - `list[Setu]`: Setu 对象列表
+          - `List[Setu]`: Setu 对象列表
         """
         tasks = []
         for setu in data:
@@ -139,17 +139,17 @@ class SetuLoader:
 
     def _setu_info_msg(
         self,
-        data: list[Setu],
-    ) -> list[Setu]:
+        data: List[Setu],
+    ) -> List[Setu]:
         """
         :说明: `_setu_info_msg`
         > 添加信息到 `Setu.msg` 中
 
         :参数:
-          * `data: list[Setu]`: Setu 对象列表
+          * `data: List[Setu]`: Setu 对象列表
 
         :返回:
-          - `list[Setu]`: Setu 对象列表
+          - `List[Setu]`: Setu 对象列表
         """
         for setu in data:
             setu.msg = (

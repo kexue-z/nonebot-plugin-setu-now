@@ -1,5 +1,5 @@
 from re import I, sub
-from typing import Optional
+from typing import List
 from asyncio import sleep
 
 from nonebot import on_regex, get_driver
@@ -7,16 +7,10 @@ from nonebot.log import logger
 from nonebot.params import State
 from nonebot.typing import T_State
 from nonebot.exception import ActionFailed
-from nonebot.adapters.onebot.v11 import (
-    GROUP,
-    PRIVATE_FRIEND,
-    Bot,
-    Message,
-    MessageEvent,
-    MessageSegment,
-    GroupMessageEvent,
-    PrivateMessageEvent,
-)
+from nonebot.adapters.onebot.v11 import (GROUP, PRIVATE_FRIEND, Bot, Message,
+                                         MessageEvent, MessageSegment,
+                                         GroupMessageEvent,
+                                         PrivateMessageEvent)
 
 from .utils import send_forward_msg
 from .config import Config
@@ -80,7 +74,7 @@ async def _(bot: Bot, event: MessageEvent, state: T_State = State()):
         await setu_matcher.finish(f"没有找到关于 {tags or key} 的色图呢～", at_sender=True)
 
     failure_msg: int = 0
-    msg_list: list[Message] = []
+    msg_list: List[Message] = []
 
     for setu in data:
         msg = Message(MessageSegment.image(setu.img))  # type: ignore

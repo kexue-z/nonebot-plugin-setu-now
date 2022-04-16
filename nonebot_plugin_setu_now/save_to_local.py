@@ -1,7 +1,6 @@
 import os
 from pathlib import Path
 
-from PIL import Image
 from anyio import open_file
 from nonebot import get_driver
 from nonebot.log import logger

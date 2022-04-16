@@ -1,4 +1,5 @@
 from random import choice
+from typing import Dict
 
 from nonebot import get_driver
 from nonebot.log import logger
@@ -12,7 +13,7 @@ plugin_config = Config.parse_obj(get_driver().config.dict())
 SUPERUSERS = plugin_config.superusers
 CDTIME = plugin_config.setu_cd
 
-cd_data: dict[str, int] = {}
+cd_data: Dict[str, int] = {}
 
 
 def check_cd(event: MessageEvent) -> int:
