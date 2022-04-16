@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nonebot-plugin-setu-now"
-version = "0.2.1"
+version = "0.2.2"
 description = "另一个色图插件"
 authors = ["kexue"]
 license = "MIT"
