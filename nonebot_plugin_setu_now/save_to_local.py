@@ -10,7 +10,7 @@ from .models import Setu
 
 plugin_config = Config.parse_obj(get_driver().config.dict())
 
-setu_path = Path(plugin_config.setu_path).absolute()  # type: ignore
+setu_path = plugin_config.setu_path
 
 if not setu_path:
     setu_path = Path("./data/setu").absolute()
@@ -26,6 +26,6 @@ async def save_img(setu: Setu):
     path = Path(
         f"{setu_path}{'r18' if setu.r18 else '' }/{setu.pid}_{setu.p}_{setu.title}_{setu.author}.jpg"
     )
-    async with await open_file(path, "wb+") as f:
+    async with await open_file(str(path), "wb+") as f:
         await f.write(setu.img)  # type: ignore
     logger.info(f"图片已保存 {path}")
