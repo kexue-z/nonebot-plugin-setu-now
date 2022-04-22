@@ -34,11 +34,11 @@ def check_cd(event: MessageEvent) -> int:
         cd: int = cd_data[uid] - event.time
         logger.debug(f"{uid} 还剩: {cd}")
     except KeyError:
-        cd = event.time - 1
-    if cd < event.time or uid in SUPERUSERS or isinstance(event, PrivateMessageEvent):
+        cd = -1
+    if cd < 0 or uid in SUPERUSERS or isinstance(event, PrivateMessageEvent):
         return 0
     else:
-        return cd - event.time
+        return cd
 
 
 def add_cd(event: MessageEvent, times: int = 1):
