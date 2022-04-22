@@ -7,10 +7,16 @@ from nonebot.log import logger
 from nonebot.params import State
 from nonebot.typing import T_State
 from nonebot.exception import ActionFailed
-from nonebot.adapters.onebot.v11 import (GROUP, PRIVATE_FRIEND, Bot, Message,
-                                         MessageEvent, MessageSegment,
-                                         GroupMessageEvent,
-                                         PrivateMessageEvent)
+from nonebot.adapters.onebot.v11 import (
+    GROUP,
+    PRIVATE_FRIEND,
+    Bot,
+    Message,
+    MessageEvent,
+    MessageSegment,
+    GroupMessageEvent,
+    PrivateMessageEvent,
+)
 
 from .utils import send_forward_msg
 from .config import Config
@@ -33,7 +39,7 @@ elif SAVE == "local":
 plugin_config = Config.parse_obj(get_driver().config.dict())
 
 setu_matcher = on_regex(
-    r"^(setu|色图|涩图|来点色色|色色|涩涩|来点色图)\s?([x]?\d+[张|个|份]?)?\s?(r18)?\s?\s?(tag)?\s?(.*)?",
+    r"^(setu|色图|涩图|来点色色|色色|涩涩|来点色图)\s?([x|✖️|×|X|*]?\d+[张|个|份]?)?\s?(r18)?\s?\s?(tag)?\s?(.*)?",
     flags=I,
     permission=PRIVATE_FRIEND | GROUP,
 )
@@ -47,7 +53,7 @@ async def _(bot: Bot, event: MessageEvent, state: T_State = State()):
     tags = args[3]
     key = args[4]
 
-    num = int(sub(r"[张|个|份|x]", "", num)) if num else 1
+    num = int(sub(r"[张|个|份|x|✖️|×|X|*]", "", num)) if num else 1
     if num > MAX:
         num = MAX
 
@@ -64,7 +70,7 @@ async def _(bot: Bot, event: MessageEvent, state: T_State = State()):
         await setu_matcher.finish(cd_msg(cd), at_sender=True)
 
     logger.debug(f"Setu: r18:{r18}, tag:{tags}, key:{key}, num:{num}")
-    add_cd(event)
+    add_cd(event, num)
 
     setu_obj = SetuLoader()
     try:

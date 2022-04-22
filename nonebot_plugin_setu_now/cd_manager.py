@@ -22,33 +22,35 @@ def check_cd(event: MessageEvent) -> int:
         * 检查是否达到CD时间\n
         * 如果达到则返回 `0`\n
         * 如果未达到则返回 `剩余CD时间`
-
-
     :参数:
       * `event: MessageEvent`: 事件对象
 
     :返回:
-      - `int`: 时间差
+      - `int`: 剩余时间
     """
-    # cd =  当前时间 - 上一次记录的时间
+    uid = event.get_user_id()
+    # cd = 设置的到期时间 - 当前时间
     try:
-        cd: int = event.time - cd_data[event.get_user_id()]
-        logger.debug(f"{event.get_user_id()} cd: {cd} 还剩: {CDTIME - cd}")
+        cd: int = cd_data[uid] - event.time
+        logger.debug(f"{uid} 还剩: {cd}")
     except KeyError:
-        cd = CDTIME + 1
-    if (
-        cd > CDTIME
-        or event.get_user_id() in SUPERUSERS
-        or isinstance(event, PrivateMessageEvent)
-    ):
+        cd = event.time - 1
+    if cd < event.time or uid in SUPERUSERS or isinstance(event, PrivateMessageEvent):
         return 0
     else:
-        return cd
+        return cd - event.time
 
 
-def add_cd(event: MessageEvent):
-    """添加CD"""
-    cd_data[event.get_user_id()] = event.time
+def add_cd(event: MessageEvent, times: int = 1):
+    """
+    :说明: `add_cd`
+    > 添加cd, 到期时间 = 当前时间 + 设定的CD * 倍数
+
+    :参数:
+      * `event: MessageEvent`: 事件
+      * `times: int`: 倍数, 默认为 `1`
+    """
+    cd_data[event.get_user_id()] = event.time + times * CDTIME
     logger.debug("色图CD: {}".format(cd_data))
 
 
