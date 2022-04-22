@@ -60,9 +60,8 @@ def remove_cd(event: MessageEvent):
     logger.debug("色图CD: {}".format(cd_data))
 
 
-def cd_msg(cd) -> str:
+def cd_msg(time_last) -> str:
     """获取CD提示信息"""
-    time_last = CDTIME - cd
     hours, minutes, seconds = 0, 0, 0
     if time_last >= 60:
         minutes, seconds = divmod(time_last, 60)
