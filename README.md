@@ -20,7 +20,9 @@ pip install -U nonebot-plugin-setu-now
 ### .env 默认配置
 
 > 如果你不知道你要做什么 直接安装好插件 然后直接载入
+
 > 本章内容可以不看
+
 > 在吗？在读下去之前能不能告诉什么叫可选配备？
 
 是像这样写全都写上但是都留空吗？
@@ -98,7 +100,7 @@ setu_reverse_proxy=
 setu_max=0
 ```
 
-### bot.py
+## 载入插件 bot.py
 
 ```py
 nonebot.load_plugin("nonebot_plugin_setu_now")
