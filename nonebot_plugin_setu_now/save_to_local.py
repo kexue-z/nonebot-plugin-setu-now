@@ -23,9 +23,10 @@ else:
 
 
 async def save_img(setu: Setu):
-    path = Path(
-        f"{setu_path}{'r18' if setu.r18 else '' }/{setu.pid}_{setu.p}_{setu.title}_{setu.author}.jpg"
+    info = "{}_{}_{}_{}".format(setu.pid, setu.p, setu.title, setu.author).replace(
+        "/", "-"
     )
-    async with await open_file(str(path), "wb+") as f:
+    path = Path(f"{setu_path}{'r18' if setu.r18 else '' }/{info}.jpg")
+    async with await open_file(path, "wb+") as f:
         await f.write(setu.img)  # type: ignore
     logger.info(f"图片已保存 {path}")
