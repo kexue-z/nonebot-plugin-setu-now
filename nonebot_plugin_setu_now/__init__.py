@@ -1,8 +1,8 @@
 import asyncio
 from re import I, sub
 from typing import List
-from asyncio import sleep
-
+from asyncio import sleep, create_task
+from asyncio.tasks import Task
 
 from nonebot import on_regex, get_driver
 from nonebot.log import logger
@@ -83,7 +83,7 @@ async def _(bot: Bot, event: MessageEvent, state: T_State = State()):
 
     failure_msg: int = 0
     msg_list: List[Message] = []
-
+    setu_saving_tasks: List[Task] = []
 
     for setu in data:
         msg = Message(MessageSegment.image(setu.img))  # type: ignore
