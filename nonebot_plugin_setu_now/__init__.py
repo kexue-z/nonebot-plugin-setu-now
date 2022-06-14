@@ -1,6 +1,8 @@
+import asyncio
 from re import I, sub
 from typing import List
 from asyncio import sleep
+
 
 from nonebot import on_regex, get_driver
 from nonebot.log import logger
@@ -82,6 +84,7 @@ async def _(bot: Bot, event: MessageEvent, state: T_State = State()):
     failure_msg: int = 0
     msg_list: List[Message] = []
 
+
     for setu in data:
         msg = Message(MessageSegment.image(setu.img))  # type: ignore
 
@@ -91,7 +94,7 @@ async def _(bot: Bot, event: MessageEvent, state: T_State = State()):
         msg_list.append(msg)  # type: ignore
 
         if SAVE:
-            await save_img(setu)
+            setu_saving_tasks.append(create_task(save_img(setu)))
 
         # 私聊 或者 群聊中 <= 3 图, 直接发送
     if isinstance(event, PrivateMessageEvent) or len(data) <= 3:
@@ -121,3 +124,5 @@ async def _(bot: Bot, event: MessageEvent, state: T_State = State()):
             message=Message(f"消息被风控，{failure_msg} 个图发不出来了\n"),
             at_sender=True,
         )
+
+    await asyncio.gather(*setu_saving_tasks)
