@@ -1,6 +1,8 @@
+import asyncio
 from re import I, sub
-from typing import Optional
-from asyncio import sleep
+from typing import List
+from asyncio import sleep, create_task
+from asyncio.tasks import Task
 
 from nonebot import on_regex, get_driver
 from nonebot.log import logger
@@ -39,7 +41,7 @@ elif SAVE == "local":
 plugin_config = Config.parse_obj(get_driver().config.dict())
 
 setu_matcher = on_regex(
-    r"^(setu|色图|涩图|来点色色|色色|涩涩|来点色图)\s?([x]?\d+[张|个|份]?)\s?(r18)?\s?\s?(tag)?\s?(.*)?",
+    r"^(setu|色图|涩图|来点色色|色色|涩涩|来点色图)\s?([x|✖️|×|X|*]?\d+[张|个|份]?)?\s?(r18)?\s?\s?(tag)?\s?(.*)?",
     flags=I,
     permission=PRIVATE_FRIEND | GROUP,
 )
@@ -53,7 +55,7 @@ async def _(bot: Bot, event: MessageEvent, state: T_State = State()):
     tags = args[3]
     key = args[4]
 
-    num = int(sub(r"[张|个|份|x]", "", num)) if num else 1
+    num = int(sub(r"[张|个|份|x|✖️|×|X|*]", "", num)) if num else 1
     if num > MAX:
         num = MAX
 
@@ -70,7 +72,7 @@ async def _(bot: Bot, event: MessageEvent, state: T_State = State()):
         await setu_matcher.finish(cd_msg(cd), at_sender=True)
 
     logger.debug(f"Setu: r18:{r18}, tag:{tags}, key:{key}, num:{num}")
-    add_cd(event)
+    add_cd(event, num)
 
     setu_obj = SetuLoader()
     try:
@@ -80,7 +82,8 @@ async def _(bot: Bot, event: MessageEvent, state: T_State = State()):
         await setu_matcher.finish(f"没有找到关于 {tags or key} 的色图呢～", at_sender=True)
 
     failure_msg: int = 0
-    msg_list: list[Message] = []
+    msg_list: List[Message] = []
+    setu_saving_tasks: List[Task] = []
 
     for setu in data:
         msg = Message(MessageSegment.image(setu.img))  # type: ignore
@@ -91,7 +94,7 @@ async def _(bot: Bot, event: MessageEvent, state: T_State = State()):
         msg_list.append(msg)  # type: ignore
 
         if SAVE:
-            await save_img(setu)
+            setu_saving_tasks.append(create_task(save_img(setu)))
 
         # 私聊 或者 群聊中 <= 3 图, 直接发送
     if isinstance(event, PrivateMessageEvent) or len(data) <= 3:
@@ -121,3 +124,5 @@ async def _(bot: Bot, event: MessageEvent, state: T_State = State()):
             message=Message(f"消息被风控，{failure_msg} 个图发不出来了\n"),
             at_sender=True,
         )
+
+    await asyncio.gather(*setu_saving_tasks)
