@@ -1,4 +1,5 @@
 from random import choice
+from typing import Dict
 
 from nonebot import get_driver
 from nonebot.log import logger
@@ -12,7 +13,7 @@ plugin_config = Config.parse_obj(get_driver().config.dict())
 SUPERUSERS = plugin_config.superusers
 CDTIME = plugin_config.setu_cd
 
-cd_data: dict[str, int] = {}
+cd_data: Dict[str, int] = {}
 
 
 def check_cd(event: MessageEvent) -> int:
@@ -21,33 +22,35 @@ def check_cd(event: MessageEvent) -> int:
         * 检查是否达到CD时间\n
         * 如果达到则返回 `0`\n
         * 如果未达到则返回 `剩余CD时间`
-
-
     :参数:
       * `event: MessageEvent`: 事件对象
 
     :返回:
-      - `int`: 时间差
+      - `int`: 剩余时间
     """
-    # cd =  当前时间 - 上一次记录的时间
+    uid = event.get_user_id()
+    # cd = 设置的到期时间 - 当前时间
     try:
-        cd: int = event.time - cd_data[event.get_user_id()]
-        logger.debug(f"{event.get_user_id()} cd: {cd} 还剩: {CDTIME - cd}")
+        cd: int = cd_data[uid] - event.time
+        logger.debug(f"{uid} 还剩: {cd}")
     except KeyError:
-        cd = CDTIME + 1
-    if (
-        cd > CDTIME
-        or event.get_user_id() in SUPERUSERS
-        or isinstance(event, PrivateMessageEvent)
-    ):
+        cd = -1
+    if cd < 0 or uid in SUPERUSERS or isinstance(event, PrivateMessageEvent):
         return 0
     else:
         return cd
 
 
-def add_cd(event: MessageEvent):
-    """添加CD"""
-    cd_data[event.get_user_id()] = event.time
+def add_cd(event: MessageEvent, times: int = 1):
+    """
+    :说明: `add_cd`
+    > 添加cd, 到期时间 = 当前时间 + 设定的CD * 倍数
+
+    :参数:
+      * `event: MessageEvent`: 事件
+      * `times: int`: 倍数, 默认为 `1`
+    """
+    cd_data[event.get_user_id()] = event.time + times * CDTIME
     logger.debug("色图CD: {}".format(cd_data))
 
 
@@ -57,9 +60,8 @@ def remove_cd(event: MessageEvent):
     logger.debug("色图CD: {}".format(cd_data))
 
 
-def cd_msg(cd) -> str:
+def cd_msg(time_last) -> str:
     """获取CD提示信息"""
-    time_last = CDTIME - cd
     hours, minutes, seconds = 0, 0, 0
     if time_last >= 60:
         minutes, seconds = divmod(time_last, 60)
