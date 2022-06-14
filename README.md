@@ -26,7 +26,7 @@ pip install -U nonebot-plugin-setu-now
 > 在吗？在读下去之前能不能告诉什么叫可选配备？
 
 是像这样写全都写上但是都留空吗？
- 
+
 ```ini
 setu_cd=60
 setu_save=
@@ -58,7 +58,6 @@ setu_path=/data/setu
 
 下面是配置的说明
 
-
 - `setu_cd` CD(单位秒) 可选 默认`60`秒
 - `setu_save` 保存模式 可选 `webdav`(保存到 webdav 服务器中) 或 `local`(本地) 或 留空,不保存
 - `setu_path` 保存路径 可选 当选择保存模式时可按需填写, 可不填使用默认
@@ -84,9 +83,8 @@ setu_path=/data/setu
 - `setu_size` 色图质量 默认 `regular` 可选 `original` `regular` `small` `thumb` `mini`
 - `setu_api_url` 色图信息 api 地址 默认`https://api.lolicon.app/setu/v2` 如果有 api 符合类型也能用
 - `setu_max` 一次获取色图的数量 默认 `30` 如果你的服务器/主机内存吃紧 建议调小
-`
-~~所有配置都可选了,还能出问题吗?~~
-
+  `
+  ~~所有配置都可选了,还能出问题吗?~~
 
 那你可以告诉我，下面这个设置出现了什么问题吗？
 
@@ -111,7 +109,7 @@ nonebot.load_plugin("nonebot_plugin_setu_now")
 如果你能读懂正则就不用看了
 
 ```r
-^(setu|色图|涩图|来点色色|色色|涩涩|来点色图)\s?([x]?\d+[张|个|份]?)?\s?(r18)?\s?\s?(tag)?\s?(.*)?
+^(setu|色图|涩图|来点色色|色色|涩涩|来点色图)\s?([x|✖️|×|X|*]?\d+[张|个|份]?)?\s?(r18)?\s?\s?(tag)?\s?(.*)?
 ```
 
 - 指令 以 `setu|色图|涩图|来点色色|色色|涩涩` 为开始
