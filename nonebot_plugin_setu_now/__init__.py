@@ -6,7 +6,6 @@ from asyncio.tasks import Task
 
 from nonebot import on_regex, get_driver
 from nonebot.log import logger
-from nonebot.params import State
 from nonebot.typing import T_State
 from nonebot.exception import ActionFailed
 from nonebot.adapters.onebot.v11 import (
@@ -48,7 +47,7 @@ setu_matcher = on_regex(
 
 
 @setu_matcher.handle()
-async def _(bot: Bot, event: MessageEvent, state: T_State = State()):
+async def _(bot: Bot, event: MessageEvent, state: T_State):
     args = list(state["_matched_groups"])
     num = args[1]
     r18 = args[2]
