@@ -27,9 +27,9 @@ def upload_file(img: BytesIO, pid, p, r18, title, author):
     client = dav_client(
         setu_dav_url,  # type: ignore
         auth=(setu_dav_username, setu_dav_password),  # type: ignore
-        timeout=None
+        timeout=None,
     )
-    path = f"{setu_path}{'r18' if r18 else ''}/{pid}_{p}_{title}_{author}.jpg"
+    path = f"{setu_path}{'r18' if r18 else ''}/{pid}_{p}.jpg"
     client.upload_fileobj(img, to_path=path, overwrite=True)  # type: ignore
     logger.debug(f"WebDAV: {setu_dav_url} 图片已保存{path}")
 
