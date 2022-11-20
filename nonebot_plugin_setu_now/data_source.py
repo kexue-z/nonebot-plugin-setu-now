@@ -1,22 +1,23 @@
-import re
 from random import choice
 from typing import List, Optional
 from asyncio import gather
-
+from io import BytesIO
 from httpx import AsyncClient
 from nonebot import get_driver
 from nonebot.log import logger
 
-from .utils import download_pic
-from .config import Config
-from .models import Setu, SetuApiData, SetuNotFindError
-from .setu_message import SETU_MSG
+from nonebot_plugin_setu_now.utils import download_pic
+from nonebot_plugin_setu_now.config import Config
+from nonebot_plugin_setu_now.models import Setu, SetuApiData, SetuNotFindError
+from nonebot_plugin_setu_now.setu_message import SETU_MSG
+from nonebot_plugin_setu_now.img_utils import randon_effect
 
 plugin_config = Config.parse_obj(get_driver().config.dict())
 SETU_SIZE = plugin_config.setu_size
 API_URL = plugin_config.setu_api_url
 REVERSE_PROXY = plugin_config.setu_reverse_proxy
 PROXY = plugin_config.setu_proxy
+EFFECT = plugin_config.setu_add_randon_effect
 
 
 class SetuLoader:
@@ -158,3 +159,27 @@ class SetuLoader:
                 f"pid: {setu.pid}"
             )
         return data
+
+
+async def get_pic(url: str, proxies: Optional[str] = None) -> Optional[BytesIO]:
+    """
+    :说明: `get_pic`
+    > 获取图片
+
+    :参数:
+      * `url: str`: url
+
+    :可选参数:
+      * `proxies: Optional[str] = None`: 代理地址
+
+    :返回:
+      - `Optional[BytesIO]`: 图片
+    """
+
+    pic = await download_pic(url, proxies)
+
+    if pic:
+        if EFFECT:
+            return randon_effect(pic)
+        else:
+            return randon_effect(pic, 0)
