@@ -1,6 +1,7 @@
 from io import BytesIO
 from random import choice, choices, randint
 from typing import Optional
+
 from PIL import Image
 
 
@@ -74,9 +75,8 @@ def randon_effect(img: bytes, effect: Optional[int] = None) -> BytesIO:
         func = funcs[1][effect]
     else:
         func = choices(population=funcs[1], weights=funcs[2], k=1)
-
     output: Image.Image = func[0](_img)
-    _o = BytesIO()
-    output.save(_o)
+    buffer = BytesIO()
+    output.convert("RGB").save(buffer, "jpeg")
 
-    return _o
+    return buffer

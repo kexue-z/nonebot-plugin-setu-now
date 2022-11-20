@@ -1,7 +1,8 @@
+from io import BytesIO
 from random import choice
 from typing import List, Optional
 from asyncio import gather
-from io import BytesIO
+
 from httpx import AsyncClient
 from nonebot import get_driver
 from nonebot.log import logger
@@ -9,8 +10,8 @@ from nonebot.log import logger
 from nonebot_plugin_setu_now.utils import download_pic
 from nonebot_plugin_setu_now.config import Config
 from nonebot_plugin_setu_now.models import Setu, SetuApiData, SetuNotFindError
-from nonebot_plugin_setu_now.setu_message import SETU_MSG
 from nonebot_plugin_setu_now.img_utils import randon_effect
+from nonebot_plugin_setu_now.setu_message import SETU_MSG
 
 plugin_config = Config.parse_obj(get_driver().config.dict())
 SETU_SIZE = plugin_config.setu_size
@@ -130,7 +131,7 @@ class SetuLoader:
         tasks = []
         for setu in data:
             logger.debug(f"添加下载任务 {setu.urls}")
-            tasks.append(download_pic(setu.urls[self.size]))
+            tasks.append(get_pic(setu.urls[self.size]))
         results = await gather(*tasks)
         i = 0
         for setu in data:
