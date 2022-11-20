@@ -1,4 +1,3 @@
-from io import BytesIO
 from random import choice
 from typing import List, Optional
 from asyncio import gather
@@ -47,7 +46,7 @@ class SetuLoader:
     async def get_setu(
         self,
         keyword: Optional[str] = None,
-        tags: Optional[list] = None,
+        tags: Optional[List[list]] = None,
         r18: bool = False,
         num: int = 1,
     ) -> List[Setu]:
@@ -57,7 +56,7 @@ class SetuLoader:
 
         :可选参数:
           * `keyword: Optional[str] = None`: 关键词
-          * `tags: Optional[list] = None`: 标签
+          * `tags: Optional[List[list]] = None`: 标签
           * `r18: bool = False`: r18
           * `num: int = 1`: 数量
 
@@ -78,7 +77,7 @@ class SetuLoader:
     async def _get_info_from_setu_api(
         self,
         keyword: Optional[str] = None,
-        tags: Optional[list] = None,
+        tags: Optional[List[list]] = None,
         r18: bool = False,
         num: int = 1,
     ) -> SetuApiData:
@@ -88,7 +87,7 @@ class SetuLoader:
 
         :可选参数:
           * `keyword: Optional[str] = None`: 关键词
-          * `tags: Optional[list] = None`: 标签列表
+          * `tags: Optional[List[list]] = None`: 标签列表
           * `r18: bool = False`: r18
           * `num: int = 1`: 数量
 
@@ -97,7 +96,7 @@ class SetuLoader:
         """
         data = {
             "keyword": keyword,
-            "tags": tags,
+            "tag": tags,
             "r18": r18,
             "proxy": self.reverse_proxy_url,
             "num": num,
@@ -139,8 +138,8 @@ class SetuLoader:
             i += 1
         return data
 
+    @staticmethod
     def _setu_info_msg(
-        self,
         data: List[Setu],
     ) -> List[Setu]:
         """
@@ -162,7 +161,7 @@ class SetuLoader:
         return data
 
 
-async def get_pic(url: str, proxies: Optional[str] = None) -> Optional[BytesIO]:
+async def get_pic(url: str, proxies: Optional[str] = None) -> Optional[bytes]:
     """
     :说明: `get_pic`
     > 获取图片
@@ -174,13 +173,13 @@ async def get_pic(url: str, proxies: Optional[str] = None) -> Optional[BytesIO]:
       * `proxies: Optional[str] = None`: 代理地址
 
     :返回:
-      - `Optional[BytesIO]`: 图片
+      - `Optional[bytes]`: 图片
     """
 
     pic = await download_pic(url, proxies)
 
     if pic:
         if EFFECT:
-            return randon_effect(pic)
+            return randon_effect(pic).getvalue()
         else:
-            return randon_effect(pic, 0)
+            return randon_effect(pic, 0).getvalue()
