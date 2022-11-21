@@ -60,7 +60,7 @@ async def _(bot: Bot, event: MessageEvent, state: T_State):
 
     # 如果存在 tag 关键字, 则将 key 视为tag
     if tags:
-        tags = key.split()
+        tags = list(map(lambda l: l.split("或"), key.split()))
         key = ""
 
     # 仅在私聊中开启
