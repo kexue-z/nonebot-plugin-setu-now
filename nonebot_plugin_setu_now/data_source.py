@@ -9,7 +9,7 @@ from nonebot.log import logger
 from nonebot_plugin_setu_now.utils import download_pic
 from nonebot_plugin_setu_now.config import Config
 from nonebot_plugin_setu_now.models import Setu, SetuApiData, SetuNotFindError
-from nonebot_plugin_setu_now.img_utils import randon_effect
+from nonebot_plugin_setu_now.img_utils import random_effect
 from nonebot_plugin_setu_now.setu_message import SETU_MSG
 
 plugin_config = Config.parse_obj(get_driver().config.dict())
@@ -17,7 +17,7 @@ SETU_SIZE = plugin_config.setu_size
 API_URL = plugin_config.setu_api_url
 REVERSE_PROXY = plugin_config.setu_reverse_proxy
 PROXY = plugin_config.setu_proxy
-EFFECT = plugin_config.setu_add_randon_effect
+EFFECT = plugin_config.setu_add_random_effect
 
 
 class SetuLoader:
@@ -180,6 +180,6 @@ async def get_pic(url: str, proxies: Optional[str] = None) -> Optional[bytes]:
 
     if pic:
         if EFFECT:
-            return randon_effect(pic).getvalue()
+            return random_effect(pic).getvalue()
         else:
-            return randon_effect(pic, 0).getvalue()
+            return random_effect(pic, 0).getvalue()
