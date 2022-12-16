@@ -83,7 +83,7 @@ setu_path=/data/setu
 - `setu_size` 色图质量 默认 `regular` 可选 `original` `regular` `small` `thumb` `mini`
 - `setu_api_url` 色图信息 api 地址 默认`https://api.lolicon.app/setu/v2` 如果有 api 符合类型也能用
 - `setu_max` 一次获取色图的数量 默认 `30` 如果你的服务器/主机内存吃紧 建议调小
-- `setu_add_randon_effect` 添加随机特效，防止风控，默认开。可设置为 false 关掉
+- `setu_add_random_effect` 添加随机特效，防止风控，默认开。可设置为 false 关掉
   ~~所有配置都可选了,还能出问题吗?~~
 
 那你可以告诉我，下面这个设置出现了什么问题吗？
