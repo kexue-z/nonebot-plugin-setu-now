@@ -71,11 +71,12 @@ def randon_effect(img: bytes, effect: Optional[int] = None) -> BytesIO:
         2: [0.1, 0.3, 0.3, 0.3],
     }
 
-    if effect:
+    if effect is not None:
         func = funcs[1][effect]
+        output: Image.Image = func(_img)
     else:
         func = choices(population=funcs[1], weights=funcs[2], k=1)
-    output: Image.Image = func[0](_img)
+        output: Image.Image = func[0](_img)
     buffer = BytesIO()
     output.convert("RGB").save(buffer, "jpeg")
 
