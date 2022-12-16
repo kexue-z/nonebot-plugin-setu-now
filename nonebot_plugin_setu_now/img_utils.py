@@ -5,21 +5,21 @@ from typing import Optional
 from PIL import Image
 
 
-def randon_rotate(img: Image.Image) -> Image.Image:
+def random_rotate(img: Image.Image) -> Image.Image:
     """随机旋转角度"""
     a = float(randint(0, 360))
     img = img.rotate(angle=a, expand=True)
     return img
 
 
-def randon_flip(img: Image.Image) -> Image.Image:
+def random_flip(img: Image.Image) -> Image.Image:
     """随机翻转"""
     t = [Image.Transpose.FLIP_TOP_BOTTOM, Image.Transpose.FLIP_TOP_BOTTOM]
     img = img.transpose(choice(t))
     return img
 
 
-def randon_lines(img: Image.Image) -> Image.Image:
+def random_lines(img: Image.Image) -> Image.Image:
     """随机画黑线"""
     from PIL import ImageDraw
 
@@ -50,9 +50,9 @@ def do_nothing(img: Image.Image) -> Image.Image:
     return img
 
 
-def randon_effect(img: bytes, effect: Optional[int] = None) -> BytesIO:
+def random_effect(img: bytes, effect: Optional[int] = None) -> BytesIO:
     """
-    :说明: `randon_effect`
+    :说明: `random_effect`
     > 随机处理图片，可指定方法
 
     :参数:
@@ -67,7 +67,7 @@ def randon_effect(img: bytes, effect: Optional[int] = None) -> BytesIO:
     _img = Image.open(f)
 
     funcs = {
-        1: [do_nothing, randon_rotate, randon_flip, randon_lines],
+        1: [do_nothing, random_rotate, random_flip, random_lines],
         2: [0.1, 0.3, 0.3, 0.3],
     }
 
