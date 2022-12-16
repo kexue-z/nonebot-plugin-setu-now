@@ -3,6 +3,7 @@ from random import choice, choices, randint
 from typing import Optional
 
 from PIL import Image
+from nonebot.log import logger
 
 
 def random_rotate(img: Image.Image) -> Image.Image:
@@ -72,9 +73,11 @@ def random_effect(img: bytes, effect: Optional[int] = None) -> BytesIO:
     }
 
     if effect is not None:
+        logger.debug(f"Using specified image process method: #{effect}")
         func = funcs[1][effect]
         output: Image.Image = func(_img)
     else:
+        logger.debug(f"Using random image process method")
         func = choices(population=funcs[1], weights=funcs[2], k=1)
         output: Image.Image = func[0](_img)
     buffer = BytesIO()
