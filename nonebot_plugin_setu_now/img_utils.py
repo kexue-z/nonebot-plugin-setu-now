@@ -1,3 +1,4 @@
+import time
 from io import BytesIO
 from random import choice, choices, randint
 from typing import Optional
@@ -8,7 +9,14 @@ from nonebot.log import logger
 
 def draw_frame(img: Image.Image) -> Image.Image:
     """画边框"""
-    background = img.filter(ImageFilter.GaussianBlur(150))
+    BLUR_HEIGHT_QUALITY = 128
+    resize_resoluation = (
+        int(img.width * (BLUR_HEIGHT_QUALITY / img.height)),
+        BLUR_HEIGHT_QUALITY,
+    )
+    background = img
+    background = background.resize(resize_resoluation)
+    background = background.filter(ImageFilter.GaussianBlur(6))
     background = background.resize((img.width * 2, img.height * 2))
     background.paste(img, (int(img.width / 2), int(img.height / 2)))
     return background
@@ -84,12 +92,17 @@ def random_effect(img: bytes, effect: Optional[int] = None) -> BytesIO:
     if effect is not None:
         logger.debug(f"Using specified image process method: #{effect}")
         func = funcs[1][effect]
+        start_time = time.time()
         output: Image.Image = func(_img)
     else:
         logger.debug(f"Using random image process method")
         func = choices(population=funcs[1], weights=funcs[2], k=1)
         logger.debug(f"Using effect: {func}")
+        start_time = time.time()
         output: Image.Image = func[0](_img)
+    logger.debug(
+        f"Effect filter use {round(time.time() - start_time,2)}s to process image"
+    )
     buffer = BytesIO()
     output.convert("RGB").save(buffer, "jpeg")
 
