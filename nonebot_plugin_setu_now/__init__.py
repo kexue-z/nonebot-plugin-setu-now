@@ -123,7 +123,7 @@ async def _(
     elif isinstance(event, GroupMessageEvent):
 
         try:
-            await send_forward_msg(bot, event, "好东西", bot.self_id, msg_list)
+            await send_forward_msg(bot, event, "Kyaru", bot.self_id, msg_list)
         except ActionFailed as e:
             logger.warning(e)
             failure_msg = num
