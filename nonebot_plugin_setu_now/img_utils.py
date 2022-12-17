@@ -21,7 +21,7 @@ def random_rotate(img: Image.Image) -> Image.Image:
 
 def random_flip(img: Image.Image) -> Image.Image:
     """随机翻转"""
-    t = [Image.Transpose.FLIP_TOP_BOTTOM, Image.Transpose.FLIP_TOP_BOTTOM]
+    t = [Image.Transpose.FLIP_TOP_BOTTOM, Image.Transpose.FLIP_LEFT_RIGHT]
     img = img.transpose(choice(t))
     return img
 
