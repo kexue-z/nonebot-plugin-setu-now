@@ -64,11 +64,12 @@ async def _(bot: Bot, event: MessageEvent, state: T_State):
         key = ""
 
     # 仅在私聊中开启
-    r18 = True if (isinstance(event, PrivateMessageEvent) and r18) else False
+    # r18 = True if (isinstance(event, PrivateMessageEvent) and r18) else False
+    r18 = True if r18 else False
 
     if cd := check_cd(event):
         # 如果 CD 还没到 则直接结束
-        await setu_matcher.finish(cd_msg(cd), at_sender=True)
+        await setu_matcher.finish(cd_msg(cd))
 
     logger.debug(f"Setu: r18:{r18}, tag:{tags}, key:{key}, num:{num}")
     add_cd(event, num)
@@ -78,7 +79,7 @@ async def _(bot: Bot, event: MessageEvent, state: T_State):
         data = await setu_obj.get_setu(key, tags, r18, num)
     except SetuNotFindError:
         remove_cd(event)
-        await setu_matcher.finish(f"没有找到关于 {tags or key} 的色图呢～", at_sender=True)
+        await setu_matcher.finish(f"没有找到关于 {tags or key} 的色图呢～")
 
     failure_msg: int = 0
     msg_list: List[Message] = []
@@ -99,7 +100,7 @@ async def _(bot: Bot, event: MessageEvent, state: T_State):
     if isinstance(event, PrivateMessageEvent) or len(data) <= 3:
         for msg in msg_list:
             try:
-                msg_info = await setu_matcher.send(msg, at_sender=True)
+                msg_info = await setu_matcher.send(msg)
                 add_withdraw_job(bot, **msg_info)
                 await sleep(2)
 
@@ -120,8 +121,7 @@ async def _(bot: Bot, event: MessageEvent, state: T_State):
         remove_cd(event)
 
         await setu_matcher.finish(
-            message=Message(f"消息被风控，{failure_msg} 个图发不出来了\n"),
-            at_sender=True,
+            message=Message(f"共 {failure_msg} 张图片发送失败"),
         )
 
     await asyncio.gather(*setu_saving_tasks)
