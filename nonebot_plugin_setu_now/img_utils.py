@@ -88,6 +88,7 @@ def random_effect(img: bytes, effect: Optional[int] = None) -> BytesIO:
     else:
         logger.debug(f"Using random image process method")
         func = choices(population=funcs[1], weights=funcs[2], k=1)
+        logger.debug(f"Using effect: {func}")
         output: Image.Image = func[0](_img)
     buffer = BytesIO()
     output.convert("RGB").save(buffer, "jpeg")
