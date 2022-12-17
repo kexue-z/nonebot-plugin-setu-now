@@ -22,8 +22,7 @@ def random_rotate(img: Image.Image) -> Image.Image:
 
 def random_flip(img: Image.Image) -> Image.Image:
     """随机翻转"""
-    t = [Image.Transpose.FLIP_TOP_BOTTOM, Image.Transpose.FLIP_LEFT_RIGHT]
-    img = img.transpose(choice(t))
+    img = img.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
     return img
 
 
@@ -75,7 +74,7 @@ def random_effect(img: bytes, effect: Optional[int] = None) -> BytesIO:
     _img = Image.open(f)
 
     funcs = {
-        1: [do_nothing, random_rotate, random_flip, random_lines, black_frame],
+        1: [do_nothing, random_flip, black_frame],
         2: [],
     }
     r_funcs_count = len(funcs[1]) - 1
