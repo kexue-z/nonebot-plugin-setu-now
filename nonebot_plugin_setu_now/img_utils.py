@@ -5,6 +5,13 @@ from typing import Optional
 from PIL import Image
 
 
+def black_frame(img: Image.Image) -> Image.Image:
+    """画黑色边框"""
+    background = Image.new("RGB", (img.width * 2, img.height * 2), (0, 0, 0))
+    background.paste(img, (int(img.width / 2), int(img.height / 2)))
+    return background
+
+
 def random_rotate(img: Image.Image) -> Image.Image:
     """随机旋转角度"""
     a = float(randint(0, 360))
@@ -57,7 +64,7 @@ def random_effect(img: bytes, effect: Optional[int] = None) -> BytesIO:
 
     :参数:
       * `img: bytes`: 图片
-      * `effect: Optional[int]`: 特效: 0 啥也不做 1 随机旋转 2 随机翻转 3 随机画线
+      * `effect: Optional[int]`: 特效: 0 啥也不做 1 随机旋转 2 随机翻转 3 随机画线 4 画黑色边框
 
     :返回:
       - `BytesIO`: 处理好的图
@@ -67,9 +74,11 @@ def random_effect(img: bytes, effect: Optional[int] = None) -> BytesIO:
     _img = Image.open(f)
 
     funcs = {
-        1: [do_nothing, random_rotate, random_flip, random_lines],
-        2: [0.1, 0.3, 0.3, 0.3],
+        1: [do_nothing, random_rotate, random_flip, random_lines, black_frame],
+        2: [],
     }
+    r_funcs_count = len(funcs[1]) - 1
+    funcs[2] = [0.1, *[((1 - 0.1) / r_funcs_count) for i in range(r_funcs_count)]]
 
     if effect is not None:
         func = funcs[1][effect]
