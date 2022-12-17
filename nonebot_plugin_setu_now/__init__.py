@@ -1,6 +1,6 @@
 import asyncio
 from re import I, sub
-from typing import List
+from typing import List, Union
 from asyncio import sleep, create_task
 from asyncio.tasks import Task
 
@@ -25,6 +25,7 @@ from .models import Setu, SetuNotFindError
 from .withdraw import add_withdraw_job
 from .cd_manager import add_cd, cd_msg, check_cd, remove_cd
 from .data_source import SetuLoader
+from .r18_whitelist import group_r18_whitelist_checker
 
 plugin_config = Config.parse_obj(get_driver().config.dict())
 SAVE = plugin_config.setu_save
@@ -47,7 +48,9 @@ setu_matcher = on_regex(
 
 
 @setu_matcher.handle()
-async def _(bot: Bot, event: MessageEvent, state: T_State):
+async def _(
+    bot: Bot, event: Union[PrivateMessageEvent, GroupMessageEvent], state: T_State
+):
     args = list(state["_matched_groups"])
     num = args[1]
     r18 = args[2]
@@ -65,7 +68,15 @@ async def _(bot: Bot, event: MessageEvent, state: T_State):
 
     # 仅在私聊中开启
     # r18 = True if (isinstance(event, PrivateMessageEvent) and r18) else False
-    r18 = True if r18 else False
+    if r18:
+        if isinstance(event, PrivateMessageEvent):
+            r18 = True
+        elif isinstance(event, GroupMessageEvent):
+            if not group_r18_whitelist_checker.check_is_group_in_whitelist(
+                event.group_id
+            ):
+                await setu_matcher.finish("不可以涩涩！\n本群未启用R18支持，请移除R18标签或联系维护组")
+            r18 = True
 
     if cd := check_cd(event):
         # 如果 CD 还没到 则直接结束
