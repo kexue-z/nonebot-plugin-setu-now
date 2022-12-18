@@ -1,10 +1,8 @@
-import time
-import base64
 import asyncio
 from io import BytesIO
 from re import I, sub
 from typing import List, Union
-from asyncio import sleep, create_task
+from asyncio import create_task
 from asyncio.tasks import Task
 
 from PIL import Image
@@ -30,6 +28,7 @@ from .models import Setu, SetuNotFindError
 from .withdraw import add_withdraw_job
 from .img_utils import EFFECT_FUNC_LIST
 from .cd_manager import add_cd, cd_msg, check_cd, remove_cd
+from .perf_timer import PerfTimer
 from .data_source import SetuLoader
 from .r18_whitelist import group_r18_whitelist_checker
 
@@ -110,26 +109,23 @@ async def _(
             setu_saving_tasks.append(create_task(save_img(setu)))
         for process_func in EFFECT_FUNC_LIST:
             logger.debug(f"Using effect {process_func}")
-            start_time = time.time()
+            effert_timer = PerfTimer.start("Effect process")
             image = process_func(Image.open(BytesIO(setu.img)))  # type: ignore
-            logger.debug(
-                f"Effect filter use {round(time.time() - start_time,2)}s to process image"
-            )
+            effert_timer.stop()
             image_bytesio = BytesIO()
             logger.debug(f"Saving image: {image.width} x {image.height}")
-            start_time = time.time()
+            save_timer = PerfTimer.start("Save bytes")
             if image.mode != "RGB":
                 image = image.convert("RGB")
             if image.format in ("JPEG", "JPG"):
                 image.save(image_bytesio, format="JPEG", quality="keep")
             else:
                 image.save(image_bytesio, format="JPEG", quality=95)
-            logger.debug(f"Image use {round(time.time() - start_time,2)}s to save")
+            save_timer.stop()
             msg = Message(MessageSegment.image(image_bytesio))  # type: ignore
             if plugin_config.setu_send_info_message:
                 msg.append(MessageSegment.text(setu.msg))  # type: ignore
             try:
-                logger.warning(f"Trying sending image using effect {process_func}")
                 await setu_matcher.send(msg)
                 send_success_state = True
                 break
@@ -139,7 +135,7 @@ async def _(
             msg_list.append(msg)  # type: ignore
             continue
         failure_msg += 1
-        logger.warning(f"Image send failed after retrying all effect")
+        logger.warning(f"Image send failed")
 
     if failure_msg >= num / 2:
         remove_cd(event)
