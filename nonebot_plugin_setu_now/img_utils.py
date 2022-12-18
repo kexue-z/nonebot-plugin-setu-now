@@ -66,44 +66,4 @@ def do_nothing(img: Image.Image) -> Image.Image:
     return img
 
 
-def random_effect(img: bytes, effect: Optional[int] = None) -> BytesIO:
-    """
-    :说明: `random_effect`
-    > 随机处理图片，可指定方法
-
-    :参数:
-      * `img: bytes`: 图片
-      * `effect: Optional[int]`: 特效: 0 啥也不做 1 随机旋转 2 随机翻转 3 随机画线 4 画边框
-
-    :返回:
-      - `BytesIO`: 处理好的图
-    """
-
-    f = BytesIO(img)
-    _img = Image.open(f)
-
-    funcs = {
-        1: [do_nothing, random_flip, draw_frame],
-        2: [],
-    }
-    r_funcs_count = len(funcs[1]) - 1
-    funcs[2] = [0.1, *[((1 - 0.1) / r_funcs_count) for i in range(r_funcs_count)]]
-
-    if effect is not None:
-        logger.debug(f"Using specified image process method: #{effect}")
-        func = funcs[1][effect]
-        start_time = time.time()
-        output: Image.Image = func(_img)
-    else:
-        logger.debug(f"Using random image process method")
-        func = choices(population=funcs[1], weights=funcs[2], k=1)
-        logger.debug(f"Using effect: {func}")
-        start_time = time.time()
-        output: Image.Image = func[0](_img)
-    logger.debug(
-        f"Effect filter use {round(time.time() - start_time,2)}s to process image"
-    )
-    buffer = BytesIO()
-    output.convert("RGB").save(buffer, "jpeg")
-
-    return buffer
+EFFECT_FUNC_LIST = [do_nothing, draw_frame, random_flip, random_lines, random_rotate]

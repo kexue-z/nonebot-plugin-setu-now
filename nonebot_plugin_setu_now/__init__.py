@@ -1,12 +1,17 @@
+import time
+import base64
 import asyncio
+from io import BytesIO
 from re import I, sub
 from typing import List, Union
 from asyncio import sleep, create_task
 from asyncio.tasks import Task
 
+from PIL import Image
 from nonebot import on_regex, get_driver
 from nonebot.log import logger
 from nonebot.typing import T_State
+from nonebot.matcher import Matcher
 from nonebot.exception import ActionFailed
 from nonebot.adapters.onebot.v11 import (
     GROUP,
@@ -23,6 +28,7 @@ from .utils import send_forward_msg
 from .config import Config
 from .models import Setu, SetuNotFindError
 from .withdraw import add_withdraw_job
+from .img_utils import EFFECT_FUNC_LIST
 from .cd_manager import add_cd, cd_msg, check_cd, remove_cd
 from .data_source import SetuLoader
 from .r18_whitelist import group_r18_whitelist_checker
@@ -95,38 +101,45 @@ async def _(
     failure_msg: int = 0
     msg_list: List[Message] = []
     setu_saving_tasks: List[Task] = []
-
+    """
+    优先发送原图，当原图发送失败（ActionFailedException）时，尝试逐个更换处理特效发送
+    """
     for setu in data:
-        msg = Message(MessageSegment.image(setu.img))  # type: ignore
-
-        if plugin_config.setu_send_info_message:
-            msg.append(MessageSegment.text(setu.msg))  # type: ignore
-
-        msg_list.append(msg)  # type: ignore
-
+        send_success_state = False
         if SAVE:
             setu_saving_tasks.append(create_task(save_img(setu)))
-
-        # 私聊 或者 群聊中 <= 3 图, 直接发送
-    if isinstance(event, PrivateMessageEvent) or len(data) <= 3:
-        for msg in msg_list:
+        for process_func in EFFECT_FUNC_LIST:
+            logger.debug(f"Using effect {process_func}")
+            start_time = time.time()
+            image = process_func(Image.open(BytesIO(setu.img)))  # type: ignore
+            logger.debug(
+                f"Effect filter use {round(time.time() - start_time,2)}s to process image"
+            )
+            image_bytesio = BytesIO()
+            logger.debug(f"Saving image: {image.width} x {image.height}")
+            start_time = time.time()
+            if image.mode != "RGB":
+                image = image.convert("RGB")
+            if image.format in ("JPEG", "JPG"):
+                image.save(image_bytesio, format="JPEG", quality="keep")
+            else:
+                image.save(image_bytesio, format="JPEG", quality=95)
+            logger.debug(f"Image use {round(time.time() - start_time,2)}s to save")
+            msg = Message(MessageSegment.image(image_bytesio))  # type: ignore
+            if plugin_config.setu_send_info_message:
+                msg.append(MessageSegment.text(setu.msg))  # type: ignore
             try:
-                msg_info = await setu_matcher.send(msg)
-                add_withdraw_job(bot, **msg_info)
-                await sleep(2)
-
-            except ActionFailed as e:
-                logger.warning(e)
-                failure_msg += 1
-
-    # 群聊中 > 3 图, 合并转发
-    elif isinstance(event, GroupMessageEvent):
-
-        try:
-            await send_forward_msg(bot, event, "Kyaru", bot.self_id, msg_list)
-        except ActionFailed as e:
-            logger.warning(e)
-            failure_msg = num
+                logger.warning(f"Trying sending image using effect {process_func}")
+                await setu_matcher.send(msg)
+                send_success_state = True
+                break
+            except ActionFailed:
+                logger.warning(f"Image send failed, retrying another effect")
+        if send_success_state:
+            msg_list.append(msg)  # type: ignore
+            continue
+        failure_msg += 1
+        logger.warning(f"Image send failed after retrying all effect")
 
     if failure_msg >= num / 2:
         remove_cd(event)

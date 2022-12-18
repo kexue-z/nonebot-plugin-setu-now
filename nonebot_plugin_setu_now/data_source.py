@@ -1,3 +1,4 @@
+import random
 from random import choice
 from typing import List, Optional
 from asyncio import gather
@@ -9,7 +10,6 @@ from nonebot.log import logger
 from .utils import download_pic
 from .config import Config
 from .models import Setu, SetuApiData, SetuNotFindError
-from .img_utils import random_effect
 from .setu_message import SETU_MSG
 
 plugin_config = Config.parse_obj(get_driver().config.dict())
@@ -176,10 +176,4 @@ async def get_pic(url: str, proxies: Optional[str] = None) -> Optional[bytes]:
       - `Optional[bytes]`: 图片
     """
 
-    pic = await download_pic(url, proxies)
-
-    if pic:
-        if EFFECT:
-            return random_effect(pic).getvalue()
-        else:
-            return random_effect(pic, 0).getvalue()
+    return await download_pic(url, proxies)
