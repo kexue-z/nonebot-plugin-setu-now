@@ -130,7 +130,7 @@ class SetuLoader:
         tasks = []
         for setu in data:
             logger.debug(f"添加下载任务 {setu.urls}")
-            tasks.append(get_pic(setu.urls[self.size]))
+            tasks.append(get_pic(setu.urls[self.size], proxies=self.proxy))
         results = await gather(*tasks)
         i = 0
         for setu in data:
