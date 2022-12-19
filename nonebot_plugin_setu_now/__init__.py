@@ -36,6 +36,7 @@ plugin_config = Config.parse_obj(get_driver().config.dict())
 SAVE = plugin_config.setu_save
 SETU_SIZE = plugin_config.setu_size
 MAX = plugin_config.setu_max
+EFFECT = plugin_config.setu_add_random_effect
 
 if SAVE == "webdav":
     from .save_to_webdav import save_img
@@ -100,6 +101,7 @@ async def _(
     failure_msg: int = 0
     msg_list: List[Message] = []
     setu_saving_tasks: List[Task] = []
+    forward_send_mode_state = isinstance(event, GroupMessageEvent) or num >= 5
     """
     优先发送原图，当原图发送失败（ActionFailedException）时，尝试逐个更换处理特效发送
     """
@@ -113,14 +115,14 @@ async def _(
             image = process_func(Image.open(BytesIO(setu.img)))  # type: ignore
             effert_timer.stop()
             image_bytesio = BytesIO()
-            logger.debug(f"Saving image: {image.width} x {image.height}")
-            save_timer = PerfTimer.start("Save bytes")
+            save_timer = PerfTimer.start(f"Save bytes {image.width} x {image.height}")
             if image.mode != "RGB":
                 image = image.convert("RGB")
-            if image.format in ("JPEG", "JPG"):
-                image.save(image_bytesio, format="JPEG", quality="keep")
-            else:
-                image.save(image_bytesio, format="JPEG", quality=95)
+            image.save(
+                image_bytesio,
+                format="JPEG",
+                quality="keep" if image.format in ("JPEG", "JPG") else 95,
+            )
             save_timer.stop()
             msg = Message(MessageSegment.image(image_bytesio))  # type: ignore
             if plugin_config.setu_send_info_message:
@@ -130,9 +132,10 @@ async def _(
                 send_success_state = True
                 break
             except ActionFailed:
+                if not EFFECT:  # 设置不允许添加特效
+                    break
                 logger.warning(f"Image send failed, retrying another effect")
         if send_success_state:
-            msg_list.append(msg)  # type: ignore
             continue
         failure_msg += 1
         logger.warning(f"Image send failed")
