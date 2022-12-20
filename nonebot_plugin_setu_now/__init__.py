@@ -1,3 +1,4 @@
+import time
 import asyncio
 from io import BytesIO
 from re import I, sub
@@ -37,6 +38,7 @@ SAVE = plugin_config.setu_save
 SETU_SIZE = plugin_config.setu_size
 MAX = plugin_config.setu_max
 EFFECT = plugin_config.setu_add_random_effect
+SEND_INTERVAL = plugin_config.setu_minimum_send_interval
 
 if SAVE == "webdav":
     from .save_to_webdav import save_img
@@ -57,6 +59,7 @@ setu_matcher = on_regex(
 async def _(
     bot: Bot, event: Union[PrivateMessageEvent, GroupMessageEvent], state: T_State
 ):
+    setu_total_timer = PerfTimer("Image request total")
     args = list(state["_matched_groups"])
     num = args[1]
     r18 = args[2]
@@ -64,8 +67,7 @@ async def _(
     key = args[4]
 
     num = int(sub(r"[张|个|份|x|✖️|×|X|*]", "", num)) if num else 1
-    if num > MAX:
-        num = MAX
+    num = min(num, MAX)
 
     # 如果存在 tag 关键字, 则将 key 视为tag
     if tags:
@@ -105,6 +107,7 @@ async def _(
     """
     优先发送原图，当原图发送失败（ActionFailedException）时，尝试逐个更换处理特效发送
     """
+    last_send_time = 0
     for setu in data:
         send_success_state = False
         if SAVE:
@@ -128,7 +131,14 @@ async def _(
             if plugin_config.setu_send_info_message:
                 msg.append(MessageSegment.text(setu.msg))  # type: ignore
             try:
+                send_timer = PerfTimer("Image send")
+                if (delay_time := time.time() - last_send_time) < SEND_INTERVAL:
+                    delay_time = round(delay_time, 2)
+                    logger.debug(f"Speed limit: Asyncio sleep {delay_time}s")
+                    await asyncio.sleep(delay_time)
                 await setu_matcher.send(msg)
+                last_send_time = time.time()
+                send_timer.stop()
                 send_success_state = True
                 break
             except ActionFailed:
@@ -146,5 +156,7 @@ async def _(
         await setu_matcher.finish(
             message=Message(f"共 {failure_msg} 张图片发送失败"),
         )
+
+    setu_total_timer.stop()
 
     await asyncio.gather(*setu_saving_tasks)
