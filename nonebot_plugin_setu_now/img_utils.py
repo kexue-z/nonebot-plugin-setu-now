@@ -22,6 +22,13 @@ def draw_frame(img: Image.Image) -> Image.Image:
     return background
 
 
+def black_frame(img: Image.Image) -> Image.Image:
+    """画黑色边框"""
+    background = Image.new("RGB", (img.width * 2, img.height * 2), (0, 0, 0))
+    background.paste(img, (int(img.width / 2), int(img.height / 2)))
+    return background
+
+
 def random_rotate(img: Image.Image) -> Image.Image:
     """随机旋转角度"""
     a = float(randint(0, 360))
@@ -31,7 +38,8 @@ def random_rotate(img: Image.Image) -> Image.Image:
 
 def random_flip(img: Image.Image) -> Image.Image:
     """随机翻转"""
-    img = img.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
+    t = [Image.Transpose.FLIP_TOP_BOTTOM, Image.Transpose.FLIP_LEFT_RIGHT]
+    img = img.transpose(choice(t))
     return img
 
 
