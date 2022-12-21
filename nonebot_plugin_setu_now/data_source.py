@@ -1,3 +1,4 @@
+import random
 from random import choice
 from typing import List, Optional
 from asyncio import gather
@@ -6,11 +7,11 @@ from httpx import AsyncClient
 from nonebot import get_driver
 from nonebot.log import logger
 
-from nonebot_plugin_setu_now.utils import download_pic
-from nonebot_plugin_setu_now.config import Config
-from nonebot_plugin_setu_now.models import Setu, SetuApiData, SetuNotFindError
-from nonebot_plugin_setu_now.img_utils import random_effect
-from nonebot_plugin_setu_now.setu_message import SETU_MSG
+from .utils import download_pic
+from .config import Config
+from .models import Setu, SetuApiData, SetuNotFindError
+from .perf_timer import PerfTimer
+from .setu_message import SETU_MSG
 
 plugin_config = Config.parse_obj(get_driver().config.dict())
 SETU_SIZE = plugin_config.setu_size
@@ -131,7 +132,9 @@ class SetuLoader:
         for setu in data:
             logger.debug(f"添加下载任务 {setu.urls}")
             tasks.append(get_pic(setu.urls[self.size], proxies=self.proxy))
+        download_timer = PerfTimer("Total download")
         results = await gather(*tasks)
+        download_timer.stop()
         i = 0
         for setu in data:
             setu.img = results[i]
@@ -176,10 +179,4 @@ async def get_pic(url: str, proxies: Optional[str] = None) -> Optional[bytes]:
       - `Optional[bytes]`: 图片
     """
 
-    pic = await download_pic(url, proxies)
-
-    if pic:
-        if EFFECT:
-            return random_effect(pic).getvalue()
-        else:
-            return random_effect(pic, 0).getvalue()
+    return await download_pic(url, proxies)

@@ -21,3 +21,4 @@ class Config(BaseModel, extra=Extra.ignore):
     setu_api_url: str = "https://api.lolicon.app/setu/v2"
     setu_max: int = 30
     setu_add_random_effect: bool = True
+    setu_minimum_send_interval = 5

@@ -4,6 +4,8 @@ from httpx import AsyncClient
 from nonebot.log import logger
 from nonebot.adapters.onebot.v11 import Bot, Message, GroupMessageEvent
 
+from .perf_timer import PerfTimer
+
 
 async def download_pic(url: str, proxies: Optional[str] = None) -> Optional[bytes]:
     async with AsyncClient(proxies=proxies) as client:  # type: ignore
@@ -13,7 +15,9 @@ async def download_pic(url: str, proxies: Optional[str] = None) -> Optional[byte
             "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36",
         }
         logger.debug(f"正在下载...{url}")
+        download_timer = PerfTimer.start("Image download")
         re = await client.get(url=url, headers=headers, timeout=60)
+        download_timer.stop()
         if re.status_code == 200:
             logger.debug("成功获取图片")
             return re.content
