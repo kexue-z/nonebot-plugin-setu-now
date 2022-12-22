@@ -1,6 +1,7 @@
 from typing import Dict, List, Optional
 
 from pydantic import BaseModel
+from sqlmodel import Field, Column, SQLModel
 
 
 class SetuData(BaseModel):
@@ -38,3 +39,11 @@ class SetuMessage(BaseModel):
 
 class SetuNotFindError(Exception):
     pass
+
+
+class SetuInfo(SQLModel, table=True):
+    __tablename__: str = "setu_data"
+    message_id: int = Field(default=0, primary_key=True, unique=True)
+    author: str = Field(default="Unknown")
+    title: str = Field(default="Unknown")
+    pid: int = Field(default=0, unique=True)

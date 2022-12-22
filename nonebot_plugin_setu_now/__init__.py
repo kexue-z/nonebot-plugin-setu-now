@@ -7,8 +7,12 @@ from asyncio import create_task
 from asyncio.tasks import Task
 
 from PIL import Image
-from nonebot import on_regex, get_driver
+from nonebot import on_regex, get_driver, on_command
+from sqlmodel import select
 from nonebot.log import logger
+from nonebot.rule import to_me
+from nonebot.params import Depends, EventMessage
+from nonebot.plugin import require
 from nonebot.typing import T_State
 from nonebot.matcher import Matcher
 from nonebot.exception import ActionFailed
@@ -22,16 +26,20 @@ from nonebot.adapters.onebot.v11 import (
     GroupMessageEvent,
     PrivateMessageEvent,
 )
+from sqlmodel.ext.asyncio.session import AsyncSession
 
 from .utils import send_forward_msg
 from .config import Config
-from .models import Setu, SetuNotFindError
+from .models import Setu, SetuInfo, SetuNotFindError
 from .withdraw import add_withdraw_job
 from .img_utils import EFFECT_FUNC_LIST
 from .cd_manager import add_cd, cd_msg, check_cd, remove_cd
 from .perf_timer import PerfTimer
 from .data_source import SetuLoader
 from .r18_whitelist import group_r18_whitelist_checker
+
+require("nonebot_plugin_datastore")
+from ..nonebot_plugin_datastore import get_session
 
 plugin_config = Config.parse_obj(get_driver().config.dict())
 SAVE = plugin_config.setu_save
@@ -57,7 +65,10 @@ setu_matcher = on_regex(
 
 @setu_matcher.handle()
 async def _(
-    bot: Bot, event: Union[PrivateMessageEvent, GroupMessageEvent], state: T_State
+    bot: Bot,
+    event: Union[PrivateMessageEvent, GroupMessageEvent],
+    state: T_State,
+    db_session: AsyncSession = Depends(get_session),
 ):
     setu_total_timer = PerfTimer("Image request total")
     args = list(state["_matched_groups"])
@@ -136,9 +147,19 @@ async def _(
                     delay_time = round(delay_time, 2)
                     logger.debug(f"Speed limit: Asyncio sleep {delay_time}s")
                     await asyncio.sleep(delay_time)
-                await setu_matcher.send(msg)
+                message_id: int = (await setu_matcher.send(msg))["message_id"]
+                logger.debug(f"Message ID: {message_id}")
                 last_send_time = time.time()
                 send_timer.stop()
+                db_session.add(
+                    SetuInfo(
+                        message_id=int(message_id),
+                        author=setu.author,
+                        title=setu.title,
+                        pid=int(setu.pid),
+                    )
+                )
+                await db_session.commit()
                 send_success_state = True
                 break
             except ActionFailed:
@@ -160,3 +181,33 @@ async def _(
     setu_total_timer.stop()
 
     await asyncio.gather(*setu_saving_tasks)
+
+
+setuinfo_matcher = on_command("信息")
+
+
+@setuinfo_matcher.handle()
+async def _(
+    event: MessageEvent,
+    db_session: AsyncSession = Depends(get_session),
+):
+    logger.debug("Running setu info handler")
+    event_message = event.original_message
+    reply_segment = event_message["reply"]
+    for i in event_message:
+        logger.debug(i.type)
+    if reply_segment == []:
+        logger.debug("Command invalid: Not specified setu info to get!")
+        await setuinfo_matcher.finish("请直接回复需要作品信息的插画")
+    reply_segment = reply_segment[0]
+    reply_message_id = reply_segment.data["id"]
+    logger.debug(f"Get setu info for message id: {reply_message_id}")
+    statement = select(SetuInfo).where(SetuInfo.message_id == reply_message_id)
+    setu_info = (await db_session.exec(statement)).first()
+    if not setu_info:
+        await setuinfo_matcher.finish("未找到该插画相关信息")
+    info_message = MessageSegment.text("插画信息：\n")
+    info_message += MessageSegment.text(f"标题：{setu_info.title}\n")
+    info_message += MessageSegment.text(f"画师：{setu_info.author}\n")
+    info_message += MessageSegment.text(f"PID：{setu_info.pid}")
+    await setu_matcher.finish(MessageSegment.reply(reply_message_id) + info_message)
