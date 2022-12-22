@@ -39,7 +39,7 @@ from .data_source import SetuLoader
 from .r18_whitelist import group_r18_whitelist_checker
 
 require("nonebot_plugin_datastore")
-from ..nonebot_plugin_datastore import get_session
+from nonebot_plugin_datastore import get_session
 
 plugin_config = Config.parse_obj(get_driver().config.dict())
 SAVE = plugin_config.setu_save
