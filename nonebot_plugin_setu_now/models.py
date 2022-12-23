@@ -47,3 +47,9 @@ class SetuInfo(SQLModel, table=True):
     author: str = Field(default="Unknown")
     title: str = Field(default="Unknown")
     pid: int = Field(default=0, unique=True)
+
+
+class GroupWhiteListRecord(SQLModel, table=True):
+    __tablename__: str = "white_list"
+    group_id: int = Field(default=None, primary_key=True, unique=True)
+    operator_user_id: int = Field(default=None)

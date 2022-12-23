@@ -28,6 +28,12 @@ from nonebot.adapters.onebot.v11 import (
 )
 from sqlmodel.ext.asyncio.session import AsyncSession
 
+require("nonebot_plugin_datastore")
+try:
+    from nonebot_plugin_datastore import get_session
+except ModuleNotFoundError:
+    from ..nonebot_plugin_datastore import get_session
+
 from .utils import send_forward_msg
 from .config import Config
 from .models import Setu, SetuInfo, SetuNotFindError
@@ -36,10 +42,7 @@ from .img_utils import EFFECT_FUNC_LIST
 from .cd_manager import add_cd, cd_msg, check_cd, remove_cd
 from .perf_timer import PerfTimer
 from .data_source import SetuLoader
-from .r18_whitelist import group_r18_whitelist_checker
-
-require("nonebot_plugin_datastore")
-from nonebot_plugin_datastore import get_session
+from .r18_whitelist import get_group_white_list_record
 
 plugin_config = Config.parse_obj(get_driver().config.dict())
 SAVE = plugin_config.setu_save
@@ -69,6 +72,7 @@ async def _(
     event: Union[PrivateMessageEvent, GroupMessageEvent],
     state: T_State,
     db_session: AsyncSession = Depends(get_session),
+    white_list_record=Depends(get_group_white_list_record),
 ):
     setu_total_timer = PerfTimer("Image request total")
     args = list(state["_matched_groups"])
@@ -91,10 +95,8 @@ async def _(
         if isinstance(event, PrivateMessageEvent):
             r18 = True
         elif isinstance(event, GroupMessageEvent):
-            if not group_r18_whitelist_checker.check_is_group_in_whitelist(
-                event.group_id
-            ):
-                await setu_matcher.finish("不可以涩涩！\n本群未启用R18支持，请移除R18标签或联系维护组")
+            if white_list_record is None:
+                await setu_matcher.finish("不可以涩涩！\n本群未启用R18支持\n请移除R18标签或联系维护组")
             r18 = True
 
     if cd := check_cd(event):
@@ -124,6 +126,9 @@ async def _(
         if SAVE:
             setu_saving_tasks.append(create_task(save_img(setu)))
         for process_func in EFFECT_FUNC_LIST:
+            if r18 and process_func == EFFECT_FUNC_LIST[0]:
+                # R18禁止使用默认图像处理方法(do_nothing)
+                continue
             logger.debug(f"Using effect {process_func}")
             effert_timer = PerfTimer.start("Effect process")
             image = process_func(Image.open(BytesIO(setu.img)))  # type: ignore
@@ -194,8 +199,6 @@ async def _(
     logger.debug("Running setu info handler")
     event_message = event.original_message
     reply_segment = event_message["reply"]
-    for i in event_message:
-        logger.debug(i.type)
     if reply_segment == []:
         logger.debug("Command invalid: Not specified setu info to get!")
         await setuinfo_matcher.finish("请直接回复需要作品信息的插画")
@@ -206,8 +209,7 @@ async def _(
     setu_info = (await db_session.exec(statement)).first()
     if not setu_info:
         await setuinfo_matcher.finish("未找到该插画相关信息")
-    info_message = MessageSegment.text("插画信息：\n")
-    info_message += MessageSegment.text(f"标题：{setu_info.title}\n")
+    info_message = MessageSegment.text(f"标题：{setu_info.title}\n")
     info_message += MessageSegment.text(f"画师：{setu_info.author}\n")
     info_message += MessageSegment.text(f"PID：{setu_info.pid}")
     await setu_matcher.finish(MessageSegment.reply(reply_message_id) + info_message)

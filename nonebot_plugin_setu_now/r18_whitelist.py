@@ -1,43 +1,34 @@
 from typing import List, Union
 from pathlib import Path
 
+from nonebot import get_driver
+from sqlmodel import select
+from nonebot.log import logger
+from nonebot.params import Depends
 from nonebot.plugin.on import on_command
 from nonebot.permission import SUPERUSER
+from sqlmodel.ext.asyncio.session import AsyncSession
 from nonebot.adapters.onebot.v11.event import GroupMessageEvent
 
-WHITELIST_FILE_PATH = Path(__file__).parent.joinpath("whitelist.txt")
+try:
+    from nonebot_plugin_datastore import get_session
+except ModuleNotFoundError:
+    from ..nonebot_plugin_datastore import get_session
+
+from .models import GroupWhiteListRecord
 
 
-class GroupWhiteListChecker:
-    def __init__(self) -> None:
-        self.whitelist_group_id: List[int] = []
+async def get_group_white_list_record(
+    event: GroupMessageEvent, db_session: AsyncSession = Depends(get_session)
+):
+    statement = select(GroupWhiteListRecord).where(
+        GroupWhiteListRecord.group_id == event.group_id
+    )
+    result = await db_session.exec(statement)
+    result = result.first()
+    logger.debug(f"Database white list record: {result}")
+    return result
 
-    def check_is_group_in_whitelist(self, group_id: int) -> bool:
-        return group_id in self.whitelist_group_id
-
-    def whitelist_add(self, group_id: int) -> None:
-        if self.check_is_group_in_whitelist(group_id):
-            return
-        self.whitelist_group_id.append(group_id)
-
-    def whitelist_del(self, group_id: int) -> None:
-        if not self.check_is_group_in_whitelist(group_id):
-            return
-        self.whitelist_group_id.pop(self.whitelist_group_id.index(group_id))
-
-    def load(self) -> None:
-        with open(WHITELIST_FILE_PATH, "r") as f:
-            self.whitelist_group_id = list(
-                map(lambda i: int(i) if i else 0, f.read().split("\n"))
-            )
-
-    def save(self) -> None:
-        with open(WHITELIST_FILE_PATH, "w") as f:
-            f.write("\n".join(map(str, self.whitelist_group_id)))
-
-
-group_r18_whitelist_checker = GroupWhiteListChecker()
-group_r18_whitelist_checker.load()
 
 r18_activate_matcher = on_command(
     "开启涩涩", aliases={"可以涩涩", "r18开启"}, permission=SUPERUSER
@@ -45,9 +36,14 @@ r18_activate_matcher = on_command(
 
 
 @r18_activate_matcher.handle()
-async def _(event: GroupMessageEvent):
-    group_r18_whitelist_checker.whitelist_add(event.group_id)
-    await r18_activate_matcher.finish("已解除本群R18限制")
+async def _(event: GroupMessageEvent, db_session: AsyncSession = Depends(get_session)):
+    db_session.add(
+        GroupWhiteListRecord(
+            group_id=int(event.group_id), operator_user_id=int(event.user_id)
+        )
+    )
+    await db_session.commit()
+    await r18_activate_matcher.finish("已解除本群涩图限制")
 
 
 r18_deactivate_matcher = on_command(
@@ -56,6 +52,12 @@ r18_deactivate_matcher = on_command(
 
 
 @r18_deactivate_matcher.handle()
-async def _(event: GroupMessageEvent):
-    group_r18_whitelist_checker.whitelist_del(event.group_id)
-    await r18_deactivate_matcher.finish("已启用本群R18限制")
+async def _(
+    record=Depends(get_group_white_list_record),
+    db_session: AsyncSession = Depends(get_session),
+):
+    if record is None:
+        await r18_deactivate_matcher.finish("已启用本群涩图限制")
+    await db_session.delete(record)
+    await db_session.commit()
+    await r18_deactivate_matcher.finish("已启用本群涩图限制")
