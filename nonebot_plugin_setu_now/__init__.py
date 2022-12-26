@@ -7,7 +7,7 @@ from asyncio import create_task
 from asyncio.tasks import Task
 
 from PIL import Image
-from nonebot import on_regex, get_driver, on_command
+from nonebot import get_bot, on_regex, get_driver, on_command
 from sqlmodel import select
 from nonebot.log import logger
 from nonebot.rule import to_me
@@ -27,6 +27,7 @@ from nonebot.adapters.onebot.v11 import (
     PrivateMessageEvent,
 )
 from sqlmodel.ext.asyncio.session import AsyncSession
+from nonebot.adapters.onebot.v11.helpers import autorevoke_send
 
 require("nonebot_plugin_datastore")
 try:
@@ -50,6 +51,7 @@ SETU_SIZE = plugin_config.setu_size
 MAX = plugin_config.setu_max
 EFFECT = plugin_config.setu_add_random_effect
 SEND_INTERVAL = plugin_config.setu_minimum_send_interval
+WITHDRAW_TIME = Config.parse_obj(get_driver().config.dict()).setu_withdraw
 
 if SAVE == "webdav":
     from .save_to_webdav import save_img
@@ -146,13 +148,22 @@ async def _(
             msg = Message(MessageSegment.image(image_bytesio))  # type: ignore
             if plugin_config.setu_send_info_message:
                 msg.append(MessageSegment.text(setu.msg))  # type: ignore
+            if (delay_time := time.time() - last_send_time) < SEND_INTERVAL:
+                delay_time = round(delay_time, 2)
+                logger.debug(f"Speed limit: Asyncio sleep {delay_time}s")
+                await asyncio.sleep(delay_time)
             try:
                 send_timer = PerfTimer("Image send")
-                if (delay_time := time.time() - last_send_time) < SEND_INTERVAL:
-                    delay_time = round(delay_time, 2)
-                    logger.debug(f"Speed limit: Asyncio sleep {delay_time}s")
-                    await asyncio.sleep(delay_time)
-                message_id: int = (await setu_matcher.send(msg))["message_id"]
+                message_id = 0
+                if not WITHDRAW_TIME:
+                    # 未设置撤回时间 正常发送
+                    message_id: int = (await setu_matcher.send(msg))["message_id"]
+                else:
+                    bot: Bot = get_bot()  # type:ignore
+                    logger.debug(f"Using auto revoke API, interval: {WITHDRAW_TIME}")
+                    await autorevoke_send(
+                        bot=bot, event=event, message=msg, revoke_interval=WITHDRAW_TIME
+                    )
                 logger.debug(f"Message ID: {message_id}")
                 last_send_time = time.time()
                 send_timer.stop()
