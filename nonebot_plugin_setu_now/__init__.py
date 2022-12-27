@@ -213,11 +213,13 @@ async def _(
     logger.debug(f"Get setu info for message id: {reply_message_id}")
     statement = select(MessageInfo).where(MessageInfo.message_id == reply_message_id)
     messageinfo_result: MessageInfo = (await db_session.exec(statement)).first()
+    if not messageinfo_result:
+        await setuinfo_matcher.finish("未找到该插画相关信息")
     message_pid = messageinfo_result.pid
     statement = select(SetuInfo).where(SetuInfo.pid == message_pid)
     setu_info = (await db_session.exec((statement))).first()
     if not setu_info:
-        await setuinfo_matcher.finish("未找到该插画相关信息")
+        await setuinfo_matcher.finish("该插画相关信息已被移除")
     info_message = MessageSegment.text(f"标题：{setu_info.title}\n")
     info_message += MessageSegment.text(f"画师：{setu_info.author}\n")
     info_message += MessageSegment.text(f"PID：{setu_info.pid}")
