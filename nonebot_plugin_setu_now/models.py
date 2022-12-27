@@ -42,11 +42,17 @@ class SetuNotFindError(Exception):
 
 
 class SetuInfo(SQLModel, table=True):
-    __tablename__: str = "setu_data"
-    message_id: int = Field(default=0, primary_key=True, unique=True)
-    author: str = Field(default="Unknown")
-    title: str = Field(default="Unknown")
-    pid: int = Field(default=0, unique=True)
+    __tablename__: str = "setu_info"
+    pid: int = Field(default=None, primary_key=True, unique=True)
+    author: str = Field(default=None)
+    title: str = Field(default=None)
+    url: str = Field(default=None)
+
+
+class MessageInfo(SQLModel, table=True):
+    __tablename__: str = "message_data"
+    message_id: int = Field(default=None, primary_key=True, unique=True)
+    pid: int = Field(default=None)
 
 
 class GroupWhiteListRecord(SQLModel, table=True):

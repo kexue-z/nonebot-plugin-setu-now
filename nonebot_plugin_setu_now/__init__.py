@@ -37,7 +37,8 @@ except ModuleNotFoundError:
 
 from .utils import send_forward_msg
 from .config import Config
-from .models import Setu, SetuInfo, SetuNotFindError
+from .models import Setu, SetuInfo, MessageInfo, SetuNotFindError
+from .database import bind_message_data, auto_upgrade_setuinfo
 from .withdraw import add_withdraw_job
 from .img_utils import EFFECT_FUNC_LIST
 from .cd_manager import add_cd, cd_msg, check_cd, remove_cd
@@ -158,6 +159,8 @@ async def _(
                 if not WITHDRAW_TIME:
                     # 未设置撤回时间 正常发送
                     message_id: int = (await setu_matcher.send(msg))["message_id"]
+                    await auto_upgrade_setuinfo(db_session, setu)
+                    await bind_message_data(db_session, message_id, setu.pid)
                 else:
                     bot: Bot = get_bot()  # type:ignore
                     logger.debug(f"Using auto revoke API, interval: {WITHDRAW_TIME}")
@@ -167,15 +170,7 @@ async def _(
                 logger.debug(f"Message ID: {message_id}")
                 last_send_time = time.time()
                 send_timer.stop()
-                db_session.add(
-                    SetuInfo(
-                        message_id=int(message_id),
-                        author=setu.author,
-                        title=setu.title,
-                        pid=int(setu.pid),
-                    )
-                )
-                await db_session.commit()
+
                 send_success_state = True
                 break
             except ActionFailed:
@@ -216,8 +211,11 @@ async def _(
     reply_segment = reply_segment[0]
     reply_message_id = reply_segment.data["id"]
     logger.debug(f"Get setu info for message id: {reply_message_id}")
-    statement = select(SetuInfo).where(SetuInfo.message_id == reply_message_id)
-    setu_info = (await db_session.exec(statement)).first()
+    statement = select(MessageInfo).where(MessageInfo.message_id == reply_message_id)
+    messageinfo_result: MessageInfo = (await db_session.exec(statement)).first()
+    message_pid = messageinfo_result.pid
+    statement = select(SetuInfo).where(SetuInfo.pid == message_pid)
+    setu_info = (await db_session.exec((statement))).first()
     if not setu_info:
         await setuinfo_matcher.finish("未找到该插画相关信息")
     info_message = MessageSegment.text(f"标题：{setu_info.title}\n")
