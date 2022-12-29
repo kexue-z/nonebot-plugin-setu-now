@@ -6,7 +6,7 @@ from typing import List, Union
 from asyncio import create_task
 from asyncio.tasks import Task
 
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 from nonebot import get_bot, on_regex, get_driver, on_command
 from sqlmodel import select
 from nonebot.log import logger
@@ -35,24 +35,18 @@ try:
 except ModuleNotFoundError:
     from ..nonebot_plugin_datastore import get_session
 
-from .utils import send_forward_msg
-from .config import Config
+from .utils import SpeedLimiter, send_forward_msg
+from .config import MAX, SAVE, EFFECT, WITHDRAW_TIME, Config
 from .models import Setu, SetuInfo, MessageInfo, SetuNotFindError
 from .database import bind_message_data, auto_upgrade_setuinfo
 from .withdraw import add_withdraw_job
-from .img_utils import EFFECT_FUNC_LIST
+from .img_utils import EFFECT_FUNC_LIST, image_segment_convert
 from .cd_manager import add_cd, cd_msg, check_cd, remove_cd
 from .perf_timer import PerfTimer
 from .data_source import SetuLoader
 from .r18_whitelist import get_group_white_list_record
 
-plugin_config = Config.parse_obj(get_driver().config.dict())
-SAVE = plugin_config.setu_save
-SETU_SIZE = plugin_config.setu_size
-MAX = plugin_config.setu_max
-EFFECT = plugin_config.setu_add_random_effect
-SEND_INTERVAL = plugin_config.setu_minimum_send_interval
-WITHDRAW_TIME = Config.parse_obj(get_driver().config.dict()).setu_withdraw
+global_speed_limiter = SpeedLimiter()
 
 if SAVE == "webdav":
     from .save_to_webdav import save_img
@@ -77,6 +71,7 @@ async def _(
     db_session: AsyncSession = Depends(get_session),
     white_list_record=Depends(get_group_white_list_record),
 ):
+    # await setu_matcher.finish("服务器维护喵，暂停服务抱歉喵")
     setu_total_timer = PerfTimer("Image request total")
     args = list(state["_matched_groups"])
     num = args[1]
@@ -118,41 +113,27 @@ async def _(
 
     failure_msg: int = 0
     msg_list: List[Message] = []
-    setu_saving_tasks: List[Task] = []
     forward_send_mode_state = isinstance(event, GroupMessageEvent) or num >= 5
     """
     优先发送原图，当原图发送失败（ActionFailedException）时，尝试逐个更换处理特效发送
     """
-    last_send_time = 0
     for setu in data:
         send_success_state = False
-        if SAVE:
-            setu_saving_tasks.append(create_task(save_img(setu)))
         for process_func in EFFECT_FUNC_LIST:
             if r18 and process_func == EFFECT_FUNC_LIST[0]:
                 # R18禁止使用默认图像处理方法(do_nothing)
                 continue
             logger.debug(f"Using effect {process_func}")
             effert_timer = PerfTimer.start("Effect process")
-            image = process_func(Image.open(BytesIO(setu.img)))  # type: ignore
+            try:
+                image = process_func(Image.open(BytesIO(setu.img)))  # type: ignore
+            except UnidentifiedImageError:
+                break
             effert_timer.stop()
-            image_bytesio = BytesIO()
-            save_timer = PerfTimer.start(f"Save bytes {image.width} x {image.height}")
-            if image.mode != "RGB":
-                image = image.convert("RGB")
-            image.save(
-                image_bytesio,
-                format="JPEG",
-                quality="keep" if image.format in ("JPEG", "JPG") else 95,
-            )
-            save_timer.stop()
-            msg = Message(MessageSegment.image(image_bytesio))  # type: ignore
+            msg = Message(image_segment_convert(image))
             if plugin_config.setu_send_info_message:
                 msg.append(MessageSegment.text(setu.msg))  # type: ignore
-            if (delay_time := time.time() - last_send_time) < SEND_INTERVAL:
-                delay_time = round(delay_time, 2)
-                logger.debug(f"Speed limit: Asyncio sleep {delay_time}s")
-                await asyncio.sleep(delay_time)
+            await global_speed_limiter.async_speedlimit()
             try:
                 send_timer = PerfTimer("Image send")
                 message_id = 0
@@ -161,14 +142,13 @@ async def _(
                     message_id: int = (await setu_matcher.send(msg))["message_id"]
                     await auto_upgrade_setuinfo(db_session, setu)
                     await bind_message_data(db_session, message_id, setu.pid)
+                    logger.debug(f"Message ID: {message_id}")
                 else:
-                    bot: Bot = get_bot()  # type:ignore
                     logger.debug(f"Using auto revoke API, interval: {WITHDRAW_TIME}")
                     await autorevoke_send(
                         bot=bot, event=event, message=msg, revoke_interval=WITHDRAW_TIME
                     )
-                logger.debug(f"Message ID: {message_id}")
-                last_send_time = time.time()
+                global_speed_limiter.send_success()
                 send_timer.stop()
 
                 send_success_state = True
@@ -186,12 +166,15 @@ async def _(
         remove_cd(event)
 
         await setu_matcher.finish(
-            message=Message(f"共 {failure_msg} 张图片发送失败"),
+            message=Message(f"{failure_msg} 张图片消失了喵"),
         )
 
     setu_total_timer.stop()
-
-    await asyncio.gather(*setu_saving_tasks)
+    if SAVE:
+        setu_saving_tasks: List[Task] = []
+        for setu in data:
+            setu_saving_tasks.append(create_task(save_img(setu)))
+        await asyncio.gather(*setu_saving_tasks)
 
 
 setuinfo_matcher = on_command("信息")

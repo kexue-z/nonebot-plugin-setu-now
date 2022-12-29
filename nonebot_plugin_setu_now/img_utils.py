@@ -5,6 +5,9 @@ from typing import Optional
 
 from PIL import Image, ImageFilter
 from nonebot.log import logger
+from nonebot.adapters.onebot.v11 import MessageSegment
+
+from .perf_timer import PerfTimer
 
 
 def draw_frame(img: Image.Image) -> Image.Image:
@@ -65,6 +68,20 @@ def random_lines(img: Image.Image) -> Image.Image:
 
 def do_nothing(img: Image.Image) -> Image.Image:
     return img
+
+
+def image_segment_convert(img: Image.Image) -> MessageSegment:
+    image_bytesio = BytesIO()
+    save_timer = PerfTimer.start(f"Save bytes {img.width} x {img.height}")
+    if img.mode != "RGB":
+        img = img.convert("RGB")
+    img.save(
+        image_bytesio,
+        format="JPEG",
+        quality="keep" if img.format in ("JPEG", "JPG") else 95,
+    )
+    save_timer.stop()
+    return MessageSegment.image(image_bytesio)  # type: ignore
 
 
 EFFECT_FUNC_LIST = [do_nothing, draw_frame, random_flip, random_lines, random_rotate]

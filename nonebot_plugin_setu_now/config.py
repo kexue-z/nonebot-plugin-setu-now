@@ -1,5 +1,6 @@
 from typing import Optional
 
+from nonebot import get_driver
 from pydantic import Extra, BaseModel
 
 
@@ -22,3 +23,12 @@ class Config(BaseModel, extra=Extra.ignore):
     setu_max: int = 30
     setu_add_random_effect: bool = True
     setu_minimum_send_interval: int = 5
+
+
+plugin_config = Config.parse_obj(get_driver().config.dict())
+SAVE = plugin_config.setu_save
+SETU_SIZE = plugin_config.setu_size
+MAX = plugin_config.setu_max
+EFFECT = plugin_config.setu_add_random_effect
+SEND_INTERVAL = plugin_config.setu_minimum_send_interval
+WITHDRAW_TIME = Config.parse_obj(get_driver().config.dict()).setu_withdraw

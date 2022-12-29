@@ -7,8 +7,8 @@ from nonebot.log import logger
 from nonebot.params import Depends
 from nonebot.plugin.on import on_command
 from nonebot.permission import SUPERUSER
+from nonebot.adapters.onebot.v11 import MessageEvent, GroupMessageEvent
 from sqlmodel.ext.asyncio.session import AsyncSession
-from nonebot.adapters.onebot.v11.event import GroupMessageEvent
 
 try:
     from nonebot_plugin_datastore import get_session
@@ -19,8 +19,10 @@ from .models import GroupWhiteListRecord
 
 
 async def get_group_white_list_record(
-    event: GroupMessageEvent, db_session: AsyncSession = Depends(get_session)
+    event: MessageEvent, db_session: AsyncSession = Depends(get_session)
 ):
+    if not isinstance(event, GroupMessageEvent):
+        return None
     statement = select(GroupWhiteListRecord).where(
         GroupWhiteListRecord.group_id == event.group_id
     )

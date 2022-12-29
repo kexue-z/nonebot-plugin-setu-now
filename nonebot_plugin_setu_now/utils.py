@@ -1,9 +1,12 @@
+import time
+import asyncio
 from typing import List, Optional
 
 from httpx import AsyncClient
 from nonebot.log import logger
 from nonebot.adapters.onebot.v11 import Bot, Message, GroupMessageEvent
 
+from .config import SEND_INTERVAL
 from .perf_timer import PerfTimer
 
 
@@ -52,3 +55,17 @@ async def send_forward_msg(
     await bot.call_api(
         "send_group_forward_msg", group_id=event.group_id, messages=messages
     )
+
+
+class SpeedLimiter:
+    def __init__(self) -> None:
+        self.send_success_time = 0
+
+    def send_success(self) -> None:
+        self.send_success_time = time.time()
+
+    async def async_speedlimit(self):
+        if (delay_time := time.time() - self.send_success_time) < SEND_INTERVAL:
+            delay_time = round(delay_time, 2)
+            logger.debug(f"Speed limit: Asyncio sleep {delay_time}s")
+            await asyncio.sleep(delay_time)
