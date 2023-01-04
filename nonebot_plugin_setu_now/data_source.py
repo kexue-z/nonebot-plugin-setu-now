@@ -32,6 +32,7 @@ class SetuHandler:
         tags: Optional[List[list]] = None,
         r18: bool = False,
         num: int = 1,
+        send_handler=lambda i: i,
     ):
         """
         :说明: `__init__`
@@ -55,7 +56,8 @@ class SetuHandler:
         self.tags = tags
         self.r18 = r18
         self.num = num
-        self.api_data = None
+        self.setu_list = []
+        self.send_handler = self.send_handler
 
     async def _init_api_data(self) -> None:
         """
@@ -77,7 +79,14 @@ class SetuHandler:
                 self.api_url, json=data, headers=headers, timeout=60
             )
         data = res.json()
-        self.api_data = SetuApiData(**data)
+        setu_api_data = SetuApiData(**data)
+        if len(setu_api_data.data) == 0:
+            raise SetuNotFindError()
+        for i in setu_api_data.data:
+            self.setu_list.append(Setu(data=i))
+
+    async def handle_setu_request(self) -> None:
+        await self._init_api_data()
 
 
 class SetuLoader:
