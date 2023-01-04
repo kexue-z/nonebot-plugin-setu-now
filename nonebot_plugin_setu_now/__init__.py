@@ -43,16 +43,13 @@ from .withdraw import add_withdraw_job
 from .img_utils import EFFECT_FUNC_LIST, image_segment_convert
 from .cd_manager import add_cd, cd_msg, check_cd, remove_cd
 from .perf_timer import PerfTimer
-from .data_source import SetuLoader
+from .data_source import SetuHandler
 from .r18_whitelist import get_group_white_list_record
-
-global_speed_limiter = SpeedLimiter()
 
 if SAVE == "webdav":
     from .save_to_webdav import save_img
 elif SAVE == "local":
     from .save_to_local import save_img
-
 
 plugin_config = Config.parse_obj(get_driver().config.dict())
 
@@ -104,21 +101,7 @@ async def _(
     logger.debug(f"Setu: r18:{r18}, tag:{tags}, key:{key}, num:{num}")
     add_cd(event, num)
 
-    setu_obj = SetuLoader()
-    try:
-        data = await setu_obj.get_setu(key, tags, r18, num)
-    except SetuNotFindError:
-        remove_cd(event)
-        await setu_matcher.finish(f"没有找到关于 {tags or key} 的色图呢～")
-
-    failure_msg: int = 0
-    msg_list: List[Message] = []
-    forward_send_mode_state = isinstance(event, GroupMessageEvent) or num >= 5
-    """
-    优先发送原图，当原图发送失败（ActionFailedException）时，尝试逐个更换处理特效发送
-    """
-    for setu in data:
-        send_success_state = False
+    async def nb_send_handler(setu: Setu) -> None:
         for process_func in EFFECT_FUNC_LIST:
             if r18 and process_func == EFFECT_FUNC_LIST[0]:
                 # R18禁止使用默认图像处理方法(do_nothing)
@@ -128,12 +111,9 @@ async def _(
             try:
                 image = process_func(Image.open(BytesIO(setu.img)))  # type: ignore
             except UnidentifiedImageError:
-                break
+                return
             effert_timer.stop()
             msg = Message(image_segment_convert(image))
-            if plugin_config.setu_send_info_message:
-                msg.append(MessageSegment.text(setu.msg))  # type: ignore
-            await global_speed_limiter.async_speedlimit()
             try:
                 send_timer = PerfTimer("Image send")
                 message_id = 0
@@ -148,33 +128,48 @@ async def _(
                     await autorevoke_send(
                         bot=bot, event=event, message=msg, revoke_interval=WITHDRAW_TIME
                     )
-                global_speed_limiter.send_success()
                 send_timer.stop()
 
                 send_success_state = True
-                break
+                return
             except ActionFailed:
                 if not EFFECT:  # 设置不允许添加特效
-                    break
+                    return
                 logger.warning(f"Image send failed, retrying another effect")
-        if send_success_state:
-            continue
-        failure_msg += 1
-        logger.warning(f"Image send failed")
 
-    if failure_msg >= num / 2:
+    setu_handler = SetuHandler(key, tags, r18, num, nb_send_handler)
+    try:
+        await setu_handler.process_request()
+    except SetuNotFindError:
         remove_cd(event)
+        await setu_matcher.finish(f"没有找到关于 {tags or key} 的色图呢～")
 
-        await setu_matcher.finish(
-            message=Message(f"{failure_msg} 张图片消失了喵"),
-        )
+    # failure_msg: int = 0
+    # msg_list: List[Message] = []
+    # forward_send_mode_state = isinstance(event, GroupMessageEvent) or num >= 5
+    # """
+    # 优先发送原图，当原图发送失败（ActionFailedException）时，尝试逐个更换处理特效发送
+    # """
+    # for setu in data:
 
-    setu_total_timer.stop()
-    if SAVE:
-        setu_saving_tasks: List[Task] = []
-        for setu in data:
-            setu_saving_tasks.append(create_task(save_img(setu)))
-        await asyncio.gather(*setu_saving_tasks)
+    #     if send_success_state:
+    #         continue
+    #     failure_msg += 1
+    #     logger.warning(f"Image send failed")
+
+    # if failure_msg >= num / 2:
+    #     remove_cd(event)
+
+    #     await setu_matcher.finish(
+    #         message=Message(f"{failure_msg} 张图片消失了喵"),
+    #     )
+
+    # setu_total_timer.stop()
+    # if SAVE:
+    #     setu_saving_tasks: List[Task] = []
+    #     for setu in data:
+    #         setu_saving_tasks.append(create_task(save_img(setu)))
+    #     await asyncio.gather(*setu_saving_tasks)
 
 
 setuinfo_matcher = on_command("信息")

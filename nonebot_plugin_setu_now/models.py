@@ -5,13 +5,19 @@ from sqlmodel import Field, Column, SQLModel
 
 
 class SetuData(BaseModel):
-    title: str
-    urls: Dict[str, str]
-    author: str
-    tags: List[str]
     pid: int
     p: int
+    uid: int
+    title: str
+    author: str
     r18: bool
+    width: int
+    height: int
+    tags: List[str]
+    ext: str
+    aiType: int
+    uploadDate: int
+    urls: Dict[str, str]
 
 
 class SetuApiData(BaseModel):
