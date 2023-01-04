@@ -21,6 +21,65 @@ PROXY = plugin_config.setu_proxy
 EFFECT = plugin_config.setu_add_random_effect
 
 
+class SetuHandler:
+    def __init__(
+        self,
+        size: str = SETU_SIZE,
+        api_url: str = API_URL,
+        reverse_proxy_url: Optional[str] = REVERSE_PROXY,
+        proxy: Optional[str] = PROXY,
+        keyword: Optional[str] = None,
+        tags: Optional[List[list]] = None,
+        r18: bool = False,
+        num: int = 1,
+    ):
+        """
+        :说明: `__init__`
+        > 初始化
+
+        :可选参数:
+          * `size: str = SETU_SIZE`: 图像大小
+          * `api_url: str = API_URL`: api地址
+          * `reverse_proxy_url: Optional[str] = REVERSE_PROXY`: 图片反向代理地址
+          * `proxy: Optional[str] = PROXY`: 代理地址
+          * `keyword: Optional[str] = None`: 关键词
+          * `tags: Optional[List[list]] = None`: 标签列表
+          * `r18: bool = False`: r18
+          * `num: int = 1`: 数量
+        """
+        self.size = size
+        self.api_url = api_url
+        self.reverse_proxy_url = reverse_proxy_url
+        self.proxy = proxy
+        self.keyword = keyword
+        self.tags = tags
+        self.r18 = r18
+        self.num = num
+        self.api_data = None
+
+    async def _init_api_data(self) -> None:
+        """
+        :说明: `_init_api_data`
+        > 刷新涩图 api 数据
+        """
+        data = {
+            "keyword": self.keyword,
+            "tag": self.tags,
+            "r18": self.r18,
+            "proxy": self.reverse_proxy_url,
+            "num": self.num,
+            "size": self.size,
+        }
+        headers = {"Content-Type": "application/json"}
+
+        async with AsyncClient(proxies=self.proxy) as client:  # type: ignore
+            res = await client.post(
+                self.api_url, json=data, headers=headers, timeout=60
+            )
+        data = res.json()
+        self.api_data = SetuApiData(**data)
+
+
 class SetuLoader:
     def __init__(
         self,
