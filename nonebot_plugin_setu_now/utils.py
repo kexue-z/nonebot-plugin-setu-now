@@ -23,16 +23,17 @@ async def download_pic(
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64) "
         "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36",
     }
-    # download_timer = PerfTimer.start("Image download")
+    download_timer = PerfTimer.start("Image download")
     image_path = store.get_cache_file("nonebot_plugin_setu_now", file_name)
     async with AsyncClient().stream(method="GET", url=url, headers=headers, timeout=15, params=[("proxies", proxies)]) as response:  # type: ignore
         with open(image_path, "wb") as f:
             async for chunk in response.aiter_bytes():
                 f.write(chunk)
     await response.aclose()
+    download_timer.stop()
     return image_path
     # re = await client.get(url=url, headers=headers, timeout=60)
-    # download_timer.stop()
+    download_timer.stop()
     # if re.status_code == 200:
     #     logger.debug("成功获取图片")
     #     return re.content

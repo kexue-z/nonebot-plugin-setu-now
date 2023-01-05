@@ -111,6 +111,7 @@ async def _(
             try:
                 image = process_func(setu.img)  # type: ignore
             except UnidentifiedImageError:
+                logger.warning(f"Unidentified image: {type(setu.img)}")
                 return
             effert_timer.stop()
             msg = Message(image_segment_convert(image))

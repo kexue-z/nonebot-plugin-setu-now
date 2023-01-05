@@ -13,7 +13,7 @@ from .perf_timer import PerfTimer
 
 def image_param_converter(source: Union[str, Image.Image, bytes]) -> Image.Image:
     if isinstance(source, str):
-        return Image.open(source)
+        return Image.open(Path(source))
     if isinstance(source, Image.Image):
         return source
     if isinstance(source, bytes):
