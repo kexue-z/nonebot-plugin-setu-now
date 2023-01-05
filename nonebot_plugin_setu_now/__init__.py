@@ -31,9 +31,9 @@ from nonebot.adapters.onebot.v11.helpers import autorevoke_send
 
 require("nonebot_plugin_datastore")
 try:
-    from nonebot_plugin_datastore import get_session
+    from nonebot_plugin_datastore import get_session, create_session
 except ModuleNotFoundError:
-    from ..nonebot_plugin_datastore import get_session
+    from ..nonebot_plugin_datastore import get_session, create_session
 
 from .utils import SpeedLimiter, send_forward_msg
 from .config import MAX, SAVE, EFFECT, WITHDRAW_TIME, Config
@@ -120,8 +120,9 @@ async def _(
                 if not WITHDRAW_TIME:
                     # 未设置撤回时间 正常发送
                     message_id: int = (await setu_matcher.send(msg))["message_id"]
-                    await auto_upgrade_setuinfo(db_session, setu)
-                    await bind_message_data(db_session, message_id, setu.pid)
+                    async with create_session() as temp_db_session:
+                        await auto_upgrade_setuinfo(temp_db_session, setu)
+                        await bind_message_data(temp_db_session, message_id, setu.pid)
                     logger.debug(f"Message ID: {message_id}")
                 else:
                     logger.debug(f"Using auto revoke API, interval: {WITHDRAW_TIME}")
