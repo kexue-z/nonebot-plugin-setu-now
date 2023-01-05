@@ -2,6 +2,7 @@ import random
 from random import choice
 from typing import List, Callable, Optional
 from asyncio import gather
+from pathlib import Path
 
 from httpx import AsyncClient
 from nonebot import get_driver
@@ -19,6 +20,16 @@ API_URL = plugin_config.setu_api_url
 REVERSE_PROXY = plugin_config.setu_reverse_proxy
 PROXY = plugin_config.setu_proxy
 EFFECT = plugin_config.setu_add_random_effect
+
+try:
+    import nonebot_plugin_localstore as store
+except ImportError:
+    from .. import nonebot_plugin_localstore as store
+
+CACHE_PATH = Path(store.get_cache_dir("nonebot_plugin_setu_now"))
+if not CACHE_PATH.exists():
+    logger.info("Creating setu cache floder")
+    CACHE_PATH.mkdir(parents=True, exist_ok=True)
 
 
 class SetuHandler:
@@ -59,7 +70,12 @@ class SetuHandler:
             self.setu_instance_list.append(Setu(data=i))
 
     async def prep_handler(self, setu: Setu):
-        setu.img = await download_pic(url=setu.urls[SETU_SIZE], proxies=self.proxy)
+        setu.img = await download_pic(
+            url=setu.urls[SETU_SIZE],
+            proxies=self.proxy,
+            file_mode=True,
+            file_name=f"{setu.pid}.{setu.ext}",
+        )
         await self.handler(setu)
 
     async def process_request(self):

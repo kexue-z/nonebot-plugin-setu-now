@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import Dict, List, Union, Optional
 
 from pydantic import BaseModel
 from sqlmodel import Field, Column, SQLModel
@@ -34,7 +34,8 @@ class Setu:
         self.pid: int = data.pid
         self.p: int = data.p
         self.r18: bool = data.r18
-        self.img: Optional[bytes] = None
+        self.ext: str = data.ext
+        self.img: Optional[Union[bytes, str]] = None
         self.msg: Optional[str] = None
 
 

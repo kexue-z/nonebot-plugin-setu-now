@@ -1,7 +1,8 @@
 import time
 from io import BytesIO
 from random import choice, choices, randint
-from typing import Optional
+from typing import Union, Optional
+from pathlib import Path
 
 from PIL import Image, ImageFilter
 from nonebot.log import logger
@@ -10,8 +11,19 @@ from nonebot.adapters.onebot.v11 import MessageSegment
 from .perf_timer import PerfTimer
 
 
-def draw_frame(img: Image.Image) -> Image.Image:
+def image_param_converter(source: Union[str, Image.Image, bytes]) -> Image.Image:
+    if isinstance(source, str):
+        return Image.open(source)
+    if isinstance(source, Image.Image):
+        return source
+    if isinstance(source, bytes):
+        return Image.open(BytesIO(source))
+    raise ValueError(f"Unsopported image type: {type(source)}")
+
+
+def draw_frame(img: Union[str, Image.Image, bytes]) -> Image.Image:
     """画边框"""
+    img = image_param_converter(img)
     BLUR_HEIGHT_QUALITY = 128
     resize_resoluation = (
         int(img.width * (BLUR_HEIGHT_QUALITY / img.height)),
@@ -25,22 +37,25 @@ def draw_frame(img: Image.Image) -> Image.Image:
     return background
 
 
-def random_rotate(img: Image.Image) -> Image.Image:
+def random_rotate(img: Union[str, Image.Image, bytes]) -> Image.Image:
     """随机旋转角度"""
+    img = image_param_converter(img)
     a = float(randint(0, 360))
     img = img.rotate(angle=a, expand=True)
     return img
 
 
-def random_flip(img: Image.Image) -> Image.Image:
+def random_flip(img: Union[str, Image.Image, bytes]) -> Image.Image:
     """随机翻转"""
+    img = image_param_converter(img)
     t = [Image.Transpose.FLIP_TOP_BOTTOM, Image.Transpose.FLIP_LEFT_RIGHT]
     img = img.transpose(choice(t))
     return img
 
 
-def random_lines(img: Image.Image) -> Image.Image:
+def random_lines(img: Union[str, Image.Image, bytes]) -> Image.Image:
     """随机画黑线"""
+    img = image_param_converter(img)
     from PIL import ImageDraw
 
     x, y = img.size
@@ -66,11 +81,15 @@ def random_lines(img: Image.Image) -> Image.Image:
     return img
 
 
-def do_nothing(img: Image.Image) -> Image.Image:
+def do_nothing(img: str) -> str:
     return img
 
 
-def image_segment_convert(img: Image.Image) -> MessageSegment:
+def image_segment_convert(img: Union[str, Image.Image, bytes]) -> MessageSegment:
+    if isinstance(img, str):
+        return MessageSegment.image(Path(img))
+    if isinstance(img, bytes):
+        img = Image.open(BytesIO(img))
     image_bytesio = BytesIO()
     save_timer = PerfTimer.start(f"Save bytes {img.width} x {img.height}")
     if img.mode != "RGB":

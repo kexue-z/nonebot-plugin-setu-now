@@ -109,7 +109,7 @@ async def _(
             logger.debug(f"Using effect {process_func}")
             effert_timer = PerfTimer.start("Effect process")
             try:
-                image = process_func(Image.open(BytesIO(setu.img)))  # type: ignore
+                image = process_func(setu.img)  # type: ignore
             except UnidentifiedImageError:
                 return
             effert_timer.stop()

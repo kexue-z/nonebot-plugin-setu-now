@@ -1,6 +1,6 @@
 import time
 import asyncio
-from typing import List, Optional
+from typing import List, Union, Optional
 
 from httpx import AsyncClient
 from nonebot.log import logger
@@ -9,24 +9,36 @@ from nonebot.adapters.onebot.v11 import Bot, Message, GroupMessageEvent
 from .config import SEND_INTERVAL
 from .perf_timer import PerfTimer
 
+try:
+    import nonebot_plugin_localstore as store
+except ImportError:
+    from .. import nonebot_plugin_localstore as store
 
-async def download_pic(url: str, proxies: Optional[str] = None) -> Optional[bytes]:
-    async with AsyncClient(proxies=proxies) as client:  # type: ignore
-        headers = {
-            "Referer": "https://accounts.pixiv.net/login?lang=zh&source=pc&view_type=page&ref=wwwtop_accounts_index",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64) "
-            "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36",
-        }
-        logger.debug(f"正在下载...{url}")
-        download_timer = PerfTimer.start("Image download")
-        re = await client.get(url=url, headers=headers, timeout=60)
-        download_timer.stop()
-        if re.status_code == 200:
-            logger.debug("成功获取图片")
-            return re.content
-        else:
-            logger.error(f"获取图片失败: {re.status_code}")
-            return
+
+async def download_pic(
+    url: str, proxies: Optional[str] = None, file_mode=False, file_name=""
+) -> Union[bytes, str]:
+    headers = {
+        "Referer": "https://accounts.pixiv.net/login?lang=zh&source=pc&view_type=page&ref=wwwtop_accounts_index",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36",
+    }
+    # download_timer = PerfTimer.start("Image download")
+    image_path = store.get_cache_file("nonebot_plugin_setu_now", file_name)
+    async with AsyncClient().stream(method="GET", url=url, headers=headers, timeout=15, params=[("proxies", proxies)]) as response:  # type: ignore
+        with open(image_path, "wb") as f:
+            async for chunk in response.aiter_bytes():
+                f.write(chunk)
+    await response.aclose()
+    return image_path
+    # re = await client.get(url=url, headers=headers, timeout=60)
+    # download_timer.stop()
+    # if re.status_code == 200:
+    #     logger.debug("成功获取图片")
+    #     return re.content
+    # else:
+    #     logger.error(f"获取图片失败: {re.status_code}")
+    #     return
 
 
 async def send_forward_msg(
