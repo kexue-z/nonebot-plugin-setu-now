@@ -25,11 +25,12 @@ async def download_pic(
     }
     download_timer = PerfTimer.start("Image download")
     image_path = store.get_cache_file("nonebot_plugin_setu_now", file_name)
-    async with AsyncClient().stream(method="GET", url=url, headers=headers, timeout=15, params=[("proxies", proxies)]) as response:  # type: ignore
+    client = AsyncClient(proxies=proxies, timeout=5)
+    async with client.stream(method="GET", url=url, headers=headers, timeout=15) as response:  # type: ignore # params={"proxies": [proxies]}
         with open(image_path, "wb") as f:
             async for chunk in response.aiter_bytes():
                 f.write(chunk)
-    await response.aclose()
+    await client.aclose()
     download_timer.stop()
     return image_path
     # re = await client.get(url=url, headers=headers, timeout=60)

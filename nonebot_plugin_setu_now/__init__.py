@@ -94,6 +94,9 @@ async def _(
                 await setu_matcher.finish("不可以涩涩！\n本群未启用R18支持\n请移除R18标签或联系维护组")
             r18 = True
 
+    if r18:
+        num = 1
+
     if cd := check_cd(event):
         # 如果 CD 还没到 则直接结束
         await setu_matcher.finish(cd_msg(cd))

@@ -66,6 +66,7 @@ class SetuHandler:
         setu_api_data_instance = SetuApiData(**data)
         if len(setu_api_data_instance.data) == 0:
             raise SetuNotFindError()
+        logger.debug(f"API Responsed {len(setu_api_data_instance.data)} image")
         for i in setu_api_data_instance.data:
             self.setu_instance_list.append(Setu(data=i))
 
