@@ -32,7 +32,9 @@ async def download_pic(
                 logger.warning(
                     f"Image respond status code error: {response.status_code}"
                 )
-                raise ValueError
+                raise ValueError(
+                    f"Image respond status code error: {response.status_code}"
+                )
             with open(image_path, "wb") as f:
                 async for chunk in response.aiter_bytes():
                     f.write(chunk)

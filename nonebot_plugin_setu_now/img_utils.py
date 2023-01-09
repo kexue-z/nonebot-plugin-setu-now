@@ -12,12 +12,34 @@ from .perf_timer import PerfTimer
 
 
 def image_param_converter(source: Union[str, Image.Image, bytes]) -> Image.Image:
+    FORCE_RESIZE = True
+    IMAGE_RESIZE_RES = 1080  # 限制被处理图片最大为1080P
+
+    def resize_converter(img: Image.Image):
+        if not FORCE_RESIZE:
+            return img
+        image_landscape = img.width >= img.height
+        if min(*img.size) <= IMAGE_RESIZE_RES:
+            return img
+        if image_landscape:
+            resize_res = (
+                int(IMAGE_RESIZE_RES / img.height * img.width),
+                IMAGE_RESIZE_RES,
+            )
+        else:
+            resize_res = (
+                IMAGE_RESIZE_RES,
+                int(IMAGE_RESIZE_RES / img.width * img.height),
+            )
+        logger.debug(f"Effect force resize: {img.size} -> {resize_res}")
+        return img.resize(resize_res)
+
     if isinstance(source, str):
-        return Image.open(Path(source))
+        return resize_converter(Image.open(Path(source)))
     if isinstance(source, Image.Image):
-        return source
+        return resize_converter(source)
     if isinstance(source, bytes):
-        return Image.open(BytesIO(source))
+        return resize_converter(Image.open(BytesIO(source)))
     raise ValueError(f"Unsopported image type: {type(source)}")
 
 
@@ -25,6 +47,7 @@ def draw_frame(img: Union[str, Image.Image, bytes]) -> Image.Image:
     """画边框"""
     img = image_param_converter(img)
     BLUR_HEIGHT_QUALITY = 128
+    FRAME_RATIO = 1.5
     resize_resoluation = (
         int(img.width * (BLUR_HEIGHT_QUALITY / img.height)),
         BLUR_HEIGHT_QUALITY,
@@ -32,8 +55,16 @@ def draw_frame(img: Union[str, Image.Image, bytes]) -> Image.Image:
     background = img
     background = background.resize(resize_resoluation)
     background = background.filter(ImageFilter.GaussianBlur(6))
-    background = background.resize((img.width * 2, img.height * 2))
-    background.paste(img, (int(img.width / 2), int(img.height / 2)))
+    background = background.resize(
+        (int(img.width * FRAME_RATIO), int(img.height * FRAME_RATIO))
+    )
+    background.paste(
+        img,
+        (
+            int((background.width - img.width) / 2),
+            int((background.height - img.height) / 2),
+        ),
+    )
     return background
 
 

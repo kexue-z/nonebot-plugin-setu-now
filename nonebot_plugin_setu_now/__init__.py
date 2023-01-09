@@ -122,6 +122,7 @@ async def _(
                 image = process_func(setu.img)  # type: ignore
             except UnidentifiedImageError:
                 logger.warning(f"Unidentified image: {type(setu.img)}")
+                failure_msg += 1
                 return
             effert_timer.stop()
             msg = Message(image_segment_convert(image))
@@ -144,10 +145,12 @@ async def _(
                 return
             except ActionFailed:
                 if not EFFECT:  # 设置不允许添加特效
+                    failure_msg += 1
                     return
                 await asyncio.sleep(0)
                 logger.warning(f"Image send failed, retrying another effect")
         failure_msg += 1
+        logger.warning(f"Image send failed after tried all effects")
 
     setu_handler = SetuHandler(key, tags, r18, num, nb_send_handler)
     try:
