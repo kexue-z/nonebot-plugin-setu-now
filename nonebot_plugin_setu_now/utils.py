@@ -17,7 +17,7 @@ except ImportError:
 
 async def download_pic(
     url: str, proxies: Optional[str] = None, file_mode=False, file_name=""
-) -> Union[bytes, str]:
+) -> Optional[Union[bytes, str]]:
     headers = {
         "Referer": "https://accounts.pixiv.net/login?lang=zh&source=pc&view_type=page&ref=wwwtop_accounts_index",
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64) "
@@ -26,12 +26,22 @@ async def download_pic(
     download_timer = PerfTimer.start("Image download")
     image_path = store.get_cache_file("nonebot_plugin_setu_now", file_name)
     client = AsyncClient(proxies=proxies, timeout=5)
-    async with client.stream(method="GET", url=url, headers=headers, timeout=15) as response:  # type: ignore # params={"proxies": [proxies]}
-        with open(image_path, "wb") as f:
-            async for chunk in response.aiter_bytes():
-                f.write(chunk)
-    await client.aclose()
-    download_timer.stop()
+    try:
+        async with client.stream(method="GET", url=url, headers=headers, timeout=15) as response:  # type: ignore # params={"proxies": [proxies]}
+            if response.status_code != 200:
+                logger.warning(
+                    f"Image respond status code error: {response.status_code}"
+                )
+                raise ValueError
+            with open(image_path, "wb") as f:
+                async for chunk in response.aiter_bytes():
+                    f.write(chunk)
+    except:
+        logger.warning(f"Image download failed: {url}")
+        return None
+    finally:
+        await client.aclose()
+        download_timer.stop()
     return image_path
     # re = await client.get(url=url, headers=headers, timeout=60)
     download_timer.stop()

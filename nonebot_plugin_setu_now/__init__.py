@@ -104,7 +104,14 @@ async def _(
     logger.debug(f"Setu: r18:{r18}, tag:{tags}, key:{key}, num:{num}")
     add_cd(event, num)
 
+    failure_msg = 0
+
     async def nb_send_handler(setu: Setu) -> None:
+        nonlocal failure_msg
+        if setu.img is None:
+            logger.warning("Invalid image type, skipped")
+            failure_msg += 1
+            return
         for process_func in EFFECT_FUNC_LIST:
             if r18 and process_func == EFFECT_FUNC_LIST[0]:
                 # R18禁止使用默认图像处理方法(do_nothing)
@@ -134,13 +141,13 @@ async def _(
                         bot=bot, event=event, message=msg, revoke_interval=WITHDRAW_TIME
                     )
                 send_timer.stop()
-
-                send_success_state = True
                 return
             except ActionFailed:
                 if not EFFECT:  # 设置不允许添加特效
                     return
+                await asyncio.sleep(0)
                 logger.warning(f"Image send failed, retrying another effect")
+        failure_msg += 1
 
     setu_handler = SetuHandler(key, tags, r18, num, nb_send_handler)
     try:
@@ -148,6 +155,12 @@ async def _(
     except SetuNotFindError:
         remove_cd(event)
         await setu_matcher.finish(f"没有找到关于 {tags or key} 的色图呢～")
+    if failure_msg:
+        await setu_matcher.send(
+            message=Message(f"{failure_msg} 张图片消失了喵"),
+        )
+        if failure_msg >= num / 2:
+            remove_cd(event)
 
     # failure_msg: int = 0
     # msg_list: List[Message] = []
@@ -161,13 +174,6 @@ async def _(
     #         continue
     #     failure_msg += 1
     #     logger.warning(f"Image send failed")
-
-    # if failure_msg >= num / 2:
-    #     remove_cd(event)
-
-    #     await setu_matcher.finish(
-    #         message=Message(f"{failure_msg} 张图片消失了喵"),
-    #     )
 
     # setu_total_timer.stop()
     # if SAVE:
