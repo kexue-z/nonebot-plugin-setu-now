@@ -30,7 +30,6 @@ from .utils import SpeedLimiter, send_forward_msg
 from .config import MAX, SAVE, CDTIME, EFFECT, WITHDRAW_TIME, Config
 from .models import Setu, SetuInfo, MessageInfo, SetuNotFindError
 from .database import bind_message_data, auto_upgrade_setuinfo
-from .withdraw import add_withdraw_job
 from .img_utils import EFFECT_FUNC_LIST, image_segment_convert
 from .perf_timer import PerfTimer
 from .data_source import SetuHandler

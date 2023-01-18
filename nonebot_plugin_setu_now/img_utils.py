@@ -55,9 +55,7 @@ def draw_frame(img: Union[str, Image.Image, bytes]) -> Image.Image:
     background = img
     background = background.resize(resize_resoluation)
     background = background.filter(ImageFilter.GaussianBlur(6))
-    background = background.resize(
-        (int(img.width * FRAME_RATIO), int(img.height * FRAME_RATIO))
-    )
+    background = background.resize((int(img.width * FRAME_RATIO), int(img.height * FRAME_RATIO)))
     background.paste(
         img,
         (

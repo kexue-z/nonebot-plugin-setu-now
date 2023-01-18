@@ -15,13 +15,10 @@ except ImportError:
     from .. import nonebot_plugin_localstore as store
 
 
-async def download_pic(
-    url: str, proxies: Optional[str] = None, file_mode=False, file_name=""
-) -> Optional[Union[bytes, str]]:
+async def download_pic(url: str, proxies: Optional[str] = None, file_mode=False, file_name="") -> Optional[Union[bytes, str]]:
     headers = {
         "Referer": "https://accounts.pixiv.net/login?lang=zh&source=pc&view_type=page&ref=wwwtop_accounts_index",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64) " "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36",
     }
     download_timer = PerfTimer.start("Image download")
     image_path = store.get_cache_file("nonebot_plugin_setu_now", file_name)
@@ -29,12 +26,8 @@ async def download_pic(
     try:
         async with client.stream(method="GET", url=url, headers=headers, timeout=15) as response:  # type: ignore # params={"proxies": [proxies]}
             if response.status_code != 200:
-                logger.warning(
-                    f"Image respond status code error: {response.status_code}"
-                )
-                raise ValueError(
-                    f"Image respond status code error: {response.status_code}"
-                )
+                logger.warning(f"Image respond status code error: {response.status_code}")
+                raise ValueError(f"Image respond status code error: {response.status_code}")
             with open(image_path, "wb") as f:
                 async for chunk in response.aiter_bytes():
                     f.write(chunk)
@@ -78,24 +71,17 @@ async def send_forward_msg(
         return {"type": "node", "data": {"name": name, "uin": uin, "content": msg}}
 
     messages = [to_json(msg) for msg in msgs]
-    await bot.call_api(
-        "send_group_forward_msg", group_id=event.group_id, messages=messages
-    )
+    await bot.call_api("send_group_forward_msg", group_id=event.group_id, messages=messages)
 
 
 class SpeedLimiter:
     def __init__(self) -> None:
         self.send_success_time = 0
-        self.send_status = False
 
     def send_success(self) -> None:
         self.send_success_time = time.time()
-        self.send_status = False
 
     async def async_speedlimit(self):
-        while self.send_status:
-            await asyncio.sleep(0)
-        self.send_status = True
         if (delay_time := time.time() - self.send_success_time) < SEND_INTERVAL:
             delay_time = round(delay_time, 2)
             logger.debug(f"Speed limit: Asyncio sleep {delay_time}s")
