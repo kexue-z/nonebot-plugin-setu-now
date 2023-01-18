@@ -12,7 +12,6 @@ from .utils import download_pic
 from .config import Config
 from .models import Setu, SetuApiData, SetuNotFindError
 from .perf_timer import PerfTimer
-from .setu_message import SETU_MSG
 
 plugin_config = Config.parse_obj(get_driver().config.dict())
 SETU_SIZE = plugin_config.setu_size
@@ -33,9 +32,7 @@ if not CACHE_PATH.exists():
 
 
 class SetuHandler:
-    def __init__(
-        self, key: str, tags: List[str], r18: bool, num: int, handler: Callable
-    ) -> None:
+    def __init__(self, key: str, tags: List[str], r18: bool, num: int, handler: Callable) -> None:
         self.key = key
         self.tags = tags
         self.r18 = r18
@@ -59,9 +56,7 @@ class SetuHandler:
         headers = {"Content-Type": "application/json"}
 
         async with AsyncClient(proxies=self.proxy) as client:  # type: ignore
-            res = await client.post(
-                self.api_url, json=data, headers=headers, timeout=60
-            )
+            res = await client.post(self.api_url, json=data, headers=headers, timeout=60)
         data = res.json()
         setu_api_data_instance = SetuApiData(**data)
         if len(setu_api_data_instance.data) == 0:
