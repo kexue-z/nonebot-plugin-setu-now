@@ -86,11 +86,16 @@ async def send_forward_msg(
 class SpeedLimiter:
     def __init__(self) -> None:
         self.send_success_time = 0
+        self.send_status = False
 
     def send_success(self) -> None:
         self.send_success_time = time.time()
+        self.send_status = False
 
     async def async_speedlimit(self):
+        while self.send_status:
+            await asyncio.sleep(0)
+        self.send_status = True
         if (delay_time := time.time() - self.send_success_time) < SEND_INTERVAL:
             delay_time = round(delay_time, 2)
             logger.debug(f"Speed limit: Asyncio sleep {delay_time}s")

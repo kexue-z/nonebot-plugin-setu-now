@@ -27,7 +27,11 @@ from nonebot.adapters.onebot.v11 import (
     PrivateMessageEvent,
 )
 from sqlmodel.ext.asyncio.session import AsyncSession
-from nonebot.adapters.onebot.v11.helpers import autorevoke_send
+from nonebot.adapters.onebot.v11.helpers import (
+    Cooldown,
+    CooldownIsolateLevel,
+    autorevoke_send,
+)
 
 require("nonebot_plugin_datastore")
 try:
@@ -36,12 +40,11 @@ except ModuleNotFoundError:
     from ..nonebot_plugin_datastore import get_session, create_session
 
 from .utils import SpeedLimiter, send_forward_msg
-from .config import MAX, SAVE, EFFECT, WITHDRAW_TIME, Config
+from .config import MAX, SAVE, CDTIME, EFFECT, WITHDRAW_TIME, Config
 from .models import Setu, SetuInfo, MessageInfo, SetuNotFindError
 from .database import bind_message_data, auto_upgrade_setuinfo
 from .withdraw import add_withdraw_job
 from .img_utils import EFFECT_FUNC_LIST, image_segment_convert
-from .cd_manager import add_cd, cd_msg, check_cd, remove_cd
 from .perf_timer import PerfTimer
 from .data_source import SetuHandler
 from .r18_whitelist import get_group_white_list_record
@@ -52,6 +55,7 @@ elif SAVE == "local":
     from .save_to_local import save_img
 
 plugin_config = Config.parse_obj(get_driver().config.dict())
+global_speedlimiter = SpeedLimiter()
 
 setu_matcher = on_regex(
     r"^(setu|色图|涩图|来点色色|色色|涩涩|来点色图)\s?([x|✖️|×|X|*]?\d+[张|个|份]?)?\s?(r18)?\s?\s?(tag)?\s?(.*)?",
@@ -60,12 +64,19 @@ setu_matcher = on_regex(
 )
 
 
-@setu_matcher.handle()
+@setu_matcher.handle(
+    parameterless=[
+        Cooldown(
+            cooldown=CDTIME,
+            prompt="你冲得太快啦，请稍后再试",
+            isolate_level=CooldownIsolateLevel.USER,
+        )
+    ]
+)
 async def _(
     bot: Bot,
     event: Union[PrivateMessageEvent, GroupMessageEvent],
     state: T_State,
-    db_session: AsyncSession = Depends(get_session),
     white_list_record=Depends(get_group_white_list_record),
 ):
     # await setu_matcher.finish("服务器维护喵，暂停服务抱歉喵")
@@ -97,12 +108,7 @@ async def _(
     if r18:
         num = 1
 
-    if cd := check_cd(event):
-        # 如果 CD 还没到 则直接结束
-        await setu_matcher.finish(cd_msg(cd))
-
     logger.debug(f"Setu: r18:{r18}, tag:{tags}, key:{key}, num:{num}")
-    add_cd(event, num)
 
     failure_msg = 0
 
@@ -116,6 +122,8 @@ async def _(
             if r18 and process_func == EFFECT_FUNC_LIST[0]:
                 # R18禁止使用默认图像处理方法(do_nothing)
                 continue
+            if process_func == EFFECT_FUNC_LIST[0]:
+                continue
             logger.debug(f"Using effect {process_func}")
             effert_timer = PerfTimer.start("Effect process")
             try:
@@ -127,6 +135,7 @@ async def _(
             effert_timer.stop()
             msg = Message(image_segment_convert(image))
             try:
+                await global_speedlimiter.async_speedlimit()
                 send_timer = PerfTimer("Image send")
                 message_id = 0
                 if not WITHDRAW_TIME:
@@ -142,6 +151,7 @@ async def _(
                         bot=bot, event=event, message=msg, revoke_interval=WITHDRAW_TIME
                     )
                 send_timer.stop()
+                global_speedlimiter.send_success()
                 return
             except ActionFailed:
                 if not EFFECT:  # 设置不允许添加特效
@@ -156,14 +166,11 @@ async def _(
     try:
         await setu_handler.process_request()
     except SetuNotFindError:
-        remove_cd(event)
         await setu_matcher.finish(f"没有找到关于 {tags or key} 的色图呢～")
     if failure_msg:
         await setu_matcher.send(
             message=Message(f"{failure_msg} 张图片消失了喵"),
         )
-        if failure_msg >= num / 2:
-            remove_cd(event)
 
     # failure_msg: int = 0
     # msg_list: List[Message] = []

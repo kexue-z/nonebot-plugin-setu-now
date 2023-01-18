@@ -32,3 +32,4 @@ MAX = plugin_config.setu_max
 EFFECT = plugin_config.setu_add_random_effect
 SEND_INTERVAL = plugin_config.setu_minimum_send_interval
 WITHDRAW_TIME = Config.parse_obj(get_driver().config.dict()).setu_withdraw
+CDTIME = plugin_config.setu_cd
