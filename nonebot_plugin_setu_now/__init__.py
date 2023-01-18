@@ -16,22 +16,9 @@ from nonebot.plugin import require
 from nonebot.typing import T_State
 from nonebot.matcher import Matcher
 from nonebot.exception import ActionFailed
-from nonebot.adapters.onebot.v11 import (
-    GROUP,
-    PRIVATE_FRIEND,
-    Bot,
-    Message,
-    MessageEvent,
-    MessageSegment,
-    GroupMessageEvent,
-    PrivateMessageEvent,
-)
+from nonebot.adapters.onebot.v11 import GROUP, PRIVATE_FRIEND, Bot, Message, MessageEvent, MessageSegment, GroupMessageEvent, PrivateMessageEvent
 from sqlmodel.ext.asyncio.session import AsyncSession
-from nonebot.adapters.onebot.v11.helpers import (
-    Cooldown,
-    CooldownIsolateLevel,
-    autorevoke_send,
-)
+from nonebot.adapters.onebot.v11.helpers import Cooldown, CooldownIsolateLevel, autorevoke_send
 
 require("nonebot_plugin_datastore")
 try:
@@ -147,11 +134,14 @@ async def _(
                     logger.debug(f"Message ID: {message_id}")
                 else:
                     logger.debug(f"Using auto revoke API, interval: {WITHDRAW_TIME}")
-                    await autorevoke_send(
-                        bot=bot, event=event, message=msg, revoke_interval=WITHDRAW_TIME
-                    )
+                    await autorevoke_send(bot=bot, event=event, message=msg, revoke_interval=WITHDRAW_TIME)
+                """
+                发送成功
+                """
                 send_timer.stop()
                 global_speedlimiter.send_success()
+                if SAVE:
+                    await save_img(setu)
                 return
             except ActionFailed:
                 if not EFFECT:  # 设置不允许添加特效
@@ -166,31 +156,12 @@ async def _(
     try:
         await setu_handler.process_request()
     except SetuNotFindError:
-        await setu_matcher.finish(f"没有找到关于 {tags or key} 的色图呢～")
+        await setu_matcher.finish(f"没有找到关于 {tags or key} 的色图喵")
     if failure_msg:
         await setu_matcher.send(
             message=Message(f"{failure_msg} 张图片消失了喵"),
         )
-
-    # failure_msg: int = 0
-    # msg_list: List[Message] = []
-    # forward_send_mode_state = isinstance(event, GroupMessageEvent) or num >= 5
-    # """
-    # 优先发送原图，当原图发送失败（ActionFailedException）时，尝试逐个更换处理特效发送
-    # """
-    # for setu in data:
-
-    #     if send_success_state:
-    #         continue
-    #     failure_msg += 1
-    #     logger.warning(f"Image send failed")
-
-    # setu_total_timer.stop()
-    # if SAVE:
-    #     setu_saving_tasks: List[Task] = []
-    #     for setu in data:
-    #         setu_saving_tasks.append(create_task(save_img(setu)))
-    #     await asyncio.gather(*setu_saving_tasks)
+    setu_total_timer.stop()
 
 
 setuinfo_matcher = on_command("信息")
