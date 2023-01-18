@@ -4,6 +4,7 @@ from io import BytesIO
 from re import I, sub
 from typing import List, Union
 from asyncio import create_task
+from pathlib import Path
 from asyncio.tasks import Task
 
 from PIL import Image, UnidentifiedImageError
@@ -27,18 +28,13 @@ except ModuleNotFoundError:
     from ..nonebot_plugin_datastore import get_session, create_session
 
 from .utils import SpeedLimiter, send_forward_msg
-from .config import MAX, SAVE, CDTIME, EFFECT, WITHDRAW_TIME, Config
+from .config import MAX, CDTIME, EFFECT, SETU_PATH, WITHDRAW_TIME, Config
 from .models import Setu, SetuInfo, MessageInfo, SetuNotFindError
 from .database import bind_message_data, auto_upgrade_setuinfo
 from .img_utils import EFFECT_FUNC_LIST, image_segment_convert
 from .perf_timer import PerfTimer
 from .data_source import SetuHandler
 from .r18_whitelist import get_group_white_list_record
-
-if SAVE == "webdav":
-    from .save_to_webdav import save_img
-elif SAVE == "local":
-    from .save_to_local import save_img
 
 plugin_config = Config.parse_obj(get_driver().config.dict())
 global_speedlimiter = SpeedLimiter()
@@ -108,8 +104,8 @@ async def _(
             if r18 and process_func == EFFECT_FUNC_LIST[0]:
                 # R18禁止使用默认图像处理方法(do_nothing)
                 continue
-            if process_func == EFFECT_FUNC_LIST[0]:
-                continue
+            # if process_func == EFFECT_FUNC_LIST[0]:
+            #     continue
             logger.debug(f"Using effect {process_func}")
             effert_timer = PerfTimer.start("Effect process")
             try:
@@ -139,8 +135,8 @@ async def _(
                 """
                 send_timer.stop()
                 global_speedlimiter.send_success()
-                if SAVE:
-                    await save_img(setu)
+                if SETU_PATH is None:  # 未设置缓存路径，删除缓存
+                    Path(setu.img).unlink()
                 return
             except ActionFailed:
                 if not EFFECT:  # 设置不允许添加特效
@@ -150,6 +146,8 @@ async def _(
                 logger.warning(f"Image send failed, retrying another effect")
         failure_msg += 1
         logger.warning(f"Image send failed after tried all effects")
+        if SETU_PATH is None:  # 未设置缓存路径，删除缓存
+            Path(setu.img).unlink()
 
     setu_handler = SetuHandler(key, tags, r18, num, nb_send_handler)
     try:
