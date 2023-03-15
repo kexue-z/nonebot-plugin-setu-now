@@ -1,16 +1,23 @@
-from typing import Dict, List, Optional
+from typing import Dict, List, Union, Optional
 
 from pydantic import BaseModel
+from sqlmodel import Field, Column, SQLModel
 
 
 class SetuData(BaseModel):
-    title: str
-    urls: Dict[str, str]
-    author: str
-    tags: List[str]
     pid: int
     p: int
+    uid: int
+    title: str
+    author: str
     r18: bool
+    width: int
+    height: int
+    tags: List[str]
+    ext: str
+    aiType: int
+    uploadDate: int
+    urls: Dict[str, str]
 
 
 class SetuApiData(BaseModel):
@@ -27,7 +34,8 @@ class Setu:
         self.pid: int = data.pid
         self.p: int = data.p
         self.r18: bool = data.r18
-        self.img: Optional[bytes] = None
+        self.ext: str = data.ext
+        self.img: Optional[str] = None
         self.msg: Optional[str] = None
 
 
@@ -38,3 +46,23 @@ class SetuMessage(BaseModel):
 
 class SetuNotFindError(Exception):
     pass
+
+
+class SetuInfo(SQLModel, table=True):
+    __tablename__: str = "setu_info"
+    pid: int = Field(default=None, primary_key=True, unique=True)
+    author: str = Field(default=None)
+    title: str = Field(default=None)
+    url: str = Field(default=None)
+
+
+class MessageInfo(SQLModel, table=True):
+    __tablename__: str = "message_data"
+    message_id: int = Field(default=None, primary_key=True, unique=True)
+    pid: int = Field(default=None)
+
+
+class GroupWhiteListRecord(SQLModel, table=True):
+    __tablename__: str = "white_list"
+    group_id: int = Field(default=None, primary_key=True, unique=True)
+    operator_user_id: int = Field(default=None)

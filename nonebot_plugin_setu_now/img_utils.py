@@ -1,33 +1,90 @@
+import time
 from io import BytesIO
 from random import choice, choices, randint
-from typing import Optional
+from typing import Union, Optional
+from pathlib import Path
 
-from PIL import Image
+from PIL import Image, ImageFilter
+from nonebot.log import logger
+from nonebot.adapters.onebot.v11 import MessageSegment
+
+from .perf_timer import PerfTimer
 
 
-def black_frame(img: Image.Image) -> Image.Image:
-    """画黑色边框"""
-    background = Image.new("RGB", (img.width * 2, img.height * 2), (0, 0, 0))
-    background.paste(img, (int(img.width / 2), int(img.height / 2)))
+def image_param_converter(source: Union[str, Image.Image, bytes]) -> Image.Image:
+    FORCE_RESIZE = True
+    IMAGE_RESIZE_RES = 1080  # 限制被处理图片最大为1080P
+
+    def resize_converter(img: Image.Image):
+        if not FORCE_RESIZE:
+            return img
+        image_landscape = img.width >= img.height
+        if min(*img.size) <= IMAGE_RESIZE_RES:
+            return img
+        if image_landscape:
+            resize_res = (
+                int(IMAGE_RESIZE_RES / img.height * img.width),
+                IMAGE_RESIZE_RES,
+            )
+        else:
+            resize_res = (
+                IMAGE_RESIZE_RES,
+                int(IMAGE_RESIZE_RES / img.width * img.height),
+            )
+        logger.debug(f"Effect force resize: {img.size} -> {resize_res}")
+        return img.resize(resize_res)
+
+    if isinstance(source, str):
+        return resize_converter(Image.open(Path(source)))
+    if isinstance(source, Image.Image):
+        return resize_converter(source)
+    if isinstance(source, bytes):
+        return resize_converter(Image.open(BytesIO(source)))
+    raise ValueError(f"Unsopported image type: {type(source)}")
+
+
+def draw_frame(img: Union[str, Image.Image, bytes]) -> Image.Image:
+    """画边框"""
+    img = image_param_converter(img)
+    BLUR_HEIGHT_QUALITY = 128
+    FRAME_RATIO = 1.5
+    resize_resoluation = (
+        int(img.width * (BLUR_HEIGHT_QUALITY / img.height)),
+        BLUR_HEIGHT_QUALITY,
+    )
+    background = img
+    background = background.resize(resize_resoluation)
+    background = background.filter(ImageFilter.GaussianBlur(6))
+    background = background.resize((int(img.width * FRAME_RATIO), int(img.height * FRAME_RATIO)))
+    background.paste(
+        img,
+        (
+            int((background.width - img.width) / 2),
+            int((background.height - img.height) / 2),
+        ),
+    )
     return background
 
 
-def random_rotate(img: Image.Image) -> Image.Image:
+def random_rotate(img: Union[str, Image.Image, bytes]) -> Image.Image:
     """随机旋转角度"""
+    img = image_param_converter(img)
     a = float(randint(0, 360))
     img = img.rotate(angle=a, expand=True)
     return img
 
 
-def random_flip(img: Image.Image) -> Image.Image:
+def random_flip(img: Union[str, Image.Image, bytes]) -> Image.Image:
     """随机翻转"""
+    img = image_param_converter(img)
     t = [Image.Transpose.FLIP_TOP_BOTTOM, Image.Transpose.FLIP_LEFT_RIGHT]
     img = img.transpose(choice(t))
     return img
 
 
-def random_lines(img: Image.Image) -> Image.Image:
+def random_lines(img: Union[str, Image.Image, bytes]) -> Image.Image:
     """随机画黑线"""
+    img = image_param_converter(img)
     from PIL import ImageDraw
 
     x, y = img.size
@@ -53,40 +110,26 @@ def random_lines(img: Image.Image) -> Image.Image:
     return img
 
 
-def do_nothing(img: Image.Image) -> Image.Image:
+def do_nothing(img: str) -> str:
     return img
 
 
-def random_effect(img: bytes, effect: Optional[int] = None) -> BytesIO:
-    """
-    :说明: `random_effect`
-    > 随机处理图片，可指定方法
+def image_segment_convert(img: Union[str, Image.Image, bytes]) -> MessageSegment:
+    if isinstance(img, str):
+        return MessageSegment.image(Path(img))
+    if isinstance(img, bytes):
+        img = Image.open(BytesIO(img))
+    image_bytesio = BytesIO()
+    save_timer = PerfTimer.start(f"Save bytes {img.width} x {img.height}")
+    if img.mode != "RGB":
+        img = img.convert("RGB")
+    img.save(
+        image_bytesio,
+        format="JPEG",
+        quality="keep" if img.format in ("JPEG", "JPG") else 95,
+    )
+    save_timer.stop()
+    return MessageSegment.image(image_bytesio)  # type: ignore
 
-    :参数:
-      * `img: bytes`: 图片
-      * `effect: Optional[int]`: 特效: 0 啥也不做 1 随机旋转 2 随机翻转 3 随机画线 4 画黑色边框
 
-    :返回:
-      - `BytesIO`: 处理好的图
-    """
-
-    f = BytesIO(img)
-    _img = Image.open(f)
-
-    funcs = {
-        1: [do_nothing, random_rotate, random_flip, random_lines, black_frame],
-        2: [],
-    }
-    r_funcs_count = len(funcs[1]) - 1
-    funcs[2] = [0.1, *[((1 - 0.1) / r_funcs_count) for i in range(r_funcs_count)]]
-
-    if effect is not None:
-        func = funcs[1][effect]
-        output: Image.Image = func(_img)
-    else:
-        func = choices(population=funcs[1], weights=funcs[2], k=1)
-        output: Image.Image = func[0](_img)
-    buffer = BytesIO()
-    output.convert("RGB").save(buffer, "jpeg")
-
-    return buffer
+EFFECT_FUNC_LIST = [do_nothing, draw_frame, random_flip, random_lines, random_rotate]
