@@ -1,6 +1,16 @@
 import sys
 import functools
-from typing import Any, Awaitable, Callable, Coroutine, Dict, Generic, Optional, TypeVar, Union
+from typing import (
+    Any,
+    Awaitable,
+    Callable,
+    Coroutine,
+    Dict,
+    Generic,
+    Optional,
+    TypeVar,
+    Union,
+)
 
 if sys.version_info >= (3, 10):
     from typing import ParamSpec
@@ -49,7 +59,6 @@ class TaskGroup(_TaskGroup):
     def soonify(
         self, async_function: Callable[T_ParamSpec, Awaitable[T]], name: object = None
     ) -> Callable[T_ParamSpec, SoonValue[T]]:
-
         @functools.wraps(async_function)
         def wrapper(
             *args: T_ParamSpec.args, **kwargs: T_ParamSpec.kwargs
@@ -86,7 +95,6 @@ def runnify(
     backend: str = "asyncio",
     backend_options: Optional[Dict[str, Any]] = None,
 ) -> Callable[T_ParamSpec, T_Retval]:
-
     @functools.wraps(async_function)
     def wrapper(*args: T_ParamSpec.args, **kwargs: T_ParamSpec.kwargs) -> T_Retval:
         partial_f = functools.partial(async_function, *args, **kwargs)
@@ -100,7 +108,6 @@ def syncify(
     async_function: Callable[T_ParamSpec, Coroutine[Any, Any, T_Retval]],
     raise_sync_error: bool = True,
 ) -> Callable[T_ParamSpec, T_Retval]:
-
     @functools.wraps(async_function)
     def wrapper(*args: T_ParamSpec.args, **kwargs: T_ParamSpec.kwargs) -> T_Retval:
         current_async_module = getattr(threadlocals, "current_async_module", None)
@@ -118,7 +125,6 @@ def asyncify(
     cancellable: bool = False,
     limiter: Optional[anyio.CapacityLimiter] = None
 ) -> Callable[T_ParamSpec, Awaitable[T_Retval]]:
-
     async def wrapper(
         *args: T_ParamSpec.args, **kwargs: T_ParamSpec.kwargs
     ) -> T_Retval:

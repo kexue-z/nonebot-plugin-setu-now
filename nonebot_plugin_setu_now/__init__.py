@@ -1,31 +1,32 @@
-import time
 import asyncio
-from io import BytesIO
 from re import I, sub
-from typing import List, Union
-from asyncio import create_task
+from typing import Union
 from pathlib import Path
-from asyncio.tasks import Task
 
-from PIL import Image, UnidentifiedImageError
-from nonebot import get_bot, on_regex, get_driver, on_command
+from PIL import UnidentifiedImageError
+from nonebot import on_regex, get_driver, on_command
 from sqlmodel import select
 from nonebot.log import logger
-from nonebot.rule import to_me
-from nonebot.params import Depends, EventMessage
+from nonebot.params import Depends
 from nonebot.plugin import require
 from nonebot.typing import T_State
-from nonebot.matcher import Matcher
 from nonebot.exception import ActionFailed
-from nonebot.adapters.onebot.v11 import GROUP, PRIVATE_FRIEND, Bot, Message, MessageEvent, MessageSegment, GroupMessageEvent, PrivateMessageEvent
+from nonebot.adapters.onebot.v11 import (
+    GROUP,
+    PRIVATE_FRIEND,
+    Bot,
+    Message,
+    MessageEvent,
+    MessageSegment,
+    GroupMessageEvent,
+    PrivateMessageEvent,
+)
 from sqlmodel.ext.asyncio.session import AsyncSession
-from nonebot.adapters.onebot.v11.helpers import Cooldown, CooldownIsolateLevel, autorevoke_send
-
-require("nonebot_plugin_datastore")
-try:
-    from nonebot_plugin_datastore import get_session, create_session
-except ModuleNotFoundError:
-    from ..nonebot_plugin_datastore import get_session, create_session
+from nonebot.adapters.onebot.v11.helpers import (
+    Cooldown,
+    CooldownIsolateLevel,
+    autorevoke_send,
+)
 
 from .utils import SpeedLimiter, send_forward_msg
 from .config import MAX, CDTIME, EFFECT, SETU_PATH, WITHDRAW_TIME, Config
@@ -35,6 +36,11 @@ from .img_utils import EFFECT_FUNC_LIST, image_segment_convert
 from .perf_timer import PerfTimer
 from .data_source import SetuHandler
 from .r18_whitelist import get_group_white_list_record
+
+require("nonebot_plugin_datastore")
+require("nonebot_plugin_localstore")
+
+from nonebot_plugin_datastore import get_session, create_session
 
 plugin_config = Config.parse_obj(get_driver().config.dict())
 global_speedlimiter = SpeedLimiter()
@@ -129,7 +135,9 @@ async def _(
                     logger.debug(f"Message ID: {message_id}")
                 else:
                     logger.debug(f"Using auto revoke API, interval: {WITHDRAW_TIME}")
-                    await autorevoke_send(bot=bot, event=event, message=msg, revoke_interval=WITHDRAW_TIME)
+                    await autorevoke_send(
+                        bot=bot, event=event, message=msg, revoke_interval=WITHDRAW_TIME
+                    )
                 """
                 发送成功
                 """
@@ -143,9 +151,9 @@ async def _(
                     failure_msg += 1
                     return
                 await asyncio.sleep(0)
-                logger.warning(f"Image send failed, retrying another effect")
+                logger.warning("Image send failed, retrying another effect")
         failure_msg += 1
-        logger.warning(f"Image send failed after tried all effects")
+        logger.warning("Image send failed after tried all effects")
         if SETU_PATH is None:  # 未设置缓存路径，删除缓存
             Path(setu.img).unlink()
 
@@ -179,12 +187,12 @@ async def _(
     reply_message_id = reply_segment.data["id"]
     logger.debug(f"Get setu info for message id: {reply_message_id}")
     statement = select(MessageInfo).where(MessageInfo.message_id == reply_message_id)
-    messageinfo_result: MessageInfo = (await db_session.exec(statement)).first()
+    messageinfo_result: MessageInfo = (await db_session.exec(statement)).first()  # type: ignore
     if not messageinfo_result:
         await setuinfo_matcher.finish("未找到该插画相关信息")
     message_pid = messageinfo_result.pid
     statement = select(SetuInfo).where(SetuInfo.pid == message_pid)
-    setu_info = (await db_session.exec((statement))).first()
+    setu_info = (await db_session.exec((statement))).first()  # type: ignore
     if not setu_info:
         await setuinfo_matcher.finish("该插画相关信息已被移除")
     info_message = MessageSegment.text(f"标题：{setu_info.title}\n")

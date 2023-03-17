@@ -9,7 +9,7 @@ from .data_source import SETU_SIZE, Setu
 
 async def auto_upgrade_setuinfo(session: AsyncSession, setu_instance: Setu):
     statement = select(SetuInfo).where(SetuInfo.pid == setu_instance.pid)
-    setuinfo_result = (await session.exec(statement)).first()
+    setuinfo_result = (await session.exec(statement)).first()  # type: ignore
     if setuinfo_result:
         return
     session.add(

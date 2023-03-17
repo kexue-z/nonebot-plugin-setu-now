@@ -1,7 +1,7 @@
-from typing import Dict, List, Union, Optional
+from typing import Dict, List, Optional
 
 from pydantic import BaseModel
-from sqlmodel import Field, Column, SQLModel
+from sqlmodel import Field, SQLModel
 
 
 class SetuData(BaseModel):
