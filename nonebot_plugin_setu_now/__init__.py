@@ -28,7 +28,7 @@ from nonebot.adapters.onebot.v11.helpers import (
     autorevoke_send,
 )
 
-from .utils import SpeedLimiter, send_forward_msg
+from .utils import SpeedLimiter
 from .config import MAX, CDTIME, EFFECT, SETU_PATH, WITHDRAW_TIME, Config
 from .models import Setu, SetuInfo, MessageInfo, SetuNotFindError
 from .database import bind_message_data, auto_upgrade_setuinfo
