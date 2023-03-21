@@ -3,20 +3,15 @@ from asyncio import gather
 from pathlib import Path
 
 from httpx import AsyncClient
-from nonebot import get_driver
+from nonebot import get_driver,require
 from nonebot.log import logger
 
 from .utils import download_pic
-from .config import Config
+from .config import API_URL, REVERSE_PROXY, PROXY, SETU_SIZE, EFFECT
 from .models import Setu, SetuApiData, SetuNotFindError
 
-plugin_config = Config.parse_obj(get_driver().config.dict())
-SETU_SIZE = plugin_config.setu_size
-API_URL = plugin_config.setu_api_url
-REVERSE_PROXY = plugin_config.setu_reverse_proxy
-PROXY = plugin_config.setu_proxy
-EFFECT = plugin_config.setu_add_random_effect
 
+require("nonebot_plugin_localstore")
 
 import nonebot_plugin_localstore as store
 

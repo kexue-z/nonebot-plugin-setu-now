@@ -29,7 +29,7 @@ from nonebot.adapters.onebot.v11.helpers import (
 )
 
 from .utils import SpeedLimiter
-from .config import MAX, CDTIME, EFFECT, SETU_PATH, WITHDRAW_TIME, Config
+from .config import MAX, CDTIME, EFFECT, SETU_PATH, WITHDRAW_TIME
 from .models import Setu, SetuInfo, MessageInfo, SetuNotFindError
 from .database import bind_message_data, auto_upgrade_setuinfo
 from .img_utils import EFFECT_FUNC_LIST, image_segment_convert
@@ -42,7 +42,6 @@ require("nonebot_plugin_localstore")
 
 from nonebot_plugin_datastore import get_session, create_session
 
-plugin_config = Config.parse_obj(get_driver().config.dict())
 global_speedlimiter = SpeedLimiter()
 
 setu_matcher = on_regex(

@@ -8,6 +8,8 @@ from nonebot.adapters.onebot.v11 import MessageEvent, GroupMessageEvent
 from sqlmodel.ext.asyncio.session import AsyncSession
 from .models import GroupWhiteListRecord
 
+require("nonebot_plugin_datastore")
+
 from nonebot_plugin_datastore import get_session
 
 
