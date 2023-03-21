@@ -3,7 +3,7 @@ from asyncio import gather
 from pathlib import Path
 
 from httpx import AsyncClient
-from nonebot import get_driver,require
+from nonebot import require
 from nonebot.log import logger
 
 from .utils import download_pic

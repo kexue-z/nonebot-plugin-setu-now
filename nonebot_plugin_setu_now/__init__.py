@@ -4,7 +4,7 @@ from typing import Union
 from pathlib import Path
 
 from PIL import UnidentifiedImageError
-from nonebot import on_regex, get_driver, on_command
+from nonebot import on_regex, on_command
 from sqlmodel import select
 from nonebot.log import logger
 from nonebot.params import Depends

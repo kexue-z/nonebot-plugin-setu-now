@@ -1,7 +1,7 @@
 import time
 from io import BytesIO
-from random import choice, choices, randint
-from typing import Union, Optional
+from random import choice, randint
+from typing import Union
 from pathlib import Path
 
 from PIL import Image, ImageFilter
