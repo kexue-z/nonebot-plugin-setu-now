@@ -1,20 +1,64 @@
+<p align="center">
+  <a href="https://v2.nonebot.dev/store"><img src="https://user-images.githubusercontent.com/44545625/209862575-acdc9feb-3c76-471d-ad89-cc78927e5875.png" width="180" height="180" alt="NoneBotPluginLogo"></a>
+</p>
+
+<div align="center">
+
 # nonebot-plugin-setu-now
 
-- 另一个色图插件
-- 根据别人的改了亿点点
-- 支持私聊获取~~特殊~~色图
-- 对临时聊天不生效
-- 每个图逐个发送 (支持撤回)
-- 在发送不成功时，尝试添加边框，防止风控（不防封号
-- CD 计算方式为: 设置的 CD 时间 \* 获取图片的数量
-  - 如果设置了 60s 那么，\*20 后就是 1200s ≈ 0.33h
-- 支持r18白名单，发送 `不可以涩涩` 或 `可以涩涩` 来在群聊中关闭/开启 
+_✨ NoneBot2 涩图插件 ✨_
 
-## 安装配置
+</div>
 
-```sh
-pip install -U nonebot-plugin-setu-now
+<p align="center">
+  <a href="https://raw.githubusercontent.com/kexue-z/nonebot-plugin-setu-now/master/LICENSE">
+    <img src="https://img.shields.io/github/license/kexue-z/nonebot-plugin-setu-now.svg" alt="license">
+  </a>
+  <a href="https://pypi.org/project/nonebot-plugin-setu-now/">
+    <img src="https://img.shields.io/pypi/v/nonebot-plugin-setu-now" alt="pypi">
+  </a>
+  <img src="https://img.shields.io/badge/python-3.8+-blue.svg" alt="python">
+</p>
+
+
+## 简介
+
+可通过群聊或私聊获取 Pixiv 涩图的 NoneBot2 插件
+得益于独家
+
+
+## 特色
+
+- **极高的涩图发送成功率**
+
+- 通过回复获取图片信息
+
+- 自动撤回涩图
+
+- R18白名单群组
+
+- 自动撤回涩图
+
+- 独立的下载发送任务结构，速度更快
+
+
+## 安装
+
+**使用 `nb-cli` 安装（推荐）：**
 ```
+nb plugin install nonebot-plugin-setu-now
+```
+
+使用 `pip` 安装：
+```
+pip install nonebot-plugin-setu-now
+```
+
+使用 `git clone` 安装：
+```
+git clone https://github.com/kexue-z/nonebot-plugin-setu-now.git
+```
+
 
 ### .env 默认配置
 
@@ -44,11 +88,6 @@ setu_max=
 
 所有配置均可选，按需填写
 
-## 载入插件 bot.py
-
-```py
-nonebot.load_plugin("nonebot_plugin_setu_now")
-```
 
 ## 使用
 
