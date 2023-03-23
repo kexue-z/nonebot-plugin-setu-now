@@ -36,7 +36,7 @@ class Setu:
         self.p: int = data.p
         self.r18: bool = data.r18
         self.ext: str = data.ext
-        self.img: Optional[Path | str] = None
+        self.img: Optional[Path] = None
         self.msg: Optional[str] = None
 
 

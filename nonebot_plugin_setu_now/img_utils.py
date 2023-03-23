@@ -11,7 +11,7 @@ from nonebot.adapters.onebot.v11 import MessageSegment
 from .perf_timer import PerfTimer
 
 
-def image_param_converter(source: Union[str, Image.Image, bytes]) -> Image.Image:
+def image_param_converter(source: Union[Path, Image.Image, bytes]) -> Image.Image:
     FORCE_RESIZE = True
     IMAGE_RESIZE_RES = 1080  # 限制被处理图片最大为1080P
 
@@ -34,8 +34,8 @@ def image_param_converter(source: Union[str, Image.Image, bytes]) -> Image.Image
         logger.debug(f"Effect force resize: {img.size} -> {resize_res}")
         return img.resize(resize_res)
 
-    if isinstance(source, str):
-        return resize_converter(Image.open(Path(source)))
+    if isinstance(source, Path):
+        return resize_converter(Image.open(source))
     if isinstance(source, Image.Image):
         return resize_converter(source)
     if isinstance(source, bytes):
@@ -43,7 +43,7 @@ def image_param_converter(source: Union[str, Image.Image, bytes]) -> Image.Image
     raise ValueError(f"Unsopported image type: {type(source)}")
 
 
-def draw_frame(img: Union[str, Image.Image, bytes]) -> Image.Image:
+def draw_frame(img: Union[Path, Image.Image, bytes]) -> Image.Image:
     """画边框"""
     img = image_param_converter(img)
     BLUR_HEIGHT_QUALITY = 128
@@ -55,9 +55,7 @@ def draw_frame(img: Union[str, Image.Image, bytes]) -> Image.Image:
     background = img
     background = background.resize(resize_resoluation)
     background = background.filter(ImageFilter.GaussianBlur(6))
-    background = background.resize(
-        (int(img.width * FRAME_RATIO), int(img.height * FRAME_RATIO))
-    )
+    background = background.resize((int(img.width * FRAME_RATIO), int(img.height * FRAME_RATIO)))
     background.paste(
         img,
         (
@@ -68,7 +66,7 @@ def draw_frame(img: Union[str, Image.Image, bytes]) -> Image.Image:
     return background
 
 
-def random_rotate(img: Union[str, Image.Image, bytes]) -> Image.Image:
+def random_rotate(img: Union[Path, Image.Image, bytes]) -> Image.Image:
     """随机旋转角度"""
     img = image_param_converter(img)
     a = float(randint(0, 360))
@@ -76,7 +74,7 @@ def random_rotate(img: Union[str, Image.Image, bytes]) -> Image.Image:
     return img
 
 
-def random_flip(img: Union[str, Image.Image, bytes]) -> Image.Image:
+def random_flip(img: Union[Path, Image.Image, bytes]) -> Image.Image:
     """随机翻转"""
     img = image_param_converter(img)
     t = [Image.Transpose.FLIP_TOP_BOTTOM, Image.Transpose.FLIP_LEFT_RIGHT]
@@ -84,7 +82,7 @@ def random_flip(img: Union[str, Image.Image, bytes]) -> Image.Image:
     return img
 
 
-def random_lines(img: Union[str, Image.Image, bytes]) -> Image.Image:
+def random_lines(img: Union[Path, Image.Image, bytes]) -> Image.Image:
     """随机画黑线"""
     img = image_param_converter(img)
     from PIL import ImageDraw
@@ -112,15 +110,17 @@ def random_lines(img: Union[str, Image.Image, bytes]) -> Image.Image:
     return img
 
 
-def do_nothing(img: str) -> str:
+def do_nothing(img: Path) -> Path:
     return img
 
 
-def image_segment_convert(img: Union[str, Image.Image, bytes]) -> MessageSegment:
-    if isinstance(img, str):
-        return MessageSegment.image(Path(img))
-    if isinstance(img, bytes):
+def image_segment_convert(img: Union[Path, Image.Image, bytes]) -> MessageSegment:
+    if isinstance(img, Path):
+        return MessageSegment.image(img)
+    elif isinstance(img, bytes):
         img = Image.open(BytesIO(img))
+    else:
+        raise ValueError(f"Unsopported image type: {type(img)}")
     image_bytesio = BytesIO()
     save_timer = PerfTimer.start(f"Save bytes {img.width} x {img.height}")
     if img.mode != "RGB":

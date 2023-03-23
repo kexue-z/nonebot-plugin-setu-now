@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nonebot-plugin-setu-now"
-version = "0.5.0-alpha.1"
+version = "0.5.0-alpha.2"
 description = "另一个色图插件"
 authors = ["kexue <x@kexue-cloud.cn>"]
 license = "MIT"
@@ -17,6 +17,7 @@ pydantic = "^1.5.0"
 nonebot-plugin-apscheduler = "^0.2.0"
 pillow = ">=8.0.0"
 nonebot-plugin-datastore = "^0.5.10"
+nonebot-plugin-localstore = "^0.4.1"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^4.0.1"
