@@ -5,28 +5,15 @@ from pathlib import Path
 
 from PIL import UnidentifiedImageError
 from nonebot import on_regex, on_command
-from sqlmodel import select
+from sqlalchemy import select
 from nonebot.log import logger
 from nonebot.params import Depends
 from nonebot.plugin import require
 from nonebot.typing import T_State
 from nonebot.exception import ActionFailed
-from nonebot.adapters.onebot.v11 import (
-    GROUP,
-    PRIVATE_FRIEND,
-    Bot,
-    Message,
-    MessageEvent,
-    MessageSegment,
-    GroupMessageEvent,
-    PrivateMessageEvent,
-)
-from sqlmodel.ext.asyncio.session import AsyncSession
-from nonebot.adapters.onebot.v11.helpers import (
-    Cooldown,
-    CooldownIsolateLevel,
-    autorevoke_send,
-)
+from nonebot.adapters.onebot.v11 import GROUP, PRIVATE_FRIEND, Bot, Message, MessageEvent, MessageSegment, GroupMessageEvent, PrivateMessageEvent
+from sqlalchemy.ext.asyncio.session import AsyncSession
+from nonebot.adapters.onebot.v11.helpers import Cooldown, CooldownIsolateLevel, autorevoke_send
 
 from .utils import SpeedLimiter
 from .config import MAX, CDTIME, EFFECT, SETU_PATH, WITHDRAW_TIME
@@ -134,9 +121,7 @@ async def _(
                     logger.debug(f"Message ID: {message_id}")
                 else:
                     logger.debug(f"Using auto revoke API, interval: {WITHDRAW_TIME}")
-                    await autorevoke_send(
-                        bot=bot, event=event, message=msg, revoke_interval=WITHDRAW_TIME
-                    )
+                    await autorevoke_send(bot=bot, event=event, message=msg, revoke_interval=WITHDRAW_TIME)
                 """
                 发送成功
                 """
@@ -186,12 +171,12 @@ async def _(
     reply_message_id = reply_segment.data["id"]
     logger.debug(f"Get setu info for message id: {reply_message_id}")
     statement = select(MessageInfo).where(MessageInfo.message_id == reply_message_id)
-    messageinfo_result: MessageInfo = (await db_session.exec(statement)).first()  # type: ignore
+    messageinfo_result: MessageInfo = (await db_session.scalars(statement)).first()  # type: ignore
     if not messageinfo_result:
         await setuinfo_matcher.finish("未找到该插画相关信息")
     message_pid = messageinfo_result.pid
     statement = select(SetuInfo).where(SetuInfo.pid == message_pid)
-    setu_info = (await db_session.exec((statement))).first()  # type: ignore
+    setu_info = (await db_session.scalars(statement)).first()  # type: ignore
     if not setu_info:
         await setuinfo_matcher.finish("该插画相关信息已被移除")
     info_message = MessageSegment.text(f"标题：{setu_info.title}\n")

@@ -2,7 +2,10 @@ from typing import Dict, List, Optional
 from pathlib import Path
 
 from pydantic import BaseModel
-from sqlmodel import Field, SQLModel
+from sqlalchemy.orm import Mapped, mapped_column
+from nonebot_plugin_datastore import get_plugin_data
+
+Base = get_plugin_data().Model
 
 
 class SetuData(BaseModel):
@@ -49,21 +52,21 @@ class SetuNotFindError(Exception):
     pass
 
 
-class SetuInfo(SQLModel, table=True):
+class SetuInfo(Base):
     __tablename__: str = "setu_info"
-    pid: int = Field(default=None, primary_key=True, unique=True)
-    author: str = Field(default=None)
-    title: str = Field(default=None)
-    url: str = Field(default=None)
+    pid: Mapped[int] = mapped_column(primary_key=True)
+    author: Mapped[str]
+    title: Mapped[str]
+    url: Mapped[str]
 
 
-class MessageInfo(SQLModel, table=True):
+class MessageInfo(Base):
     __tablename__: str = "message_data"
-    message_id: int = Field(default=None, primary_key=True, unique=True)
-    pid: int = Field(default=None)
+    message_id: Mapped[int] = mapped_column(primary_key=True)
+    pid: Mapped[int]
 
 
-class GroupWhiteListRecord(SQLModel, table=True):
+class GroupWhiteListRecord(Base):
     __tablename__: str = "white_list"
-    group_id: int = Field(default=None, primary_key=True, unique=True)
-    operator_user_id: int = Field(default=None)
+    group_id: Mapped[int] = mapped_column(primary_key=True)
+    operator_user_id: Mapped[int]

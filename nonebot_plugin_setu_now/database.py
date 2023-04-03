@@ -1,5 +1,5 @@
-from sqlmodel import select
-from sqlmodel.ext.asyncio.session import AsyncSession
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio.session import AsyncSession
 
 from .models import SetuInfo, MessageInfo
 from .data_source import SETU_SIZE, Setu
@@ -7,7 +7,7 @@ from .data_source import SETU_SIZE, Setu
 
 async def auto_upgrade_setuinfo(session: AsyncSession, setu_instance: Setu):
     statement = select(SetuInfo).where(SetuInfo.pid == setu_instance.pid)
-    setuinfo_result = (await session.exec(statement)).first()  # type: ignore
+    setuinfo_result = (await session.scalars(statement)).first()  # type: ignore
     if setuinfo_result:
         return
     session.add(

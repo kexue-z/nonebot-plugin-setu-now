@@ -119,6 +119,8 @@ def image_segment_convert(img: Union[Path, Image.Image, bytes]) -> MessageSegmen
         return MessageSegment.image(img)
     elif isinstance(img, bytes):
         img = Image.open(BytesIO(img))
+    elif isinstance(img, Image.Image):
+        pass
     else:
         raise ValueError(f"Unsopported image type: {type(img)}")
     image_bytesio = BytesIO()
