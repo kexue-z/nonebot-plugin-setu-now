@@ -5,6 +5,10 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Mapped, mapped_column
 from nonebot_plugin_datastore import get_plugin_data
 
+require("nonebot_plugin_datastore")
+
+from nonebot_plugin_datastore.db import get_engine
+
 Base = get_plugin_data().Model
 
 
@@ -70,3 +74,6 @@ class GroupWhiteListRecord(Base):
     __tablename__: str = "white_list"
     group_id: Mapped[int] = mapped_column(primary_key=True)
     operator_user_id: Mapped[int]
+
+
+Base.metadata.create_all(get_engine())
