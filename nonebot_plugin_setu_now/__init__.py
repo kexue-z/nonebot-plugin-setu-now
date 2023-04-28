@@ -1,33 +1,46 @@
 import asyncio
+from pathlib import Path
 from re import I, sub
 from typing import Union
-from pathlib import Path
 
-from PIL import UnidentifiedImageError
-from nonebot import on_regex, on_command
-from sqlalchemy import select
+from nonebot import on_command, on_regex
+from nonebot.adapters.onebot.v11 import (
+    GROUP,
+    PRIVATE_FRIEND,
+    Bot,
+    GroupMessageEvent,
+    Message,
+    MessageEvent,
+    MessageSegment,
+    PrivateMessageEvent,
+)
+from nonebot.adapters.onebot.v11.helpers import (
+    Cooldown,
+    CooldownIsolateLevel,
+    autorevoke_send,
+)
+from nonebot.exception import ActionFailed
 from nonebot.log import logger
 from nonebot.params import Depends
 from nonebot.plugin import require
 from nonebot.typing import T_State
-from nonebot.exception import ActionFailed
-from nonebot.adapters.onebot.v11 import GROUP, PRIVATE_FRIEND, Bot, Message, MessageEvent, MessageSegment, GroupMessageEvent, PrivateMessageEvent
+from PIL import UnidentifiedImageError
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio.session import AsyncSession
-from nonebot.adapters.onebot.v11.helpers import Cooldown, CooldownIsolateLevel, autorevoke_send
 
-from .utils import SpeedLimiter
-from .config import MAX, CDTIME, EFFECT, SETU_PATH, WITHDRAW_TIME
-from .models import Setu, SetuInfo, MessageInfo, SetuNotFindError
-from .database import bind_message_data, auto_upgrade_setuinfo
-from .img_utils import EFFECT_FUNC_LIST, image_segment_convert
-from .perf_timer import PerfTimer
+from .config import CDTIME, EFFECT, MAX, SETU_PATH, WITHDRAW_TIME
 from .data_source import SetuHandler
+from .database import auto_upgrade_setuinfo, bind_message_data
+from .img_utils import EFFECT_FUNC_LIST, image_segment_convert
+from .models import MessageInfo, Setu, SetuInfo, SetuNotFindError
+from .perf_timer import PerfTimer
 from .r18_whitelist import get_group_white_list_record
+from .utils import SpeedLimiter
 
 require("nonebot_plugin_datastore")
 require("nonebot_plugin_localstore")
 
-from nonebot_plugin_datastore import get_session, create_session
+from nonebot_plugin_datastore import create_session, get_session
 
 global_speedlimiter = SpeedLimiter()
 
@@ -121,7 +134,9 @@ async def _(
                     logger.debug(f"Message ID: {message_id}")
                 else:
                     logger.debug(f"Using auto revoke API, interval: {WITHDRAW_TIME}")
-                    await autorevoke_send(bot=bot, event=event, message=msg, revoke_interval=WITHDRAW_TIME)
+                    await autorevoke_send(
+                        bot=bot, event=event, message=msg, revoke_interval=WITHDRAW_TIME
+                    )
                 """
                 发送成功
                 """

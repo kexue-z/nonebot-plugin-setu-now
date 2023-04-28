@@ -1,12 +1,12 @@
 import time
 from io import BytesIO
+from pathlib import Path
 from random import choice, randint
 from typing import Union
-from pathlib import Path
 
-from PIL import Image, ImageFilter
-from nonebot.log import logger
 from nonebot.adapters.onebot.v11 import MessageSegment
+from nonebot.log import logger
+from PIL import Image, ImageFilter
 
 from .perf_timer import PerfTimer
 
@@ -55,7 +55,9 @@ def draw_frame(img: Union[Path, Image.Image, bytes]) -> Image.Image:
     background = img
     background = background.resize(resize_resoluation)
     background = background.filter(ImageFilter.GaussianBlur(6))
-    background = background.resize((int(img.width * FRAME_RATIO), int(img.height * FRAME_RATIO)))
+    background = background.resize(
+        (int(img.width * FRAME_RATIO), int(img.height * FRAME_RATIO))
+    )
     background.paste(
         img,
         (

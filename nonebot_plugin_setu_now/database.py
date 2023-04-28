@@ -1,9 +1,9 @@
-from sqlalchemy import select
 from nonebot.plugin import require
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio.session import AsyncSession
 
-from .models import SetuInfo, MessageInfo, GroupWhiteListRecord
 from .data_source import SETU_SIZE, Setu
+from .models import GroupWhiteListRecord, MessageInfo, SetuInfo
 
 require("nonebot_plugin_datastore")
 from nonebot_plugin_datastore.db import get_engine, post_db_init

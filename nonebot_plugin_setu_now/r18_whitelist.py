@@ -1,10 +1,10 @@
 from nonebot import require
-from sqlalchemy import select
+from nonebot.adapters.onebot.v11 import GroupMessageEvent, MessageEvent
 from nonebot.log import logger
 from nonebot.params import Depends
-from nonebot.plugin.on import on_command
 from nonebot.permission import SUPERUSER
-from nonebot.adapters.onebot.v11 import MessageEvent, GroupMessageEvent
+from nonebot.plugin.on import on_command
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio.session import AsyncSession
 
 from .models import GroupWhiteListRecord
@@ -14,10 +14,14 @@ require("nonebot_plugin_datastore")
 from nonebot_plugin_datastore import get_session
 
 
-async def get_group_white_list_record(event: MessageEvent, db_session: AsyncSession = Depends(get_session)):
+async def get_group_white_list_record(
+    event: MessageEvent, db_session: AsyncSession = Depends(get_session)
+):
     if not isinstance(event, GroupMessageEvent):
         return None
-    statement = select(GroupWhiteListRecord).where(GroupWhiteListRecord.group_id == event.group_id)
+    statement = select(GroupWhiteListRecord).where(
+        GroupWhiteListRecord.group_id == event.group_id
+    )
     result = (await db_session.scalars(statement)).first()  # type: ignore
     if not result:
         return None
@@ -25,7 +29,9 @@ async def get_group_white_list_record(event: MessageEvent, db_session: AsyncSess
     return result
 
 
-r18_activate_matcher = on_command("开启涩涩", aliases={"可以涩涩", "r18开启"}, permission=SUPERUSER)
+r18_activate_matcher = on_command(
+    "开启涩涩", aliases={"可以涩涩", "r18开启"}, permission=SUPERUSER
+)
 
 
 @r18_activate_matcher.handle()
@@ -36,12 +42,18 @@ async def _(
 ):
     if not record:
         await r18_activate_matcher.finish("已解除本群涩图限制")
-    db_session.add(GroupWhiteListRecord(group_id=int(event.group_id), operator_user_id=int(event.user_id)))
+    db_session.add(
+        GroupWhiteListRecord(
+            group_id=int(event.group_id), operator_user_id=int(event.user_id)
+        )
+    )
     await db_session.commit()
     await r18_activate_matcher.finish("已解除本群涩图限制")
 
 
-r18_deactivate_matcher = on_command("关闭涩涩", aliases={"不可以涩涩", "r18关闭"}, permission=SUPERUSER)
+r18_deactivate_matcher = on_command(
+    "关闭涩涩", aliases={"不可以涩涩", "r18关闭"}, permission=SUPERUSER
+)
 
 
 @r18_deactivate_matcher.handle()

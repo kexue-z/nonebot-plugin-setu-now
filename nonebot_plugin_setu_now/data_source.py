@@ -1,15 +1,14 @@
-from typing import List, Callable
 from asyncio import gather
 from pathlib import Path
+from typing import Callable, List
 
 from httpx import AsyncClient
 from nonebot import require
 from nonebot.log import logger
 
-from .utils import download_pic
-from .config import API_URL, REVERSE_PROXY, PROXY, SETU_SIZE, EFFECT
+from .config import API_URL, EFFECT, PROXY, REVERSE_PROXY, SETU_SIZE
 from .models import Setu, SetuApiData, SetuNotFindError
-
+from .utils import download_pic
 
 require("nonebot_plugin_localstore")
 

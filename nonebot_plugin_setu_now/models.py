@@ -1,9 +1,10 @@
-from typing import Dict, List, Optional
 from pathlib import Path
+from typing import Dict, List, Optional
 
+from nonebot import require
+from nonebot_plugin_datastore import get_plugin_data
 from pydantic import BaseModel
 from sqlalchemy.orm import Mapped, mapped_column
-from nonebot_plugin_datastore import get_plugin_data
 
 require("nonebot_plugin_datastore")
 
@@ -76,4 +77,4 @@ class GroupWhiteListRecord(Base):
     operator_user_id: Mapped[int]
 
 
-Base.metadata.create_all(get_engine())
+Base.metadata.create_all(get_engine())  # type: ignore
