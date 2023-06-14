@@ -2,12 +2,12 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 from nonebot import require
-from nonebot_plugin_datastore import get_plugin_data
 from pydantic import BaseModel
 from sqlalchemy.orm import Mapped, mapped_column
 
 require("nonebot_plugin_datastore")
 
+from nonebot_plugin_datastore import get_plugin_data
 from nonebot_plugin_datastore.db import get_engine
 
 Base = get_plugin_data().Model

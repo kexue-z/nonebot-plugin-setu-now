@@ -1,46 +1,45 @@
 import asyncio
-from pathlib import Path
 from re import I, sub
-from typing import Union
+from typing import Any, Union, Annotated
+from pathlib import Path
 
-from nonebot import on_command, on_regex
+from PIL import UnidentifiedImageError
+from nonebot import on_regex, on_command
+from sqlalchemy import select
+from nonebot.log import logger
+from nonebot.params import Depends, RegexGroup
+from nonebot.plugin import require
+from nonebot.exception import ActionFailed
 from nonebot.adapters.onebot.v11 import (
     GROUP,
     PRIVATE_FRIEND,
     Bot,
-    GroupMessageEvent,
     Message,
     MessageEvent,
     MessageSegment,
+    GroupMessageEvent,
     PrivateMessageEvent,
 )
+from sqlalchemy.ext.asyncio.session import AsyncSession
 from nonebot.adapters.onebot.v11.helpers import (
     Cooldown,
     CooldownIsolateLevel,
     autorevoke_send,
 )
-from nonebot.exception import ActionFailed
-from nonebot.log import logger
-from nonebot.params import Depends
-from nonebot.plugin import require
-from nonebot.typing import T_State
-from PIL import UnidentifiedImageError
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio.session import AsyncSession
 
-from .config import CDTIME, EFFECT, MAX, SETU_PATH, WITHDRAW_TIME
-from .data_source import SetuHandler
-from .database import auto_upgrade_setuinfo, bind_message_data
-from .img_utils import EFFECT_FUNC_LIST, image_segment_convert
-from .models import MessageInfo, Setu, SetuInfo, SetuNotFindError
-from .perf_timer import PerfTimer
-from .r18_whitelist import get_group_white_list_record
 from .utils import SpeedLimiter
+from .config import MAX, CDTIME, EFFECT, SETU_PATH, WITHDRAW_TIME
+from .models import Setu, SetuInfo, MessageInfo, SetuNotFindError
+from .database import bind_message_data, auto_upgrade_setuinfo
+from .img_utils import EFFECT_FUNC_LIST, image_segment_convert
+from .perf_timer import PerfTimer
+from .data_source import SetuHandler
+from .r18_whitelist import get_group_white_list_record
 
-require("nonebot_plugin_datastore")
 require("nonebot_plugin_localstore")
+require("nonebot_plugin_datastore")
 
-from nonebot_plugin_datastore import create_session, get_session
+from nonebot_plugin_datastore import get_session, create_session
 
 global_speedlimiter = SpeedLimiter()
 
@@ -63,12 +62,14 @@ setu_matcher = on_regex(
 async def _(
     bot: Bot,
     event: Union[PrivateMessageEvent, GroupMessageEvent],
-    state: T_State,
+    # state: T_State,
+    regex_group: Annotated[tuple[Any, ...], RegexGroup()],
     white_list_record=Depends(get_group_white_list_record),
 ):
     # await setu_matcher.finish("服务器维护喵，暂停服务抱歉喵")
     setu_total_timer = PerfTimer("Image request total")
-    args = list(state["_matched_groups"])
+    args = list(regex_group)
+    logger.debug(f"args={args}")
     num = args[1]
     r18 = args[2]
     tags = args[3]
