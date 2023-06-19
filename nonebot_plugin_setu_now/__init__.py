@@ -5,10 +5,9 @@ from pathlib import Path
 
 from PIL import UnidentifiedImageError
 from nonebot import on_regex, on_command
-
 from nonebot.log import logger
 from nonebot.params import Depends, RegexGroup
-from nonebot.plugin import require
+from nonebot.plugin import PluginMetadata, require
 from nonebot.exception import ActionFailed
 from nonebot.adapters.onebot.v11 import (
     GROUP,
@@ -20,8 +19,6 @@ from nonebot.adapters.onebot.v11 import (
     GroupMessageEvent,
     PrivateMessageEvent,
 )
-
-
 from nonebot.adapters.onebot.v11.helpers import (
     Cooldown,
     CooldownIsolateLevel,
@@ -29,13 +26,24 @@ from nonebot.adapters.onebot.v11.helpers import (
 )
 
 from .utils import SpeedLimiter
-from .config import MAX, CDTIME, EFFECT, SETU_PATH, WITHDRAW_TIME
+from .config import MAX, CDTIME, EFFECT, SETU_PATH, WITHDRAW_TIME, Config
 from .models import Setu, SetuNotFindError
-from .database import bind_message_data, auto_upgrade_setuinfo, SetuInfo, MessageInfo
+from .database import SetuInfo, MessageInfo, bind_message_data, auto_upgrade_setuinfo
 from .img_utils import EFFECT_FUNC_LIST, image_segment_convert
 from .perf_timer import PerfTimer
 from .data_source import SetuHandler
 from .r18_whitelist import get_group_white_list_record
+
+usage_msg = """TL;DR: 色图 或 看文档"""
+
+__plugin_meta__ = PluginMetadata(
+    name="nonebot-plugin-setu-now",
+    description="另一个色图插件",
+    usage=usage_msg,
+    type="application",
+    config=Config,
+    extra={},
+)
 
 require("nonebot_plugin_localstore")
 require("nonebot_plugin_tortoise_orm")
