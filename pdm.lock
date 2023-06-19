@@ -2,6 +2,24 @@
 # It is not intended for manual editing.
 
 [[package]]
+name = "aiomysql"
+version = "0.1.1"
+requires_python = ">=3.7"
+summary = "MySQL driver for asyncio."
+dependencies = [
+    "PyMySQL>=1.0",
+]
+
+[[package]]
+name = "aiosqlite"
+version = "0.17.0"
+requires_python = ">=3.6"
+summary = "asyncio bridge to the standard sqlite3 module"
+dependencies = [
+    "typing-extensions>=3.7.2",
+]
+
+[[package]]
 name = "anyio"
 version = "3.7.0"
 requires_python = ">=3.7"
@@ -11,6 +29,12 @@ dependencies = [
     "idna>=2.8",
     "sniffio>=1.1",
 ]
+
+[[package]]
+name = "asyncpg"
+version = "0.27.0"
+requires_python = ">=3.7.0"
+summary = "An asyncio PostgreSQL driver"
 
 [[package]]
 name = "certifi"
@@ -67,6 +91,12 @@ requires_python = ">=3.5"
 summary = "Internationalized Domain Names in Applications (IDNA)"
 
 [[package]]
+name = "iso8601"
+version = "1.1.0"
+requires_python = ">=3.6.2,<4.0"
+summary = "Simple module to parse ISO 8601 dates"
+
+[[package]]
 name = "loguru"
 version = "0.7.0"
 requires_python = ">=3.5"
@@ -95,6 +125,18 @@ summary = "OneBot(CQHTTP) adapter for nonebot2"
 dependencies = [
     "msgpack<2.0.0,>=1.0.3",
     "nonebot2<3.0.0,>=2.0.0-beta.3",
+]
+
+[[package]]
+name = "nonebot-plugin-tortoise-orm"
+version = "0.0.1a3"
+requires_python = ">=3.7.3,<4.0.0"
+summary = "一个通用数据库连接插件"
+dependencies = [
+    "aiomysql<0.2.0,>=0.1.1",
+    "aiosqlite<0.18.0,>=0.17.0",
+    "nonebot2<3.0.0,>=2.0.0-beta.1",
+    "tortoise-orm[asyncpg]<0.20.0,>=0.19.1",
 ]
 
 [[package]]
@@ -143,10 +185,27 @@ version = "2.5.0"
 summary = "A pure Python trie data structure implementation."
 
 [[package]]
+name = "pymysql"
+version = "1.0.3"
+requires_python = ">=3.7"
+summary = "Pure Python MySQL Driver"
+
+[[package]]
+name = "pypika-tortoise"
+version = "0.1.6"
+requires_python = ">=3.7,<4.0"
+summary = "Forked from pypika and streamline just for tortoise-orm"
+
+[[package]]
 name = "python-dotenv"
 version = "1.0.0"
 requires_python = ">=3.8"
 summary = "Read key-value pairs from a .env file and set them as environment variables"
+
+[[package]]
+name = "pytz"
+version = "2023.3"
+summary = "World timezone definitions, modern and historical"
 
 [[package]]
 name = "sniffio"
@@ -159,6 +218,29 @@ name = "tomli"
 version = "2.0.1"
 requires_python = ">=3.7"
 summary = "A lil' TOML parser"
+
+[[package]]
+name = "tortoise-orm"
+version = "0.19.3"
+requires_python = ">=3.7,<4.0"
+summary = "Easy async ORM for python, built with relations in mind"
+dependencies = [
+    "aiosqlite<0.18.0,>=0.16.0",
+    "iso8601<2.0.0,>=1.0.2",
+    "pypika-tortoise<0.2.0,>=0.1.6",
+    "pytz",
+]
+
+[[package]]
+name = "tortoise-orm"
+version = "0.19.3"
+extras = ["asyncpg"]
+requires_python = ">=3.7,<4.0"
+summary = "Easy async ORM for python, built with relations in mind"
+dependencies = [
+    "asyncpg",
+    "tortoise-orm==0.19.3",
+]
 
 [[package]]
 name = "typing-extensions"
@@ -186,12 +268,58 @@ dependencies = [
 lock_version = "4.2"
 cross_platform = true
 groups = ["default"]
-content_hash = "sha256:505f6c1c48692e4f30feb5c50207f6d093e558a51b51c991d6ea7fc557fd956c"
+content_hash = "sha256:6dd9d0a8c06242f897b2b15ec89bf93dae5f6143ec4d8962bbf79d2af66d88f5"
 
 [metadata.files]
+"aiomysql 0.1.1" = [
+    {url = "https://files.pythonhosted.org/packages/31/03/1a112200f689892e0faa60d6fa8bff4fffc1d5fa29833c5d1439de808628/aiomysql-0.1.1.tar.gz", hash = "sha256:0d686c4fdae6b67d1825d8be60fa3b0e644fca2c84d3c936d850fc259c8e107e"},
+    {url = "https://files.pythonhosted.org/packages/92/09/4be9cda17cfb0334e15df26f52f580e5611457a41cf972c1e31aa7e0ceeb/aiomysql-0.1.1-py3-none-any.whl", hash = "sha256:b66fa1481ca71c5ee0d933ec3abf51f6136543a3710ba80b134eb33da7ed6f13"},
+]
+"aiosqlite 0.17.0" = [
+    {url = "https://files.pythonhosted.org/packages/40/e0/ad1edd74311831ca71b32a5b83352b490d78d11a90a1cde04e1b6830e018/aiosqlite-0.17.0.tar.gz", hash = "sha256:f0e6acc24bc4864149267ac82fb46dfb3be4455f99fe21df82609cc6e6baee51"},
+    {url = "https://files.pythonhosted.org/packages/a0/48/77c0092f716c4bf9460dca44f5120f70b8f71f14a12f40d22551a7152719/aiosqlite-0.17.0-py3-none-any.whl", hash = "sha256:6c49dc6d3405929b1d08eeccc72306d3677503cc5e5e43771efc1e00232e8231"},
+]
 "anyio 3.7.0" = [
     {url = "https://files.pythonhosted.org/packages/68/fe/7ce1926952c8a403b35029e194555558514b365ad77d75125f521a2bec62/anyio-3.7.0-py3-none-any.whl", hash = "sha256:eddca883c4175f14df8aedce21054bfca3adb70ffe76a9f607aef9d7fa2ea7f0"},
     {url = "https://files.pythonhosted.org/packages/c6/b3/fefbf7e78ab3b805dec67d698dc18dd505af7a18a8dd08868c9b4fa736b5/anyio-3.7.0.tar.gz", hash = "sha256:275d9973793619a5374e1c89a4f4ad3f4b0a5510a2b5b939444bee8f4c4d37ce"},
+]
+"asyncpg 0.27.0" = [
+    {url = "https://files.pythonhosted.org/packages/04/78/06b4979eb2b553a450fe38008353f5cba152a66de83c64b1639046e9ca0e/asyncpg-0.27.0.tar.gz", hash = "sha256:720986d9a4705dd8a40fdf172036f5ae787225036a7eb46e704c45aa8f62c054"},
+    {url = "https://files.pythonhosted.org/packages/05/46/250c9e277b77ccbfd1b1746c529fc61250280f854d686b2775f8e4d59be5/asyncpg-0.27.0-cp39-cp39-win32.whl", hash = "sha256:8934577e1ed13f7d2d9cea3cc016cc6f95c19faedea2c2b56a6f94f257cea672"},
+    {url = "https://files.pythonhosted.org/packages/07/f1/a6a75b579b4b50bd7ccefb72b53c9fc12d4d368a9636d64e49c5525e81a0/asyncpg-0.27.0-cp37-cp37m-musllinux_1_1_x86_64.whl", hash = "sha256:5710cb0937f696ce303f5eed6d272e3f057339bb4139378ccecafa9ee923a71c"},
+    {url = "https://files.pythonhosted.org/packages/0b/6f/ca1922ed44d98eb446611d1e992b44bb7787a7092b5deaa6d1000b2a753a/asyncpg-0.27.0-cp311-cp311-musllinux_1_1_x86_64.whl", hash = "sha256:609054a1f47292a905582a1cfcca51a6f3f30ab9d822448693e66fdddde27920"},
+    {url = "https://files.pythonhosted.org/packages/15/83/055b9aadaf23e8d4276e85208cf73c38b25ff931706e83c3a032ea84dc4c/asyncpg-0.27.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:a7a94c03386bb95456b12c66026b3a87d1b965f0f1e5733c36e7229f8f137747"},
+    {url = "https://files.pythonhosted.org/packages/18/78/9631ce405698a972a305525b58f44783166e4252d231d921cf9d2223ade2/asyncpg-0.27.0-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:975a320baf7020339a67315284a4d3bf7460e664e484672bd3e71dbd881bc692"},
+    {url = "https://files.pythonhosted.org/packages/30/ee/0cd25cbd10e8d27a697d52716f896d8b4075e6f610209155225dfb9d2602/asyncpg-0.27.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:ccddb9419ab4e1c48742457d0c0362dbdaeb9b28e6875115abfe319b29ee225d"},
+    {url = "https://files.pythonhosted.org/packages/32/d7/611dfa9de0be62c6a8513ea96bb65a4a52e9dc9fe0990dc34bf74a06fcd4/asyncpg-0.27.0-cp38-cp38-win32.whl", hash = "sha256:69aa1b443a182b13a17ff926ed6627af2d98f62f2fe5890583270cc4073f63bf"},
+    {url = "https://files.pythonhosted.org/packages/3c/53/ecc64dafc500db45e1b53dcf349d6b829bda93d99d8baaa603b8e2384dfd/asyncpg-0.27.0-cp37-cp37m-musllinux_1_1_aarch64.whl", hash = "sha256:eca01eb112a39d31cc4abb93a5aef2a81514c23f70956729f42fb83b11b3483f"},
+    {url = "https://files.pythonhosted.org/packages/46/bb/8194887dca2397be82bf6f84ab4af0e73327a5dfd66d06c55502b3758e06/asyncpg-0.27.0-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:fddcacf695581a8d856654bc4c8cfb73d5c9df26d5f55201722d3e6a699e9629"},
+    {url = "https://files.pythonhosted.org/packages/57/1e/7d670f60b3ff52f6da82bb9dc7363363ed0540f4b7e27c27d7318d4a4e0c/asyncpg-0.27.0-cp39-cp39-win_amd64.whl", hash = "sha256:1b6499de06fe035cf2fa932ec5617ed3f37d4ebbf663b655922e105a484a6af9"},
+    {url = "https://files.pythonhosted.org/packages/60/06/1074e40c81bac8865fd583e117b2b3354f71bebaa3bbbc94c5e5be4241dd/asyncpg-0.27.0-cp39-cp39-musllinux_1_1_x86_64.whl", hash = "sha256:eb4b2fdf88af4fb1cc569781a8f933d2a73ee82cd720e0cb4edabbaecf2a905b"},
+    {url = "https://files.pythonhosted.org/packages/66/af/dbc65035f6356019a9fbff0f6a2315d906c40a0c5c66e1421a06a5f8a0a7/asyncpg-0.27.0-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:16ba8ec2e85d586b4a12bcd03e8d29e3d99e832764d6a1d0b8c27dbbe4a2569d"},
+    {url = "https://files.pythonhosted.org/packages/6c/06/3a35225d0cb2b630faddbe5c97dcc85e6f3c72873428374795b9bee08fda/asyncpg-0.27.0-cp310-cp310-musllinux_1_1_x86_64.whl", hash = "sha256:9654085f2b22f66952124de13a8071b54453ff972c25c59b5ce1173a4283ffd9"},
+    {url = "https://files.pythonhosted.org/packages/6f/2c/89991b750e3be0be7f0413869ed68e1bd49680bc6534d4e4d852f1eaa0ce/asyncpg-0.27.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:2232ebae9796d4600a7819fc383da78ab51b32a092795f4555575fc934c1c89d"},
+    {url = "https://files.pythonhosted.org/packages/71/be/22126235b30802adb1fbfd73087e595dcdf215787a546f569f6405a3a787/asyncpg-0.27.0-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:d20dea7b83651d93b1eb2f353511fe7fd554752844523f17ad30115d8b9c8cd6"},
+    {url = "https://files.pythonhosted.org/packages/72/f1/9996a01d342264cf9b7b81ff1ae6d8b6bb8af8404f5ca67a2892809bc18c/asyncpg-0.27.0-cp38-cp38-win_amd64.whl", hash = "sha256:62932f29cf2433988fcd799770ec64b374a3691e7902ecf85da14d5e0854d1ea"},
+    {url = "https://files.pythonhosted.org/packages/7b/71/73522029c8c9342a804d24af020139fb3dd23c83c49ebb18a837e3578954/asyncpg-0.27.0-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:7d8585707ecc6661d07367d444bbaa846b4e095d84451340da8df55a3757e152"},
+    {url = "https://files.pythonhosted.org/packages/7d/ae/697c3159fc0e5ab91fbe728fa37ea0239bee5826482644ee94159703154b/asyncpg-0.27.0-cp310-cp310-win32.whl", hash = "sha256:879c29a75969eb2722f94443752f4720d560d1e748474de54ae8dd230bc4956b"},
+    {url = "https://files.pythonhosted.org/packages/7e/03/83d88954c6d210af93a9fc1015c6af51b9eb884925139b53098d082c2f40/asyncpg-0.27.0-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:c2232d4625c558f2aa001942cac1d7952aa9f0dbfc212f63bc754277769e1ef2"},
+    {url = "https://files.pythonhosted.org/packages/82/06/10eabd23fe4f6297726747964121cbfe6a9c9969dd1d5596302fd83a171b/asyncpg-0.27.0-cp310-cp310-musllinux_1_1_aarch64.whl", hash = "sha256:bfc3980b4ba6f97138b04f0d32e8af21d6c9fa1f8e6e140c07d15690a0a99279"},
+    {url = "https://files.pythonhosted.org/packages/8c/ab/e2033446c3fd186bb32eee17ff30fa504ea3ee07a5c7988719ee16216a74/asyncpg-0.27.0-cp37-cp37m-win_amd64.whl", hash = "sha256:71cca80a056ebe19ec74b7117b09e650990c3ca535ac1c35234a96f65604192f"},
+    {url = "https://files.pythonhosted.org/packages/91/7c/6578b36a33076dfbdca98c0b7a3e56f1dc8513400f77c83955776d160aaa/asyncpg-0.27.0-cp37-cp37m-manylinux_2_17_aarch64.manylinux2014_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:4750f5cf49ed48a6e49c6e5aed390eee367694636c2dcfaf4a273ca832c5c43c"},
+    {url = "https://files.pythonhosted.org/packages/95/9b/81423019fe5ac788922ba878199442afeeb174bc630cd3008a1c9e4e655f/asyncpg-0.27.0-cp310-cp310-win_amd64.whl", hash = "sha256:ab0f21c4818d46a60ca789ebc92327d6d874d3b7ccff3963f7af0a21dc6cff52"},
+    {url = "https://files.pythonhosted.org/packages/a8/d9/e2179eaa22a707637946a4c7c9b313c2ad86e61e28f6254f333989988eb4/asyncpg-0.27.0-cp38-cp38-musllinux_1_1_aarch64.whl", hash = "sha256:e56ac8a8237ad4adec97c0cd4728596885f908053ab725e22900b5902e7f8e69"},
+    {url = "https://files.pythonhosted.org/packages/aa/d6/6aa305b16945deac43b877e1f6f2b9ea4265b9720208720d6277cd3fe2be/asyncpg-0.27.0-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:18f77e8e71e826ba2d0c3ba6764930776719ae2b225ca07e014590545928b576"},
+    {url = "https://files.pythonhosted.org/packages/ab/80/1f68ef84be31e0eb69c771c4db7e72c56379ecd558a27db4d554eb2cb147/asyncpg-0.27.0-cp311-cp311-win_amd64.whl", hash = "sha256:bb71211414dd1eeb8d31ec529fe77cff04bf53efc783a5f6f0a32d84923f45cf"},
+    {url = "https://files.pythonhosted.org/packages/ae/0a/54ca6f30c65d68e2c0e28d1aab5266c2ea8d16d4059ae8b91c31416597be/asyncpg-0.27.0-cp311-cp311-win32.whl", hash = "sha256:8113e17cfe236dc2277ec844ba9b3d5312f61bd2fdae6d3ed1c1cdd75f6cf2d8"},
+    {url = "https://files.pythonhosted.org/packages/c1/da/efa8399607c5401eb3f935e379b0e4e314ee1a986cc45d7b8527143c203b/asyncpg-0.27.0-cp38-cp38-macosx_11_0_arm64.whl", hash = "sha256:4bb366ae34af5b5cabc3ac6a5347dfb6013af38c68af8452f27968d49085ecc0"},
+    {url = "https://files.pythonhosted.org/packages/c9/a2/f000f9de321427490266bb981a032ec7f1f63cf4ed8e29d5592ff2d0170f/asyncpg-0.27.0-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:9a3a4ff43702d39e3c97a8786314123d314e0f0e4dabc8367db5b665c93914de"},
+    {url = "https://files.pythonhosted.org/packages/cb/33/fcab8e85f4b868f3c27c4dcb6e4772439dc60195b0b8cdef33b1b4b33126/asyncpg-0.27.0-cp311-cp311-musllinux_1_1_aarch64.whl", hash = "sha256:768e0e7c2898d40b16d4ef7a0b44e8150db3dd8995b4652aa1fe2902e92c7df8"},
+    {url = "https://files.pythonhosted.org/packages/cf/1f/baa9877fbf14c487feabea9c724abd7d93217c2c1002d4d4dd4e3aba6c08/asyncpg-0.27.0-cp38-cp38-musllinux_1_1_x86_64.whl", hash = "sha256:bf21ebf023ec67335258e0f3d3ad7b91bb9507985ba2b2206346de488267cad0"},
+    {url = "https://files.pythonhosted.org/packages/df/7d/a6b3aa9c80791ec7daa358856bd7c9690eddfbde68408c13d2d8f3e9a3af/asyncpg-0.27.0-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:7a6206210c869ebd3f4eb9e89bea132aefb56ff3d1b7dd7e26b102b17e27bbb1"},
+    {url = "https://files.pythonhosted.org/packages/e6/c9/7a361daeeec3ab9b63347a5629895099317003b1db9949536339848aea35/asyncpg-0.27.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:fca608d199ffed4903dce1bcd97ad0fe8260f405c1c225bdf0002709132171c2"},
+    {url = "https://files.pythonhosted.org/packages/e7/84/0e848301b97bde051e8f318d6b3af2b51e0398a88230231f2d3cbf3fa077/asyncpg-0.27.0-cp39-cp39-musllinux_1_1_aarch64.whl", hash = "sha256:88b62164738239f62f4af92567b846a8ef7cf8abf53eddd83650603de4d52163"},
+    {url = "https://files.pythonhosted.org/packages/f3/66/b9efec66d97008fd0276382fdcb9ebd47e8c66484d4ae2feef67e7d482a9/asyncpg-0.27.0-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:20b596d8d074f6f695c13ffb8646d0b6bb1ab570ba7b0cfd349b921ff03cfc1e"},
 ]
 "certifi 2023.5.7" = [
     {url = "https://files.pythonhosted.org/packages/93/71/752f7a4dd4c20d6b12341ed1732368546bc0ca9866139fe812f6009d9ac7/certifi-2023.5.7.tar.gz", hash = "sha256:0f0d56dc5a6ad56fd4ba36484d6cc34451e1c6548c61daad8c320169f91eddc7"},
@@ -220,6 +348,10 @@ content_hash = "sha256:505f6c1c48692e4f30feb5c50207f6d093e558a51b51c991d6ea7fc55
 "idna 3.4" = [
     {url = "https://files.pythonhosted.org/packages/8b/e1/43beb3d38dba6cb420cefa297822eac205a277ab43e5ba5d5c46faf96438/idna-3.4.tar.gz", hash = "sha256:814f528e8dead7d329833b91c5faa87d60bf71824cd12a7530b5526063d02cb4"},
     {url = "https://files.pythonhosted.org/packages/fc/34/3030de6f1370931b9dbb4dad48f6ab1015ab1d32447850b9fc94e60097be/idna-3.4-py3-none-any.whl", hash = "sha256:90b77e79eaa3eba6de819a0c442c0b4ceefc341a7a2ab77d7562bf49f425c5c2"},
+]
+"iso8601 1.1.0" = [
+    {url = "https://files.pythonhosted.org/packages/31/8c/1c342fdd2f4af0857684d16af766201393ef53318c15fa785fcb6c3b7c32/iso8601-1.1.0.tar.gz", hash = "sha256:32811e7b81deee2063ea6d2e94f8819a86d1f3811e49d23623a41fa832bef03f"},
+    {url = "https://files.pythonhosted.org/packages/65/6c/9d72435c72adfa6e4ed1824b6df7fffbeaaf15c653881e9b041a318ba572/iso8601-1.1.0-py3-none-any.whl", hash = "sha256:8400e90141bf792bce2634df533dc57e3bee19ea120a87bebcd3da89a58ad73f"},
 ]
 "loguru 0.7.0" = [
     {url = "https://files.pythonhosted.org/packages/0c/1d/697cbb4ae54217784c1c4805696efb2fd7a1cbbe4827264a80a49e52b828/loguru-0.7.0.tar.gz", hash = "sha256:1612053ced6ae84d7959dd7d5e431a0532642237ec21f7fd83ac73fe539e03e1"},
@@ -370,6 +502,10 @@ content_hash = "sha256:505f6c1c48692e4f30feb5c50207f6d093e558a51b51c991d6ea7fc55
     {url = "https://files.pythonhosted.org/packages/60/12/253510c7c117cad35d3c5edc50b6e85898ee7dbf7b25850f9787229e59c0/nonebot_adapter_onebot-2.2.3.tar.gz", hash = "sha256:e0ac165536a24f7c5e620092ab596022e8f85d462c17ec8d7a17b191093b4859"},
     {url = "https://files.pythonhosted.org/packages/eb/37/68ce09f3f10db4487190de8e377bfffd1b8ee94c21e734c2ee0fd52e35c4/nonebot_adapter_onebot-2.2.3-py3-none-any.whl", hash = "sha256:e715e05578cb58cf42adddb0bac6c060a6ea7c9b2f18e6f011786bbc2bc8d0bd"},
 ]
+"nonebot-plugin-tortoise-orm 0.0.1a3" = [
+    {url = "https://files.pythonhosted.org/packages/8d/f4/984ab4f1458d72a0978cb34b36aa47f4a951bee7c8fedd60f1fbc97834f6/nonebot_plugin_tortoise_orm-0.0.1a3-py3-none-any.whl", hash = "sha256:9b03f09d0dc24cb4f018467c98bcd0d1c10978e48e44036fc2836a545734d0a7"},
+    {url = "https://files.pythonhosted.org/packages/a2/79/e722f8a455ff7eb3bc307501ce17910b6821f1b489d7a5fadce39912af5c/nonebot-plugin-tortoise-orm-0.0.1a3.tar.gz", hash = "sha256:79c0cf30e7e5291089d034d561ad53744963de629b49737332467f3eaefa10e3"},
+]
 "nonebot2 2.0.0" = [
     {url = "https://files.pythonhosted.org/packages/69/60/2c0d414ff1dd015848f28a7f63181d45838a91d406af8f8bbc595185561b/nonebot2-2.0.0.tar.gz", hash = "sha256:144c175ce100c3300d53475fc47b7a9f0a6545861ff12bdc8a1442ab12d430df"},
     {url = "https://files.pythonhosted.org/packages/73/7b/a27cae287908fd5bebe70bd5291667b1922c0136c26c16adeadf7db32513/nonebot2-2.0.0-py3-none-any.whl", hash = "sha256:a3b0caedd52033a11f1d7c24875c3b89513a4b5014f703e0bb266e2e39a0bd30"},
@@ -484,9 +620,21 @@ content_hash = "sha256:505f6c1c48692e4f30feb5c50207f6d093e558a51b51c991d6ea7fc55
     {url = "https://files.pythonhosted.org/packages/b9/13/55deec25bf09383216fa7f1dfcdbfca40a04aa00b6d15a5cbf25af8fce5f/pygtrie-2.5.0.tar.gz", hash = "sha256:203514ad826eb403dab1d2e2ddd034e0d1534bbe4dbe0213bb0593f66beba4e2"},
     {url = "https://files.pythonhosted.org/packages/ec/cd/bd196b2cf014afb1009de8b0f05ecd54011d881944e62763f3c1b1e8ef37/pygtrie-2.5.0-py3-none-any.whl", hash = "sha256:8795cda8105493d5ae159a5bef313ff13156c5d4d72feddefacaad59f8c8ce16"},
 ]
+"pymysql 1.0.3" = [
+    {url = "https://files.pythonhosted.org/packages/5b/b1/bb485db528749f07d6f11aa123e5f931f2e465a9c27945d6122bae5f7df7/PyMySQL-1.0.3-py3-none-any.whl", hash = "sha256:89fc6ae41c0aeb6e1f7710cdd623702ea2c54d040565767a78b00a5ebb12f4e5"},
+    {url = "https://files.pythonhosted.org/packages/7a/6f/b3fadf41239b9ca7ea3857c440c499fd2e9e0f410bb942bd8d593dce4bd6/PyMySQL-1.0.3.tar.gz", hash = "sha256:3dda943ef3694068a75d69d071755dbecacee1adf9a1fc5b206830d2b67d25e8"},
+]
+"pypika-tortoise 0.1.6" = [
+    {url = "https://files.pythonhosted.org/packages/81/9e/cdeeceb107cb255cb039823dea80410df0b65c7372bd69ef178fea8287d5/pypika_tortoise-0.1.6-py3-none-any.whl", hash = "sha256:2d68bbb7e377673743cff42aa1059f3a80228d411fbcae591e4465e173109fd8"},
+    {url = "https://files.pythonhosted.org/packages/86/55/1bfd4150f664d2e07b36c8f442178cc1f717bb9ae6cae20f21e851c208c6/pypika-tortoise-0.1.6.tar.gz", hash = "sha256:d802868f479a708e3263724c7b5719a26ad79399b2a70cea065f4a4cadbebf36"},
+]
 "python-dotenv 1.0.0" = [
     {url = "https://files.pythonhosted.org/packages/31/06/1ef763af20d0572c032fa22882cfbfb005fba6e7300715a37840858c919e/python-dotenv-1.0.0.tar.gz", hash = "sha256:a8df96034aae6d2d50a4ebe8216326c61c3eb64836776504fcca410e5937a3ba"},
     {url = "https://files.pythonhosted.org/packages/44/2f/62ea1c8b593f4e093cc1a7768f0d46112107e790c3e478532329e434f00b/python_dotenv-1.0.0-py3-none-any.whl", hash = "sha256:f5971a9226b701070a4bf2c38c89e5a3f0d64de8debda981d1db98583009122a"},
+]
+"pytz 2023.3" = [
+    {url = "https://files.pythonhosted.org/packages/5e/32/12032aa8c673ee16707a9b6cdda2b09c0089131f35af55d443b6a9c69c1d/pytz-2023.3.tar.gz", hash = "sha256:1d8ce29db189191fb55338ee6d0387d82ab59f3d00eac103412d64e0ebd0c588"},
+    {url = "https://files.pythonhosted.org/packages/7f/99/ad6bd37e748257dd70d6f85d916cafe79c0b0f5e2e95b11f7fbc82bf3110/pytz-2023.3-py2.py3-none-any.whl", hash = "sha256:a151b3abb88eda1d4e34a9814df37de2a80e301e68ba0fd856fb9b46bfbbbffb"},
 ]
 "sniffio 1.3.0" = [
     {url = "https://files.pythonhosted.org/packages/c3/a0/5dba8ed157b0136607c7f2151db695885606968d1fae123dc3391e0cfdbf/sniffio-1.3.0-py3-none-any.whl", hash = "sha256:eecefdce1e5bbfb7ad2eeaabf7c1eeb404d7757c379bd1f7e5cce9d8bf425384"},
@@ -495,6 +643,10 @@ content_hash = "sha256:505f6c1c48692e4f30feb5c50207f6d093e558a51b51c991d6ea7fc55
 "tomli 2.0.1" = [
     {url = "https://files.pythonhosted.org/packages/97/75/10a9ebee3fd790d20926a90a2547f0bf78f371b2f13aa822c759680ca7b9/tomli-2.0.1-py3-none-any.whl", hash = "sha256:939de3e7a6161af0c887ef91b7d41a53e7c5a1ca976325f429cb46ea9bc30ecc"},
     {url = "https://files.pythonhosted.org/packages/c0/3f/d7af728f075fb08564c5949a9c95e44352e23dee646869fa104a3b2060a3/tomli-2.0.1.tar.gz", hash = "sha256:de526c12914f0c550d15924c62d72abc48d6fe7364aa87328337a31007fe8a4f"},
+]
+"tortoise-orm 0.19.3" = [
+    {url = "https://files.pythonhosted.org/packages/58/cf/286eb8997113dd04a61c430b5a0d3b2aef9ee51031440d18357bf21740a9/tortoise_orm-0.19.3-py3-none-any.whl", hash = "sha256:9e368820c70a0866ef9c521d43aa5503485bd7a20a561edc0933b7b0f7036fbc"},
+    {url = "https://files.pythonhosted.org/packages/8a/47/4369c766243067776b4899b1041281d0fc2452b67a0d5a4b7ac72f3e962f/tortoise_orm-0.19.3.tar.gz", hash = "sha256:ca574bca5191f55608f9013314b1f5d1c6ffd4165a1fcc2f60f6c902f529b3b6"},
 ]
 "typing-extensions 4.6.3" = [
     {url = "https://files.pythonhosted.org/packages/42/56/cfaa7a5281734dadc842f3a22e50447c675a1c5a5b9f6ad8a07b467bffe7/typing_extensions-4.6.3.tar.gz", hash = "sha256:d91d5919357fe7f681a9f2b5b4cb2a5f1ef0a1e9f59c4d8ff0d3491e05c0ffd5"},

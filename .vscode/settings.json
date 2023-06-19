@@ -1,7 +1,7 @@
 {
     "python.analysis.completeFunctionParens": true,
     "python.analysis.typeCheckingMode": "basic",
-    "python.formatting.provider": "black",
+    "python.formatting.provider": "none",
     "python.languageServer": "Pylance",
     "python.linting.flake8Enabled": true,
     "python.sortImports.args": [
@@ -20,7 +20,8 @@
         "editor.codeActionsOnSave": {
             "source.organizeImports": true,
             "source.fixAll": true
-        }
+        },
+        "editor.defaultFormatter": "ms-python.black-formatter"
     },
     "autoDocstring.customTemplatePath": ".vscode/docstring.mustache",
     "files.encoding": "utf8",
