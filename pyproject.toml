@@ -1,6 +1,6 @@
 [project]
 name = "nonebot-plugin-setu-now"
-version = "0.5.1"
+version = "0.6.0.beta.1"
 description = "另一个色图插件"
 authors = [
     {name = "kexue", email = "xana278@foxmail.com"},
@@ -12,6 +12,7 @@ dependencies = [
     "pydantic>=1.5.0",
     "pillow>=8.0.0",
     "nonebot-plugin-tortoise-orm>=0.0.1a3",
+    "nonebot-plugin-localstore>=0.5.0",
 ]
 requires-python = ">=3.8,<4.0"
 readme = "README.md"

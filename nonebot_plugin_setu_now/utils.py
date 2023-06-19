@@ -1,14 +1,14 @@
-import asyncio
 import time
-from pathlib import Path
+import asyncio
 from typing import List, Optional
+from pathlib import Path
 
 from httpx import AsyncClient
 from nonebot import require
-from nonebot.adapters.onebot.v11 import Bot, GroupMessageEvent, Message
 from nonebot.log import logger
+from nonebot.adapters.onebot.v11 import Bot, Message, GroupMessageEvent
 
-from .config import SEND_INTERVAL, SETU_PATH
+from .config import SETU_PATH, SEND_INTERVAL
 from .perf_timer import PerfTimer
 
 require("nonebot_plugin_localstore")

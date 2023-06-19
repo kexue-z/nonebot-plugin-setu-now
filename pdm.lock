@@ -128,6 +128,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "nonebot-plugin-localstore"
+version = "0.5.0"
+requires_python = ">=3.8,<4.0"
+summary = "Local Storage Support for NoneBot2"
+dependencies = [
+    "nonebot2<3.0.0,>=2.0.0",
+    "typing-extensions>=4.0.0",
+]
+
+[[package]]
 name = "nonebot-plugin-tortoise-orm"
 version = "0.0.1a3"
 requires_python = ">=3.7.3,<4.0.0"
@@ -268,7 +278,7 @@ dependencies = [
 lock_version = "4.2"
 cross_platform = true
 groups = ["default"]
-content_hash = "sha256:6dd9d0a8c06242f897b2b15ec89bf93dae5f6143ec4d8962bbf79d2af66d88f5"
+content_hash = "sha256:b92750561a80259173c2622e488be2a6580025597c185a29b5928a1b214d98d1"
 
 [metadata.files]
 "aiomysql 0.1.1" = [
@@ -501,6 +511,10 @@ content_hash = "sha256:6dd9d0a8c06242f897b2b15ec89bf93dae5f6143ec4d8962bbf79d2af
 "nonebot-adapter-onebot 2.2.3" = [
     {url = "https://files.pythonhosted.org/packages/60/12/253510c7c117cad35d3c5edc50b6e85898ee7dbf7b25850f9787229e59c0/nonebot_adapter_onebot-2.2.3.tar.gz", hash = "sha256:e0ac165536a24f7c5e620092ab596022e8f85d462c17ec8d7a17b191093b4859"},
     {url = "https://files.pythonhosted.org/packages/eb/37/68ce09f3f10db4487190de8e377bfffd1b8ee94c21e734c2ee0fd52e35c4/nonebot_adapter_onebot-2.2.3-py3-none-any.whl", hash = "sha256:e715e05578cb58cf42adddb0bac6c060a6ea7c9b2f18e6f011786bbc2bc8d0bd"},
+]
+"nonebot-plugin-localstore 0.5.0" = [
+    {url = "https://files.pythonhosted.org/packages/02/b5/d5d93672d6e93c976acc3b48730bbeae06d5c2c6f0f6b9e2407d52e60143/nonebot_plugin_localstore-0.5.0.tar.gz", hash = "sha256:0099d99c427b13c52b6a23588b954dc8651c0b0b556d743f36aa2dd246576611"},
+    {url = "https://files.pythonhosted.org/packages/7c/21/b653d8801ef1172da2a467bbb9d9813787c7343f370e175515f4bff23ba1/nonebot_plugin_localstore-0.5.0-py3-none-any.whl", hash = "sha256:31ada7d363bdc9326e14f054d02f2c8cee58ec7a970e534ac2793d75b818cf95"},
 ]
 "nonebot-plugin-tortoise-orm 0.0.1a3" = [
     {url = "https://files.pythonhosted.org/packages/8d/f4/984ab4f1458d72a0978cb34b36aa47f4a951bee7c8fedd60f1fbc97834f6/nonebot_plugin_tortoise_orm-0.0.1a3-py3-none-any.whl", hash = "sha256:9b03f09d0dc24cb4f018467c98bcd0d1c10978e48e44036fc2836a545734d0a7"},
