@@ -1,31 +1,35 @@
-[tool.poetry]
+[project]
 name = "nonebot-plugin-setu-now"
-version = "0.5.0-alpha.2"
+version = "0.5.1"
 description = "另一个色图插件"
-authors = ["kexue <x@kexue-cloud.cn>"]
-license = "MIT"
+authors = [
+    {name = "kexue", email = "xana278@foxmail.com"},
+]
+dependencies = [
+    "httpx<1.0.0,>=0.18.0",
+    "nonebot2>=2.0.0",
+    "nonebot-adapter-onebot>=2.0.0",
+    "pydantic>=1.5.0",
+    "pillow>=8.0.0",
+]
+requires-python = ">=3.8,<4.0"
 readme = "README.md"
+license = {text = "MIT"}
+
+[project.urls]
 homepage = "https://github.com/kexue-z/nonebot-plugin-setu-now"
 
-[tool.poetry.dependencies]
-python = "^3.8"
-httpx = ">=0.18.0,<1.0.0"
-nonebot2 = ">=2.0.0"
-nonebot-adapter-onebot = ">=2.0.0-beta.1"
-pydantic = ">=1.5.0"
-pillow = ">=8.0.0"
-nonebot-plugin-datastore = ">=0.6.0"
-nonebot-plugin-localstore = ">=0.3.0"
-
-[tool.poetry.group.dev.dependencies]
+[project.group.dev.dependencies]
 isort = "^5.12.0"
 flake8 = "^4.0.1"
 black = "^22.3.0"
 
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+[tool.pdm.build]
+includes = []
 
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
 
 [tool.isort]
 profile = "black"
