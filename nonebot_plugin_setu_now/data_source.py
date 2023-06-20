@@ -4,16 +4,11 @@ from pathlib import Path
 
 import nonebot_plugin_localstore as store
 from httpx import AsyncClient
-
-from nonebot import require
 from nonebot.log import logger
 
 from .utils import download_pic
 from .config import PROXY, API_URL, SETU_SIZE, REVERSE_PROXY
 from .models import Setu, SetuApiData, SetuNotFindError
-
-
-require("nonebot_plugin_tortoise_orm")
 
 CACHE_PATH = Path(store.get_cache_dir("nonebot_plugin_setu_now"))
 if not CACHE_PATH.exists():

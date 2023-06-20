@@ -1,11 +1,7 @@
 from tortoise import fields
-
-from nonebot.plugin import require
 from tortoise.models import Model
 
 from .data_source import SETU_SIZE, Setu
-
-require("nonebot_plugin_tortoise_orm")
 
 
 class SetuInfo(Model):

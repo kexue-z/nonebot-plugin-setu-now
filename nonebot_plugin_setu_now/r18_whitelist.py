@@ -1,6 +1,3 @@
-from nonebot import require
-
-
 from nonebot.log import logger
 
 from nonebot.plugin.on import on_command
@@ -8,8 +5,6 @@ from nonebot.permission import SUPERUSER
 from nonebot.adapters.onebot.v11 import MessageEvent, GroupMessageEvent
 
 from .database import GroupWhiteListRecord
-
-require("nonebot_plugin_tortoise_orm")
 
 
 async def get_group_white_list_record(
@@ -28,7 +23,6 @@ r18_activate_matcher = on_command(
 
 @r18_activate_matcher.handle()
 async def _(event: GroupMessageEvent):
-
     if _ := await GroupWhiteListRecord.get_or_none(group_id=event.group_id):
         logger.debug("已有白名单记录")
 

@@ -3,17 +3,13 @@ import asyncio
 from typing import List, Optional
 from pathlib import Path
 
+import nonebot_plugin_localstore as store
 from httpx import AsyncClient
-from nonebot import require
 from nonebot.log import logger
 from nonebot.adapters.onebot.v11 import Bot, Message, GroupMessageEvent
 
 from .config import SETU_PATH, SEND_INTERVAL
 from .perf_timer import PerfTimer
-
-require("nonebot_plugin_localstore")
-
-import nonebot_plugin_localstore as store
 
 
 async def download_pic(

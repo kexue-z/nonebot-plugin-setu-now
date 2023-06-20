@@ -47,6 +47,7 @@ __plugin_meta__ = PluginMetadata(
 
 require("nonebot_plugin_localstore")
 require("nonebot_plugin_tortoise_orm")
+
 from nonebot_plugin_tortoise_orm import add_model
 
 add_model("nonebot_plugin_setu_now.database")
@@ -205,7 +206,6 @@ async def _(
         await setuinfo_matcher.finish("未找到该插画相关信息")
 
     if setu_info := await SetuInfo.get_or_none(pid=message_pid):
-
         info_message = MessageSegment.text(f"标题：{setu_info.title}\n")
         info_message += MessageSegment.text(f"画师：{setu_info.author}\n")
         info_message += MessageSegment.text(f"PID：{setu_info.pid}")
