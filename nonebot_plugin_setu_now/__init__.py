@@ -1,3 +1,8 @@
+from nonebot import require
+
+require("nonebot_plugin_localstore")
+require("nonebot_plugin_tortoise_orm")
+
 import asyncio
 from re import I, sub
 from typing import Any, Union, Annotated
@@ -7,7 +12,7 @@ from PIL import UnidentifiedImageError
 from nonebot import on_regex, on_command
 from nonebot.log import logger
 from nonebot.params import Depends, RegexGroup
-from nonebot.plugin import PluginMetadata, require
+from nonebot.plugin import PluginMetadata
 from nonebot.exception import ActionFailed
 from nonebot.adapters.onebot.v11 import (
     GROUP,
@@ -19,6 +24,7 @@ from nonebot.adapters.onebot.v11 import (
     GroupMessageEvent,
     PrivateMessageEvent,
 )
+from nonebot_plugin_tortoise_orm import add_model
 from nonebot.adapters.onebot.v11.helpers import (
     Cooldown,
     CooldownIsolateLevel,
@@ -45,10 +51,6 @@ __plugin_meta__ = PluginMetadata(
     extra={},
 )
 
-require("nonebot_plugin_localstore")
-require("nonebot_plugin_tortoise_orm")
-
-from nonebot_plugin_tortoise_orm import add_model
 
 add_model("nonebot_plugin_setu_now.database")
 
