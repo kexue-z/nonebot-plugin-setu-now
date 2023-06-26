@@ -1,3 +1,8 @@
+from nonebot import require
+
+require("nonebot_plugin_localstore")
+require("nonebot_plugin_tortoise_orm")
+
 import asyncio
 from re import I, sub
 from typing import Any, Union, Annotated
@@ -5,10 +10,9 @@ from pathlib import Path
 
 from PIL import UnidentifiedImageError
 from nonebot import on_regex, on_command
-from sqlalchemy import select
 from nonebot.log import logger
 from nonebot.params import Depends, RegexGroup
-from nonebot.plugin import require
+from nonebot.plugin import PluginMetadata
 from nonebot.exception import ActionFailed
 from nonebot.adapters.onebot.v11 import (
     GROUP,
@@ -20,7 +24,7 @@ from nonebot.adapters.onebot.v11 import (
     GroupMessageEvent,
     PrivateMessageEvent,
 )
-from sqlalchemy.ext.asyncio.session import AsyncSession
+from nonebot_plugin_tortoise_orm import add_model
 from nonebot.adapters.onebot.v11.helpers import (
     Cooldown,
     CooldownIsolateLevel,
@@ -28,18 +32,27 @@ from nonebot.adapters.onebot.v11.helpers import (
 )
 
 from .utils import SpeedLimiter
-from .config import MAX, CDTIME, EFFECT, SETU_PATH, WITHDRAW_TIME
-from .models import Setu, SetuInfo, MessageInfo, SetuNotFindError
-from .database import bind_message_data, auto_upgrade_setuinfo
+from .config import MAX, CDTIME, EFFECT, SETU_PATH, WITHDRAW_TIME, Config
+from .models import Setu, SetuNotFindError
+from .database import SetuInfo, MessageInfo, bind_message_data, auto_upgrade_setuinfo
 from .img_utils import EFFECT_FUNC_LIST, image_segment_convert
 from .perf_timer import PerfTimer
 from .data_source import SetuHandler
 from .r18_whitelist import get_group_white_list_record
 
-require("nonebot_plugin_localstore")
-require("nonebot_plugin_datastore")
+usage_msg = """TL;DR: 色图 或 看文档"""
 
-from nonebot_plugin_datastore import get_session, create_session
+__plugin_meta__ = PluginMetadata(
+    name="nonebot-plugin-setu-now",
+    description="另一个色图插件",
+    usage=usage_msg,
+    type="application",
+    config=Config,
+    extra={},
+)
+
+
+add_model("nonebot_plugin_setu_now.database")
 
 global_speedlimiter = SpeedLimiter()
 
@@ -129,9 +142,9 @@ async def _(
                 if not WITHDRAW_TIME:
                     # 未设置撤回时间 正常发送
                     message_id: int = (await setu_matcher.send(msg))["message_id"]
-                    async with create_session() as temp_db_session:
-                        await auto_upgrade_setuinfo(temp_db_session, setu)
-                        await bind_message_data(temp_db_session, message_id, setu.pid)
+
+                    await auto_upgrade_setuinfo(setu)
+                    await bind_message_data(message_id, setu.pid)
                     logger.debug(f"Message ID: {message_id}")
                 else:
                     logger.debug(f"Using auto revoke API, interval: {WITHDRAW_TIME}")
@@ -175,27 +188,30 @@ setuinfo_matcher = on_command("信息")
 @setuinfo_matcher.handle()
 async def _(
     event: MessageEvent,
-    db_session: AsyncSession = Depends(get_session),
 ):
     logger.debug("Running setu info handler")
     event_message = event.original_message
     reply_segment = event_message["reply"]
+
     if reply_segment == []:
         logger.debug("Command invalid: Not specified setu info to get!")
         await setuinfo_matcher.finish("请直接回复需要作品信息的插画")
+
     reply_segment = reply_segment[0]
     reply_message_id = reply_segment.data["id"]
+
     logger.debug(f"Get setu info for message id: {reply_message_id}")
-    statement = select(MessageInfo).where(MessageInfo.message_id == reply_message_id)
-    messageinfo_result: MessageInfo = (await db_session.scalars(statement)).first()  # type: ignore
-    if not messageinfo_result:
+
+    if message_info := await MessageInfo.get_or_none(message_id=reply_message_id):
+        message_pid = message_info.pid
+    else:
         await setuinfo_matcher.finish("未找到该插画相关信息")
-    message_pid = messageinfo_result.pid
-    statement = select(SetuInfo).where(SetuInfo.pid == message_pid)
-    setu_info = (await db_session.scalars(statement)).first()  # type: ignore
-    if not setu_info:
+
+    if setu_info := await SetuInfo.get_or_none(pid=message_pid):
+        info_message = MessageSegment.text(f"标题：{setu_info.title}\n")
+        info_message += MessageSegment.text(f"画师：{setu_info.author}\n")
+        info_message += MessageSegment.text(f"PID：{setu_info.pid}")
+
+        await setu_matcher.finish(MessageSegment.reply(reply_message_id) + info_message)
+    else:
         await setuinfo_matcher.finish("该插画相关信息已被移除")
-    info_message = MessageSegment.text(f"标题：{setu_info.title}\n")
-    info_message += MessageSegment.text(f"画师：{setu_info.author}\n")
-    info_message += MessageSegment.text(f"PID：{setu_info.pid}")
-    await setu_matcher.finish(MessageSegment.reply(reply_message_id) + info_message)

@@ -1,18 +1,14 @@
+from typing import List, Callable
 from asyncio import gather
 from pathlib import Path
-from typing import Callable, List
-
-from httpx import AsyncClient
-from nonebot import require
-from nonebot.log import logger
-
-from .config import API_URL, EFFECT, PROXY, REVERSE_PROXY, SETU_SIZE
-from .models import Setu, SetuApiData, SetuNotFindError
-from .utils import download_pic
-
-require("nonebot_plugin_localstore")
 
 import nonebot_plugin_localstore as store
+from httpx import AsyncClient
+from nonebot.log import logger
+
+from .utils import download_pic
+from .config import PROXY, API_URL, SETU_SIZE, REVERSE_PROXY
+from .models import Setu, SetuApiData, SetuNotFindError
 
 CACHE_PATH = Path(store.get_cache_dir("nonebot_plugin_setu_now"))
 if not CACHE_PATH.exists():
