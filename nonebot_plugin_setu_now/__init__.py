@@ -47,6 +47,7 @@ __plugin_meta__ = PluginMetadata(
     description="另一个色图插件",
     usage=usage_msg,
     type="application",
+    homepage="https://github.com/kexue-z/nonebot-plugin-setu-now",
     config=Config,
     extra={},
 )

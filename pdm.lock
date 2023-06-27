@@ -285,7 +285,7 @@ dependencies = [
 lock_version = "4.2"
 cross_platform = true
 groups = ["default"]
-content_hash = "sha256:b92750561a80259173c2622e488be2a6580025597c185a29b5928a1b214d98d1"
+content_hash = "sha256:f5f17cdfff1b36af544e580bfc7ea9f372974ef2bedfa27b38e4d401ca483236"
 
 [metadata.files]
 "aiosqlite 0.17.0" = [
