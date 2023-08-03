@@ -1,12 +1,13 @@
 from io import BytesIO
-from pathlib import Path
 from random import choice, randint
 from typing import Union
+from pathlib import Path
 
-from nonebot.adapters.onebot.v11 import MessageSegment
-from nonebot.log import logger
 from PIL import Image, ImageFilter
+from nonebot.log import logger
+from nonebot.adapters.onebot.v11 import MessageSegment
 
+from .config import SEND_AS_BYTES
 from .perf_timer import PerfTimer
 
 
@@ -117,7 +118,11 @@ def do_nothing(img: Path) -> Path:
 
 def image_segment_convert(img: Union[Path, Image.Image, bytes]) -> MessageSegment:
     if isinstance(img, Path):
-        return MessageSegment.image(img)
+        # 将图片读取
+        if SEND_AS_BYTES:
+            img = Image.open(img)
+        else:
+            return MessageSegment.image(img)
     elif isinstance(img, bytes):
         img = Image.open(BytesIO(img))
     elif isinstance(img, Image.Image):
