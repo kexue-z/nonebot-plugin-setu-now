@@ -1,6 +1,6 @@
 [project]
 name = "nonebot-plugin-setu-now"
-version = "0.6.3"
+version = "0.6.4"
 description = "另一个色图插件"
 authors = [{ name = "kexue", email = "xana278@foxmail.com" }]
 dependencies = [
@@ -14,7 +14,9 @@ dependencies = [
 ]
 requires-python = ">=3.8,<4.0"
 readme = "README.md"
-license = { text = "MIT" }
+license = { file = "LICENSE" }
+keywords = ["nonebot2"]
+
 
 [project.urls]
 homepage = "https://github.com/kexue-z/nonebot-plugin-setu-now"
