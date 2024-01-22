@@ -17,7 +17,7 @@ class Config(BaseModel, extra=Extra.ignore):
     setu_max: int = 30
     setu_add_random_effect: bool = True
     setu_minimum_send_interval: int = 3
-    setu_send_as_bytes: bool = False
+    setu_send_as_bytes: bool = True
 
 
 plugin_config = Config.parse_obj(get_driver().config.dict())
