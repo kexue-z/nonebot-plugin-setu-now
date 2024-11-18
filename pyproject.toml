@@ -4,11 +4,11 @@ version = "0.6.4"
 description = "另一个色图插件"
 authors = [{ name = "kexue", email = "xana278@foxmail.com" }]
 dependencies = [
-    "httpx<1.0.0,>=0.18.0",
+    "httpx>=0.18.0",
     "nonebot2>=2.0.0",
     "nonebot-adapter-onebot>=2.0.0",
-    "pydantic>=1.5.0",
-    "pillow>=8.0.0",
+    "pydantic",
+    "pillow>=11.0.0",
     "nonebot-plugin-tortoise-orm>=0.1.0",
     "nonebot-plugin-localstore>=0.5.0",
 ]
@@ -21,17 +21,10 @@ keywords = ["nonebot2"]
 [project.urls]
 homepage = "https://github.com/kexue-z/nonebot-plugin-setu-now"
 
-[project.group.dev.dependencies]
-isort = "^5.12.0"
-flake8 = "^4.0.1"
-black = "^22.3.0"
-
-[tool.pdm.build]
-includes = []
 
 [build-system]
-requires = ["pdm-backend"]
-build-backend = "pdm.backend"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.isort]
-profile = "black"
+[tool.ruff]
+ignore = ["E402"]

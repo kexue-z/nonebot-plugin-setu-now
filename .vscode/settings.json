@@ -1,12 +1,4 @@
 {
-    "python.analysis.completeFunctionParens": true,
-    "python.analysis.typeCheckingMode": "basic",
-    "python.formatting.provider": "none",
-    "python.languageServer": "Pylance",
-    "python.linting.flake8Enabled": true,
-    "python.sortImports.args": [
-        "--ls"
-    ],
     "editor.formatOnSave": true,
     "files.watcherExclude": {
         "**/.git/objects/**": true,
@@ -14,14 +6,7 @@
         "**/node_modules/**": true,
         "**/.hg/store/**": true,
         "**/.venv/**": true,
-        "**/.mypy_cache/**": true,
-    },
-    "[python]": {
-        "editor.codeActionsOnSave": {
-            "source.organizeImports": true,
-            "source.fixAll": true
-        },
-        "editor.defaultFormatter": "ms-python.black-formatter"
+        "**/.mypy_cache/**": true
     },
     "autoDocstring.customTemplatePath": ".vscode/docstring.mustache",
     "files.encoding": "utf8",
@@ -32,6 +17,7 @@
         ".venv": true,
         ".mypy_cache": true,
         "poetry.lock": true,
-        "LICENSE": true,
+        "LICENSE": true
     },
+    "ruff.enable": true
 }
