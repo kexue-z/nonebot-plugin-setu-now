@@ -476,8 +476,8 @@ wheels = [
 
 [[package]]
 name = "nonebot-plugin-setu-now"
-version = "0.6.4"
-source = { virtual = "." }
+version = "0.6.5.1"
+source = { editable = "." }
 dependencies = [
     { name = "httpx" },
     { name = "nonebot-adapter-onebot" },
@@ -495,8 +495,8 @@ requires-dist = [
     { name = "nonebot-plugin-localstore", specifier = ">=0.5.0" },
     { name = "nonebot-plugin-tortoise-orm", specifier = ">=0.1.0" },
     { name = "nonebot2", specifier = ">=2.0.0" },
-    { name = "pillow", specifier = ">=8.0.0" },
-    { name = "pydantic" },
+    { name = "pillow", specifier = ">=10.4.0" },
+    { name = "pydantic", specifier = ">=2.9.2" },
 ]
 
 [[package]]
