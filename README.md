@@ -75,6 +75,7 @@ setu_max=
 setu_add_random_effect=
 setu_minimum_send_interval=
 setu_send_as_bytes=
+setu_excludeAI=
 ```
 
 
@@ -91,6 +92,9 @@ setu_send_as_bytes=
 - `setu_send_as_bytes` 以bytes方式发送到客户端，默认 `False` ，
   - `True` ：Nonebot将会读取临时路径下的图片，并传到gocq等客户端。速度较慢
   - `False` : 将会直接传输文件路径到gocq等客户端，并让客户端来读取。速度较快。如果 gocq 与 Nonebot 处于容器中，并且没有设定共享路径，则客户端将会无法读取图片，导致发送失败。
+- `setu_excludeAI` 排除 AI 生成的图片 默认 `False`
+  - `True` ：排除 AI 生成的图片
+  - `False` : 不排除 AI 生成的图片
 
 > 有配置均可选，按需填写
 

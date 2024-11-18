@@ -32,7 +32,7 @@ from nonebot.adapters.onebot.v11.helpers import (
 )
 
 from .utils import SpeedLimiter
-from .config import MAX, CDTIME, EFFECT, SETU_PATH, WITHDRAW_TIME, Config
+from .config import MAX, CDTIME, EFFECT, SETU_PATH, WITHDRAW_TIME, Config, EXCLUDEAI
 from .models import Setu, SetuNotFindError
 from .database import SetuInfo, MessageInfo, bind_message_data, auto_upgrade_setuinfo
 from .img_utils import EFFECT_FUNC_LIST, image_segment_convert
@@ -57,6 +57,7 @@ add_model("nonebot_plugin_setu_now.database")
 
 global_speedlimiter = SpeedLimiter()
 
+# TODO: 不要用regex辣
 setu_matcher = on_regex(
     r"^(setu|色图|涩图|来点色色|色色|涩涩|来点色图)\s?([x|✖️|×|X|*]?\d+[张|个|份]?)?\s?(r18)?\s?\s?(tag)?\s?(.*)?",
     flags=I,
@@ -104,7 +105,9 @@ async def _(
             r18 = True
         elif isinstance(event, GroupMessageEvent):
             if white_list_record is None:
-                await setu_matcher.finish("不可以涩涩！\n本群未启用R18支持\n请移除R18标签或联系维护组")
+                await setu_matcher.finish(
+                    "不可以涩涩！\n本群未启用R18支持\n请移除R18标签或联系维护组"
+                )
             r18 = True
 
     if r18:
@@ -171,7 +174,7 @@ async def _(
         if SETU_PATH is None:  # 未设置缓存路径，删除缓存
             Path(setu.img).unlink()
 
-    setu_handler = SetuHandler(key, tags, r18, num, nb_send_handler)
+    setu_handler = SetuHandler(key, tags, r18, num, nb_send_handler, EXCLUDEAI)
     try:
         await setu_handler.process_request()
     except SetuNotFindError:
