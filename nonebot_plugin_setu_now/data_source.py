@@ -65,7 +65,7 @@ class SetuHandler:
     async def prep_handler(self, setu: Setu):
         setu.img = await download_pic(
             url=setu.urls[SETU_SIZE],
-            proxies=self.proxy,
+            proxy=self.proxy,
             file_mode=True,
             file_name=f"{setu.pid}.{setu.ext}",
         )
