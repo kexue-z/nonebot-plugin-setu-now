@@ -16,7 +16,6 @@
         "**/__pycache__": true,
         ".venv": true,
         ".mypy_cache": true,
-        "poetry.lock": true,
         "LICENSE": true
     },
     "ruff.enable": true

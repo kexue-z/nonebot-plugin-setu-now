@@ -47,5 +47,3 @@ class SetuMessage(BaseModel):
 
 class SetuNotFindError(Exception):
     pass
-
-

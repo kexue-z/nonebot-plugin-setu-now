@@ -1,16 +1,15 @@
-from typing import Optional
+from pydantic import BaseModel
+from nonebot import get_plugin_config
+from typing import Set
 
-from nonebot import get_driver
-from pydantic import Extra, BaseModel
 
-
-class Config(BaseModel, extra=Extra.ignore):
-    superusers: set
-    debug: Optional[bool] = False
+class Config(BaseModel):
+    superusers: Set[str]
+    debug: bool = False
     setu_cd: int = 60
-    setu_path: Optional[str] = None
-    setu_proxy: Optional[str] = None
-    setu_withdraw: Optional[int] = None
+    setu_path: str | None = None
+    setu_proxy: str | None = None
+    setu_withdraw: int | None = None
     setu_reverse_proxy: str = "i.pixiv.re"
     setu_size: str = "regular"
     setu_api_url: str = "https://api.lolicon.app/setu/v2"
@@ -21,7 +20,7 @@ class Config(BaseModel, extra=Extra.ignore):
     setu_excludeAI: bool = False
 
 
-plugin_config = Config.parse_obj(get_driver().config.dict())
+plugin_config = get_plugin_config(Config)
 CDTIME = plugin_config.setu_cd
 SETU_PATH = plugin_config.setu_path
 PROXY = plugin_config.setu_proxy

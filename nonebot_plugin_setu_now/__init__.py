@@ -95,7 +95,7 @@ async def _(
 
     # 如果存在 tag 关键字, 则将 key 视为tag
     if tags:
-        tags = list(map(lambda l: l.split("或"), key.split()))
+        tags = list(map(lambda _l: _l.split("或"), key.split()))
         key = ""
 
     # 仅在私聊中开启

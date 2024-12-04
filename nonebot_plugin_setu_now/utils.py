@@ -13,7 +13,7 @@ from .perf_timer import PerfTimer
 
 
 async def download_pic(
-    url: str, proxies: Optional[str] = None, file_mode=False, file_name=""
+    url: str, proxy: Optional[str] = None, file_mode=False, file_name=""
 ) -> Optional[Path]:
     headers = {
         "Referer": "https://accounts.pixiv.net/login?lang=zh&source=pc&view_type=page&ref=wwwtop_accounts_index",
@@ -26,9 +26,11 @@ async def download_pic(
         if SETU_PATH is None
         else Path(SETU_PATH, file_name)
     )
-    client = AsyncClient(proxies=proxies, timeout=5)
+    client = AsyncClient(proxy=proxy, timeout=5)
     try:
-        async with client.stream(method="GET", url=url, headers=headers, timeout=15) as response:  # type: ignore # params={"proxies": [proxies]}
+        async with client.stream(
+            method="GET", url=url, headers=headers, timeout=15
+        ) as response:
             if response.status_code != 200:
                 logger.warning(
                     f"Image respond status code error: {response.status_code}"

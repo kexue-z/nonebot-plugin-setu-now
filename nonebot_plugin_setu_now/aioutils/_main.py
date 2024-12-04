@@ -123,7 +123,7 @@ def asyncify(
     function: Callable[T_ParamSpec, T_Retval],
     *,
     cancellable: bool = False,
-    limiter: Optional[anyio.CapacityLimiter] = None
+    limiter: Optional[anyio.CapacityLimiter] = None,
 ) -> Callable[T_ParamSpec, Awaitable[T_Retval]]:
     async def wrapper(
         *args: T_ParamSpec.args, **kwargs: T_ParamSpec.kwargs

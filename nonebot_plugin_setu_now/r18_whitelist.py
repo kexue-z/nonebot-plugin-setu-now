@@ -18,7 +18,9 @@ async def get_group_white_list_record(
 
 
 r18_activate_matcher = on_command(
-    "开启涩涩", aliases={"可以涩涩", "开启色色", "可以色色", "r18开启"}, permission=SUPERUSER
+    "开启涩涩",
+    aliases={"可以涩涩", "开启色色", "可以色色", "r18开启"},
+    permission=SUPERUSER,
 )
 
 
@@ -37,7 +39,9 @@ async def _(event: GroupMessageEvent):
 
 
 r18_deactivate_matcher = on_command(
-    "关闭涩涩", aliases={"不可以涩涩", "关闭色色", "不可以色色", "r18关闭"}, permission=SUPERUSER
+    "关闭涩涩",
+    aliases={"不可以涩涩", "关闭色色", "不可以色色", "r18关闭"},
+    permission=SUPERUSER,
 )
 
 

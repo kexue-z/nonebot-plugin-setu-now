@@ -18,7 +18,13 @@ if not CACHE_PATH.exists():
 
 class SetuHandler:
     def __init__(
-        self, key: str, tags: List[str], r18: bool, num: int, handler: Callable, excludeAI: bool = False
+        self,
+        key: str,
+        tags: List[str],
+        r18: bool,
+        num: int,
+        handler: Callable,
+        excludeAI: bool = False,
     ) -> None:
         self.key = key
         self.tags = tags
@@ -40,11 +46,11 @@ class SetuHandler:
             "proxy": self.reverse_proxy_url,
             "num": self.num,
             "size": self.size,
-            "excludeAI" : self.excludeAI
+            "excludeAI": self.excludeAI,
         }
         headers = {"Content-Type": "application/json"}
 
-        async with AsyncClient(proxies=self.proxy) as client:  # type: ignore
+        async with AsyncClient(proxy=self.proxy) as client:
             res = await client.post(
                 self.api_url, json=data, headers=headers, timeout=60
             )
