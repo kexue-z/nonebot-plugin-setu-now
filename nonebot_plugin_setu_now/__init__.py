@@ -15,9 +15,14 @@ from nonebot_plugin_alconna import Arparma, CommandMeta, UniMessage, on_alconna
 from nonebot_plugin_uninfo import Uninfo
 from PIL import UnidentifiedImageError
 
-from .config import CDTIME, EFFECT, EXCLUDEAI, MAX, SETU_PATH, WITHDRAW_TIME, Config
+from .config import EFFECT, EXCLUDEAI, MAX, SETU_PATH, WITHDRAW_TIME, Config
+from .cooldown import Cooldown
 from .data_source import SetuHandler
-from .database import MessageInfo, SetuInfo, auto_upgrade_setuinfo, bind_message_data
+from .database import (
+    CooldownRecord,
+    auto_upgrade_setuinfo,
+    bind_message_data,
+)
 from .img_utils import EFFECT_FUNC_LIST, pil2bytes
 from .models import Setu, SetuNotFindError
 from .perf_timer import PerfTimer
@@ -67,20 +72,19 @@ setu_matcher = on_alconna(
 
 
 # TODO: CD 限制 群聊白名单限制
-@setu_matcher.handle(
-    # parameterless=[
-    #     Cooldown(
-    #         cooldown=CDTIME,
-    #         prompt="你冲得太快啦，请稍后再试",
-    #         isolate_level=CooldownIsolateLevel.USER,
-    #     )
-    # ]
-)
+@setu_matcher.handle()
 async def _(
     session: Uninfo,
     result: Arparma,
+    is_cooldown: bool = Depends(Cooldown),
     # white_list_record=Depends(get_group_white_list_record),
 ):
+    # is_cooldown: True 表示冷却完成
+    if not is_cooldown:
+        await UniMessage.text("你冲得太快啦，请稍后再试").send(reply_to=True)
+        await setu_matcher.finish()
+
+    await CooldownRecord.set_last_use_time(session.user.id)
     # 解析参数
     num = min(result.main_args.get("num", 1), MAX)
     key = result.main_args.get("key", "")
@@ -172,6 +176,10 @@ async def _(
         await setu_matcher.send(
             message=UniMessage.text(f"{failure_msg} 张图片消失了喵"),
         )
+
+    if failure_msg == num:
+        await CooldownRecord.delete_record(session.user.id)
+
     setu_total_timer.stop()
 
 

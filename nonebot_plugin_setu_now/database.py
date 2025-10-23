@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from nonebot_plugin_orm import Model, get_session
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Mapped, mapped_column
@@ -56,3 +58,74 @@ async def bind_message_data(message_id: int, pid: int):
 class GroupWhiteListRecord(Model):
     group_id: Mapped[int] = mapped_column(primary_key=True)
     operator_user_id: Mapped[int]
+
+
+class CooldownRecord(Model):
+    """冷却时间记录表"""
+
+    user_id: Mapped[str] = mapped_column(primary_key=True)
+    last_use_time: Mapped[datetime]
+
+    @classmethod
+    async def check_is_cooldown(cls, user_id: str, cd: int) -> bool:
+        """检测用户是否冷却完成
+
+        Args:
+            user_id: 用户ID
+            cd: 冷却时间（秒）
+
+        Returns:
+            bool: 是否冷却完成（True表示冷却完成，False表示还在冷却中）
+        """
+        async with get_session() as session:
+            session: AsyncSession
+            record = await session.get(cls, user_id)
+
+            if not record:
+                return True
+
+            # 检查是否超过冷却时间
+            time_diff = datetime.now() - record.last_use_time
+            return time_diff.total_seconds() >= cd
+
+    @classmethod
+    async def set_last_use_time(cls, user_id: str) -> None:
+        """设置用户的上次使用时间
+
+        Args:
+            user_id: 用户ID
+        """
+        async with get_session() as session:
+            session: AsyncSession
+            record = await session.get(cls, user_id)
+
+            if not record:
+                # 创建新记录
+                record = cls(user_id=user_id, last_use_time=datetime.now())
+                session.add(record)
+            else:
+                # 更新现有记录
+                record.last_use_time = datetime.now()
+
+            await session.commit()
+
+    @classmethod
+    async def delete_record(cls, user_id: str) -> bool:
+        """删除用户的冷却记录
+
+        Args:
+            user_id: 用户ID
+
+        Returns:
+            bool: 是否成功删除记录（True表示删除成功，False表示记录不存在）
+        """
+        async with get_session() as session:
+            session: AsyncSession
+            record = await session.get(cls, user_id)
+
+            if not record:
+                return False
+
+            await session.delete(record)
+            await session.commit()
+            return True
