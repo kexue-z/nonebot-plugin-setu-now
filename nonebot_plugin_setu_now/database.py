@@ -56,8 +56,62 @@ async def bind_message_data(message_id: int, pid: int):
 
 
 class GroupWhiteListRecord(Model):
-    group_id: Mapped[int] = mapped_column(primary_key=True)
-    operator_user_id: Mapped[int]
+    group_id: Mapped[str] = mapped_column(primary_key=True)
+    operator_user_id: Mapped[str]
+
+    @classmethod
+    async def activate(cls, group_id: str, operator_user_id: str) -> bool:
+        """激活群白名单
+
+        Args:
+            group_id: 群号
+            operator_user_id: 操作者用户ID
+
+        Returns:
+            bool: 是否成功激活（True表示激活成功，False表示已存在）
+        """
+        async with get_session() as session:
+            session: AsyncSession
+            record = await session.get(cls, group_id)
+            if record:
+                return False
+            record = cls(group_id=group_id, operator_user_id=operator_user_id)
+            session.add(record)
+            await session.commit()
+            return True
+
+    @classmethod
+    async def deactivate(cls, group_id: str) -> bool:
+        """取消群白名单
+
+        Args:
+            group_id: 群号
+
+        Returns:
+            bool: 是否成功取消（True表示取消成功，False表示记录不存在）
+        """
+        async with get_session() as session:
+            session: AsyncSession
+            record = await session.get(cls, group_id)
+            if not record:
+                return False
+            await session.delete(record)
+            await session.commit()
+            return True
+
+    @classmethod
+    async def get_record(cls, group_id: str) -> "GroupWhiteListRecord | None":
+        """获取群白名单记录
+
+        Args:
+            group_id: 群号
+
+        Returns:
+            GroupWhiteListRecord | None: 白名单记录（存在返回记录，不存在返回None）
+        """
+        async with get_session() as session:
+            session: AsyncSession
+            return await session.get(cls, group_id)
 
 
 class CooldownRecord(Model):

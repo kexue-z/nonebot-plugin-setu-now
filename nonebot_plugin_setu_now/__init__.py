@@ -7,6 +7,7 @@ import asyncio
 from pathlib import Path
 
 from arclet.alconna import Alconna, Args, Option, action
+from nonebot import Bot
 from nonebot.exception import ActionFailed
 from nonebot.log import logger
 from nonebot.params import Depends
@@ -15,11 +16,12 @@ from nonebot_plugin_alconna import Arparma, CommandMeta, UniMessage, on_alconna
 from nonebot_plugin_uninfo import Uninfo
 from PIL import UnidentifiedImageError
 
-from .config import EFFECT, EXCLUDEAI, MAX, SETU_PATH, WITHDRAW_TIME, Config
+from .config import EFFECT, EXCLUDEAI, MAX, SETU_PATH, SETU_R18, WITHDRAW_TIME, Config
 from .cooldown import Cooldown
 from .data_source import SetuHandler
 from .database import (
     CooldownRecord,
+    GroupWhiteListRecord,
     auto_upgrade_setuinfo,
     bind_message_data,
 )
@@ -27,7 +29,7 @@ from .img_utils import EFFECT_FUNC_LIST, pil2bytes
 from .models import Setu, SetuNotFindError
 from .perf_timer import PerfTimer
 
-# from .r18_whitelist import get_group_white_list_record
+# from .r18_whitelist import check_group_r18_whitelist
 from .utils import SpeedLimiter
 
 usage_msg = """TL;DR: 色图 或 看文档"""
@@ -61,23 +63,48 @@ setu_matcher = on_alconna(
             action=action.append,
             help_text="标签, 多个标签需要连续使用 -t aaa -t bbb 分隔",
         ),
+        Option(
+            "--switch",
+            action=action.store_true,
+            default=False,
+            help_text="切换R18白名单",
+        ),
         meta=CommandMeta(
             description=(
                 "获取色图, 格式 setu [-r|--r18] [-t|--tag 标签] [数量] [关键词]"
                 "建议使用 -t 标签 来获取指定标签的色图，不建议使用关键词来获取色图。"
             )
         ),
-    ),
+    )
 )
+
+
+@setu_matcher.handle()
+async def _(bot: Bot, session: Uninfo, result: Arparma):
+    if not result.options.get("switch").value:
+        return
+
+    if session.user.id not in bot.config.superusers:
+        await setu_matcher.finish("仅超级用户可以使用该功能")
+
+    if not session.scene.is_group:
+        await setu_matcher.finish("仅支持在群组中使用")
+
+    has_r18_access = await GroupWhiteListRecord.get_record(session.group.id)
+    if has_r18_access:
+        await GroupWhiteListRecord.deactivate(session.group.id)
+        await setu_matcher.finish("已关闭R18白名单")
+    else:
+        await GroupWhiteListRecord.activate(session.group.id, session.user.id)
+        await setu_matcher.finish("已开启R18白名单")
 
 
 # TODO: CD 限制 群聊白名单限制
 @setu_matcher.handle()
-async def _(
+async def handle_setu_command(
     session: Uninfo,
     result: Arparma,
     is_cooldown: bool = Depends(Cooldown),
-    # white_list_record=Depends(get_group_white_list_record),
 ):
     # is_cooldown: True 表示冷却完成
     if not is_cooldown:
@@ -102,7 +129,12 @@ async def _(
 
     # R18内容控制逻辑
     if r18:
-        await _validate_r18_access(session)
+        has_r18_access = await _validate_r18_access(session)
+        if not has_r18_access:
+            await CooldownRecord.delete_record(session.user.id)
+            await setu_matcher.finish(
+                "不可以涩涩！\n本群未启用R18支持\n请移除R18标签或联系维护组"
+            )
         num = 1  # R18模式下强制单张图片
 
     failure_msg = 0
@@ -183,12 +215,18 @@ async def _(
     setu_total_timer.stop()
 
 
-async def _validate_r18_access(session: Uninfo) -> None:
+async def _validate_r18_access(session: Uninfo) -> bool:
     """验证R18内容访问权限"""
-    if not session.scene.is_private:
-        await setu_matcher.finish(
-            "不可以涩涩！\n本群未启用R18支持\n请移除R18标签或联系维护组"
-        )
+    # 如果是私聊，检查是否开启了R18权限
+    if session.scene.is_private:
+        return SETU_R18
+
+    # 检查群是否在 R18 白名单中
+    if session.scene.is_group:
+        has_r18_access = await GroupWhiteListRecord.get_record(session.group.id)
+        return True if has_r18_access else False
+
+    return False
 
 
 # TODO: 没有查询功能了，到时候再写

@@ -16,6 +16,7 @@ class Config(BaseModel):
     setu_add_random_effect: bool = True
     setu_minimum_send_interval: int = 3
     setu_excludeAI: bool = False
+    setu_r18: bool = False
 
 
 plugin_config = get_plugin_config(Config)
@@ -30,3 +31,4 @@ MAX = plugin_config.setu_max
 EFFECT = plugin_config.setu_add_random_effect
 SEND_INTERVAL = plugin_config.setu_minimum_send_interval
 EXCLUDEAI = plugin_config.setu_excludeAI
+SETU_R18 = plugin_config.setu_r18
