@@ -8,10 +8,10 @@ dependencies = [
     "nonebot2>=2.4.0",
     "pydantic>=2.10.3",
     "pillow>=11.0.0",
-    "nonebot-plugin-tortoise-orm>=0.1.4",
     "nonebot-plugin-localstore>=0.7.2",
     "nonebot-plugin-alconna>=0.60.1",
     "nonebot-plugin-uninfo>=0.10.0",
+    "nonebot-plugin-orm>=0.8.2",
 ]
 requires-python = ">=3.11,<4.0"
 readme = "README.md"
@@ -24,6 +24,7 @@ homepage = "https://github.com/kexue-z/nonebot-plugin-setu-now"
 
 [dependency-groups]
 dev = [
+    "greenlet>=3.2.4",
     "nb-cli>=1.4.2",
     "nonebot-adapter-onebot>=2.4.6",
     "nonebot2[fastapi]>=2.4.3",

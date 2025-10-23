@@ -1,7 +1,7 @@
 from nonebot import require
 
 require("nonebot_plugin_localstore")
-require("nonebot_plugin_tortoise_orm")
+require("nonebot_plugin_orm")
 
 import asyncio
 from pathlib import Path
@@ -16,7 +16,6 @@ from nonebot_plugin_alconna import (
     UniMessage,
     on_alconna,
 )
-from nonebot_plugin_tortoise_orm import add_model
 from nonebot_plugin_uninfo import Uninfo
 from PIL import UnidentifiedImageError
 
@@ -41,9 +40,6 @@ __plugin_meta__ = PluginMetadata(
     config=Config,
     extra={},
 )
-
-
-add_model("nonebot_plugin_setu_now.database")
 
 global_speedlimiter = SpeedLimiter()
 
