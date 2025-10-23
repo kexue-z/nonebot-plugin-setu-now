@@ -6,11 +6,12 @@ authors = [{ name = "kexue", email = "xana278@foxmail.com" }]
 dependencies = [
     "httpx>=0.28.0",
     "nonebot2>=2.4.0",
-    "nonebot-adapter-onebot>=2.4.6",
     "pydantic>=2.10.3",
     "pillow>=11.0.0",
     "nonebot-plugin-tortoise-orm>=0.1.4",
     "nonebot-plugin-localstore>=0.7.2",
+    "nonebot-plugin-alconna>=0.60.1",
+    "nonebot-plugin-uninfo>=0.10.0",
 ]
 requires-python = ">=3.11,<4.0"
 readme = "README.md"
@@ -21,10 +22,70 @@ keywords = ["nonebot2"]
 [project.urls]
 homepage = "https://github.com/kexue-z/nonebot-plugin-setu-now"
 
+[dependency-groups]
+dev = [
+    "nb-cli>=1.4.2",
+    "nonebot-adapter-onebot>=2.4.6",
+    "nonebot2[fastapi]>=2.4.3",
+]
+
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+
 [tool.ruff]
-ignore = ["E402"]
+line-length = 88
+target-version = "py39"
+
+
+[tool.ruff.format]
+line-ending = "lf"
+
+
+[tool.ruff.lint]
+select = [
+    "F",     # Pyflakes
+    "W",     # pycodestyle warnings
+    "E",     # pycodestyle errors
+    "I",     # isort
+    "UP",    # pyupgrade
+    "ASYNC", # flake8-async
+    "C4",    # flake8-comprehensions
+    "T10",   # flake8-debugger
+    "T20",   # flake8-print
+    "PYI",   # flake8-pyi
+    "PT",    # flake8-pytest-style
+    "Q",     # flake8-quotes
+    "TID",   # flake8-tidy-imports
+    "RUF",   # Ruff-specific rules
+]
+ignore = [
+    "E402",   # module-import-not-at-top-of-file
+    "UP037",  # quoted-annotation
+    "RUF001", # ambiguous-unicode-character-string
+    "RUF002", # ambiguous-unicode-character-docstring
+    "RUF003", # ambiguous-unicode-character-comment
+]
+
+[tool.ruff.lint.isort]
+force-sort-within-sections = true
+known-first-party = ["nonebot_plugin_setu_now"]
+extra-standard-library = ["typing_extensions"]
+
+
+[tool.ruff.lint.flake8-pytest-style]
+fixture-parentheses = false
+mark-parentheses = false
+
+
+[tool.ruff.lint.pyupgrade]
+keep-runtime-typing = true
+
+
+[tool.nonebot]
+plugins = ["nonebot_plugin_setu_now"]
+adapters = [
+    { name = "OneBot V11", module_name = "nonebot.adapters.onebot.v11" },
+]

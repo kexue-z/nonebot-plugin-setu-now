@@ -1,10 +1,9 @@
+from collections.abc import Awaitable, Coroutine
 import functools
 import sys
 from typing import (
     Any,
-    Awaitable,
     Callable,
-    Coroutine,
     Dict,
     Generic,
     Optional,

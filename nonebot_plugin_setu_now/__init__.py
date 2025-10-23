@@ -4,41 +4,30 @@ require("nonebot_plugin_localstore")
 require("nonebot_plugin_tortoise_orm")
 
 import asyncio
-from re import I, sub
-from typing import Any, Union, Annotated
 from pathlib import Path
 
-from PIL import UnidentifiedImageError
-from nonebot import on_regex, on_command
-from nonebot.log import logger
-from nonebot.params import Depends, RegexGroup
-from nonebot.plugin import PluginMetadata
+from arclet.alconna import Alconna, Args, Option, action
 from nonebot.exception import ActionFailed
-from nonebot.adapters.onebot.v11 import (
-    GROUP,
-    PRIVATE_FRIEND,
-    Bot,
-    Message,
-    MessageEvent,
-    MessageSegment,
-    GroupMessageEvent,
-    PrivateMessageEvent,
+from nonebot.log import logger
+from nonebot.params import Depends
+from nonebot.plugin import PluginMetadata
+from nonebot_plugin_alconna import (
+    Arparma,
+    UniMessage,
+    on_alconna,
 )
 from nonebot_plugin_tortoise_orm import add_model
-from nonebot.adapters.onebot.v11.helpers import (
-    Cooldown,
-    CooldownIsolateLevel,
-    autorevoke_send,
-)
+from nonebot_plugin_uninfo import Uninfo
+from PIL import UnidentifiedImageError
 
-from .utils import SpeedLimiter
-from .config import MAX, CDTIME, EFFECT, SETU_PATH, WITHDRAW_TIME, Config, EXCLUDEAI
-from .models import Setu, SetuNotFindError
-from .database import SetuInfo, MessageInfo, bind_message_data, auto_upgrade_setuinfo
-from .img_utils import EFFECT_FUNC_LIST, image_segment_convert
-from .perf_timer import PerfTimer
+from .config import CDTIME, EFFECT, EXCLUDEAI, MAX, SETU_PATH, WITHDRAW_TIME, Config
 from .data_source import SetuHandler
+from .database import MessageInfo, SetuInfo, auto_upgrade_setuinfo, bind_message_data
+from .img_utils import EFFECT_FUNC_LIST, pil2bytes
+from .models import Setu, SetuNotFindError
+from .perf_timer import PerfTimer
 from .r18_whitelist import get_group_white_list_record
+from .utils import SpeedLimiter
 
 usage_msg = """TL;DR: 色图 或 看文档"""
 
@@ -57,63 +46,52 @@ add_model("nonebot_plugin_setu_now.database")
 
 global_speedlimiter = SpeedLimiter()
 
-# TODO: 不要用regex辣
-setu_matcher = on_regex(
-    r"^(setu|色图|涩图|来点色色|色色|涩涩|来点色图)\s?([x|✖️|×|X|*]?\d+[张|个|份]?)?\s?(r18)?\s?\s?(tag)?\s?(.*)?",
-    flags=I,
-    permission=PRIVATE_FRIEND | GROUP,
+setu_matcher = on_alconna(
+    Alconna(
+        "setu",
+        Args["num", int, 1],
+        Args["key", str, ""],
+        Option("-r|--r18", action=action.store_true, default=False),
+        Option("-t|--tag", Args["tag", str, ""], action=action.append),
+    ),
+    aliases={"来点色图", "色色", "涩涩", "来点色色"},
 )
 
 
+# TODO: CD 限制 群聊白名单限制
 @setu_matcher.handle(
-    parameterless=[
-        Cooldown(
-            cooldown=CDTIME,
-            prompt="你冲得太快啦，请稍后再试",
-            isolate_level=CooldownIsolateLevel.USER,
-        )
-    ]
+    # parameterless=[
+    #     Cooldown(
+    #         cooldown=CDTIME,
+    #         prompt="你冲得太快啦，请稍后再试",
+    #         isolate_level=CooldownIsolateLevel.USER,
+    #     )
+    # ]
 )
 async def _(
-    bot: Bot,
-    event: Union[PrivateMessageEvent, GroupMessageEvent],
-    # state: T_State,
-    regex_group: Annotated[tuple[Any, ...], RegexGroup()],
-    white_list_record=Depends(get_group_white_list_record),
+    session: Uninfo,
+    result: Arparma,
+    # white_list_record=Depends(get_group_white_list_record),
 ):
-    # await setu_matcher.finish("服务器维护喵，暂停服务抱歉喵")
+    # 解析参数
+    num = min(result.main_args.get("num", 1), MAX)
+    key = result.main_args.get("key", "")
+    r18 = result.options.get("r18").value if "r18" in result.options else False
+    tag = (
+        result.options.get("tag").args.get("tag", []) if "tag" in result.options else []
+    )
+
+    logger.debug(f"Setu: r18:{r18}, tag:{tag}, key:{key}, num:{num}")
     setu_total_timer = PerfTimer("Image request total")
-    args = list(regex_group)
-    logger.debug(f"args={args}")
-    num = args[1]
-    r18 = args[2]
-    tags = args[3]
-    key = args[4]
 
-    num = int(sub(r"[张|个|份|x|✖️|×|X|*]", "", num)) if num else 1
-    num = min(num, MAX)
-
-    # 如果存在 tag 关键字, 则将 key 视为tag
-    if tags:
-        tags = list(map(lambda _l: _l.split("或"), key.split()))
+    # 如果存在 tag 关键字, 则不用 key
+    if tag:
         key = ""
 
-    # 仅在私聊中开启
-    # r18 = True if (isinstance(event, PrivateMessageEvent) and r18) else False
+    # R18内容控制逻辑
     if r18:
-        if isinstance(event, PrivateMessageEvent):
-            r18 = True
-        elif isinstance(event, GroupMessageEvent):
-            if white_list_record is None:
-                await setu_matcher.finish(
-                    "不可以涩涩！\n本群未启用R18支持\n请移除R18标签或联系维护组"
-                )
-            r18 = True
-
-    if r18:
-        num = 1
-
-    logger.debug(f"Setu: r18:{r18}, tag:{tags}, key:{key}, num:{num}")
+        await _validate_r18_access(session)
+        num = 1  # R18模式下强制单张图片
 
     failure_msg = 0
 
@@ -123,41 +101,44 @@ async def _(
             logger.warning("Invalid image type, skipped")
             failure_msg += 1
             return
+
         for process_func in EFFECT_FUNC_LIST:
             if r18 and process_func == EFFECT_FUNC_LIST[0]:
-                # R18禁止使用默认图像处理方法(do_nothing)
                 continue
-            # if process_func == EFFECT_FUNC_LIST[0]:
-            #     continue
+
             logger.debug(f"Using effect {process_func}")
             effert_timer = PerfTimer.start("Effect process")
+
             try:
                 image = process_func(setu.img)  # type: ignore
             except UnidentifiedImageError:
                 logger.warning(f"Unidentified image: {type(setu.img)}")
                 failure_msg += 1
                 return
+
             effert_timer.stop()
-            msg = Message(image_segment_convert(image))
+
+            msg = UniMessage.image(raw=pil2bytes(image))
+
             try:
                 await global_speedlimiter.async_speedlimit()
                 send_timer = PerfTimer("Image send")
                 message_id = 0
-                if not WITHDRAW_TIME:
-                    # 未设置撤回时间 正常发送
-                    message_id: int = (await setu_matcher.send(msg))["message_id"]
+                receipt = await msg.send()
 
-                    await auto_upgrade_setuinfo(setu)
-                    await bind_message_data(message_id, setu.pid)
-                    logger.debug(f"Message ID: {message_id}")
-                else:
-                    logger.debug(f"Using auto revoke API, interval: {WITHDRAW_TIME}")
-                    await autorevoke_send(
-                        bot=bot, event=event, message=msg, revoke_interval=WITHDRAW_TIME
+                logger.debug(receipt.msg_ids)
+                message_id = receipt.msg_ids[0]["message_id"]
+
+                await auto_upgrade_setuinfo(setu)
+                await bind_message_data(message_id, setu.pid)
+                logger.debug(f"Message ID: {message_id}")
+
+                if WITHDRAW_TIME:
+                    logger.debug(
+                        f"Recall message {message_id} in {WITHDRAW_TIME} seconds"
                     )
-                """
-                发送成功
-                """
+                    await receipt.recall(delay=WITHDRAW_TIME)
+
                 send_timer.stop()
                 global_speedlimiter.send_success()
                 if SETU_PATH is None:  # 未设置缓存路径，删除缓存
@@ -174,18 +155,28 @@ async def _(
         if SETU_PATH is None:  # 未设置缓存路径，删除缓存
             Path(setu.img).unlink()
 
-    setu_handler = SetuHandler(key, tags, r18, num, nb_send_handler, EXCLUDEAI)
+    setu_handler = SetuHandler(key, tag, r18, num, nb_send_handler, EXCLUDEAI)
     try:
         await setu_handler.process_request()
     except SetuNotFindError:
-        await setu_matcher.finish(f"没有找到关于 {tags or key} 的色图喵")
+        await setu_matcher.finish(f"没有找到关于 {tag or key} 的色图喵")
     if failure_msg:
         await setu_matcher.send(
-            message=Message(f"{failure_msg} 张图片消失了喵"),
+            message=UniMessage.text(f"{failure_msg} 张图片消失了喵"),
         )
     setu_total_timer.stop()
 
 
+async def _validate_r18_access(session: Uninfo) -> None:
+    """验证R18内容访问权限"""
+    if not session.scene.is_private:
+        await setu_matcher.finish(
+            "不可以涩涩！\n本群未启用R18支持\n请移除R18标签或联系维护组"
+        )
+
+
+# TODO: 没有查询功能了，到时候再写
+"""
 setuinfo_matcher = on_command("信息")
 
 
@@ -219,3 +210,4 @@ async def _(
         await setu_matcher.finish(MessageSegment.reply(reply_message_id) + info_message)
     else:
         await setuinfo_matcher.finish("该插画相关信息已被移除")
+"""

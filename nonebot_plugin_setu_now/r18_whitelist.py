@@ -1,9 +1,9 @@
 from typing import Optional
 
+from nonebot.adapters.onebot.v11 import GroupMessageEvent, MessageEvent
 from nonebot.log import logger
-from nonebot.plugin.on import on_command
 from nonebot.permission import SUPERUSER
-from nonebot.adapters.onebot.v11 import MessageEvent, GroupMessageEvent
+from nonebot.plugin.on import on_command
 
 from .database import GroupWhiteListRecord
 

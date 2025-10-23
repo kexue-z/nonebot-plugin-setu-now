@@ -1,14 +1,14 @@
-from typing import List, Callable
 from asyncio import gather
 from pathlib import Path
+from typing import Callable
 
-import nonebot_plugin_localstore as store
 from httpx import AsyncClient
 from nonebot.log import logger
+import nonebot_plugin_localstore as store
 
-from .utils import download_pic
-from .config import PROXY, API_URL, SETU_SIZE, REVERSE_PROXY
+from .config import API_URL, PROXY, REVERSE_PROXY, SETU_SIZE
 from .models import Setu, SetuApiData, SetuNotFindError
+from .utils import download_pic
 
 CACHE_PATH = Path(store.get_cache_dir("nonebot_plugin_setu_now"))
 if not CACHE_PATH.exists():
@@ -20,7 +20,7 @@ class SetuHandler:
     def __init__(
         self,
         key: str,
-        tags: List[str],
+        tags: list[str],
         r18: bool,
         num: int,
         handler: Callable,
@@ -35,7 +35,7 @@ class SetuHandler:
         self.proxy = PROXY
         self.reverse_proxy_url = REVERSE_PROXY
         self.handler = handler
-        self.setu_instance_list: List[Setu] = []
+        self.setu_instance_list: list[Setu] = []
         self.excludeAI = excludeAI
 
     async def refresh_api_info(self):
