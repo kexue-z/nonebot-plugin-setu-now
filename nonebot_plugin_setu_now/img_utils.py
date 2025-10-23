@@ -1,7 +1,7 @@
 from io import BytesIO
 from pathlib import Path
 from random import choice, randint
-from typing import Callable, List, Union
+from typing import Callable, Union
 
 from nonebot.adapters.onebot.v11 import MessageSegment
 from nonebot.log import logger
@@ -150,7 +150,7 @@ def pil2bytes(img: Image.Image) -> BytesIO:
     return buf
 
 
-EFFECT_FUNC_LIST: List[Callable[[Union[Path, Image.Image, bytes]], Image.Image]] = [
+EFFECT_FUNC_LIST: list[Callable[[Union[Path, Image.Image, bytes]], Image.Image]] = [
     do_nothing,
     draw_frame,
     random_flip,

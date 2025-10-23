@@ -1,7 +1,7 @@
 import asyncio
 from pathlib import Path
 import time
-from typing import List, Optional
+from typing import Optional
 
 from httpx import AsyncClient
 from nonebot.adapters.onebot.v11 import Bot, GroupMessageEvent, Message
@@ -56,7 +56,7 @@ async def send_forward_msg(
     event: GroupMessageEvent,
     name: str,
     uin: str,
-    msgs: List[Message],
+    msgs: list[Message],
 ):
     """
     :说明: `send_forward_msg`

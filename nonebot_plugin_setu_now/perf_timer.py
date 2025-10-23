@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 import time
-from typing import Dict
+from typing import ClassVar
 
 from nonebot.log import logger
 
 
 class PerfTimer:
-    timer_list: Dict[str, float] = {}
+    timer_list: ClassVar[dict[str, float]] = {}
 
     def __init__(self, name: str) -> None:
         self.name: str = name

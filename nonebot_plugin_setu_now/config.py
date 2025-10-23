@@ -1,11 +1,9 @@
-from typing import Set
-
 from nonebot import get_plugin_config
 from pydantic import BaseModel
 
 
 class Config(BaseModel):
-    superusers: Set[str]
+    superusers: set[str]
     debug: bool = False
     setu_cd: int = 60
     setu_path: str | None = None

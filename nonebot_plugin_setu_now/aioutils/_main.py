@@ -4,7 +4,6 @@ import sys
 from typing import (
     Any,
     Callable,
-    Dict,
     Generic,
     Optional,
     TypeVar,
@@ -92,7 +91,7 @@ def create_task_group() -> "TaskGroup":
 def runnify(
     async_function: Callable[T_ParamSpec, Coroutine[Any, Any, T_Retval]],
     backend: str = "asyncio",
-    backend_options: Optional[Dict[str, Any]] = None,
+    backend_options: dict[str, Any] | None = None,
 ) -> Callable[T_ParamSpec, T_Retval]:
     @functools.wraps(async_function)
     def wrapper(*args: T_ParamSpec.args, **kwargs: T_ParamSpec.kwargs) -> T_Retval:
