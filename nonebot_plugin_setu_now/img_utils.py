@@ -6,7 +6,6 @@ from typing import Callable, Union
 from nonebot.log import logger
 from PIL import Image, ImageFilter
 
-# from .config import SEND_AS_BYTES
 # from .perf_timer import PerfTimer
 
 

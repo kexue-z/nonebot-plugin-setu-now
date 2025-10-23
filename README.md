@@ -68,7 +68,6 @@ setu_api_url=
 setu_max=
 setu_add_random_effect=
 setu_minimum_send_interval=
-setu_send_as_bytes=
 setu_excludeAI=
 ```
 
@@ -83,9 +82,6 @@ setu_excludeAI=
 - `setu_max` 一次获取色图的数量 默认 `30` 如果你的服务器/主机内存吃紧 建议调小
 - `setu_add_random_effect` 在发送失败时，添加特效以尝试重新发送 默认 `True`
 - `setu_minimum_send_interval` 连续发送最小间隔（秒） 可选 默认 `3` 
-- `setu_send_as_bytes` 以bytes方式发送到客户端，默认 `True` ，
-  - `True` ：Nonebot将会读取临时路径下的图片，并传到客户端。兼容性更好
-  - `False` : 将会直接传输文件路径到客户端，并让客户端来读取。速度较快。如果客户端与 Nonebot 处于容器中，并且没有设定共享路径，则客户端将会无法读取图片，导致发送失败。
 - `setu_excludeAI` 排除 AI 生成的图片 默认 `False`
   - `True` ：排除 AI 生成的图片
   - `False` : 不排除 AI 生成的图片
