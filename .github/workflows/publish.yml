@@ -1,3 +1,5 @@
+name: Publish to PyPI
+
 on:
   push:
     tags:
@@ -33,6 +35,9 @@ jobs:
 
       - name: Build Package
         run: uv build
+
+      - name: Check Distribution
+        run: uvx twine check dist/*
 
       - name: pypi-publish
         uses: pypa/gh-action-pypi-publish@v1.11.0

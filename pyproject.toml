@@ -1,6 +1,6 @@
 [project]
 name = "nonebot-plugin-setu-now"
-version = "1.0.0.alpha.1"
+version = "1.0.0.dev1"
 description = "另一个色图插件"
 authors = [{ name = "kexue", email = "xana278@foxmail.com" }]
 dependencies = [
