@@ -845,7 +845,7 @@ default = [
 
 [[package]]
 name = "nonebot-plugin-setu-now"
-version = "1.0.0.dev1"
+version = "1.0.0.dev2"
 source = { editable = "." }
 dependencies = [
     { name = "httpx" },
