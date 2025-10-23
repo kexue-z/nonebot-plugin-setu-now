@@ -1,10 +1,9 @@
-name: Publish to PyPI
-
 on:
   push:
     tags:
-      - "*"
+    - "*"
   workflow_dispatch:
+
 
 jobs:
   pypi-publish:
@@ -12,32 +11,50 @@ jobs:
     runs-on: ubuntu-latest
     environment: release
     permissions:
-
+      # IMPORTANT: this permission is mandatory for trusted publishing
       id-token: write
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+    - name: Checkout
+      uses: actions/checkout@v4
 
-      - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@v3
-        with:
-          enable-cache: true
+    - name: Install the latest version of uv
+      uses: astral-sh/setup-uv@v3
+      with:
+        enable-cache: true
 
-      - name: "Set up Python"
-        uses: actions/setup-python@v5
-        with:
-          python-version-file: ".python-version"
+    - name: "Set up Python"
+      uses: actions/setup-python@v5
+      with:
+        python-version-file: ".python-version"
 
-      - run: uv sync
-        shell: bash
+    - run: uv sync
+      shell: bash
 
+    # - name: Get Version
+    #   id: version
+    #   run: |
+    #     echo "VERSION=$(uvx pdm show --version)" >> $GITHUB_OUTPUT
+    #     echo "TAG_VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+    #     echo "TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
 
+    # - name: Check Version
+    # if: steps.version.outputs.VERSION != steps.version.outputs.TAG_VERSION
+    #   run: exit 1
 
-      - name: Build Package
-        run: uv build
+    - name: Build Package
+      run: uv build
 
-      - name: Check Distribution
-        run: uvx twine check dist/*
+    - uses: actions/upload-artifact@v4
+      with:
+        name: artifact
+        path: dist/ # or path/to/artifact
 
-      - name: pypi-publish
-        uses: pypa/gh-action-pypi-publish@v1.11.0
+    - name: pypi-publish
+      uses: pypa/gh-action-pypi-publish@v1.12.3
+    # - name: Publish Package to PyPI
+    #   run: uv publish
+
+    # - name: Publish Package to GitHub Release
+    #   run: gh release create ${{ steps.version.outputs.TAG_NAME }} dist/*.tar.gz dist/*.whl -t "🔖 ${{ steps.version.outputs.TAG_NAME }}" --generate-notes
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
