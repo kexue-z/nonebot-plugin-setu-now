@@ -71,7 +71,8 @@ setu_matcher = on_alconna(
         ),
         meta=CommandMeta(
             description=(
-                "获取色图, 格式 setu [-r|--r18] [-t|--tag 标签] [数量] [关键词]"
+                "获取色图, 格式:\n"
+                "setu [-r|--r18] [-t|--tag 标签] [--switch] [数量] [关键词]\n"
                 "建议使用 -t 标签 来获取指定标签的色图，不建议使用关键词来获取色图。"
             )
         ),
@@ -99,7 +100,6 @@ async def _(bot: Bot, session: Uninfo, result: Arparma):
         await setu_matcher.finish("已开启R18白名单")
 
 
-# TODO: CD 限制 群聊白名单限制
 @setu_matcher.handle()
 async def handle_setu_command(
     session: Uninfo,
@@ -170,7 +170,6 @@ async def handle_setu_command(
                 message_id = 0
                 receipt = await msg.send()
 
-                logger.debug(receipt.msg_ids)
                 message_id = receipt.msg_ids[0]["message_id"]
 
                 await auto_upgrade_setuinfo(setu)

@@ -69,6 +69,7 @@ setu_max=
 setu_add_random_effect=
 setu_minimum_send_interval=
 setu_excludeAI=
+setu_r18=
 ```
 
 
@@ -85,6 +86,8 @@ setu_excludeAI=
 - `setu_excludeAI` 排除 AI 生成的图片 默认 `False`
   - `True` ：排除 AI 生成的图片
   - `False` : 不排除 AI 生成的图片
+- `setu_r18` 开启 R18 功能 默认 `False`
+
 
 > 有配置均可选，按需填写
 
@@ -96,7 +99,7 @@ setu_excludeAI=
 使用命令式交互获取色图
 
 ```
-setu [-r|--r18] [-t|--tag 标签] [数量] [关键词]
+setu [-r|--r18] [-t|--tag 标签] [--switch] [数量] [关键词]
 ```
 
 **解释:**
@@ -105,6 +108,7 @@ setu [-r|--r18] [-t|--tag 标签] [数量] [关键词]
 - 参数说明：
   - `-r` 或 `--r18`：获取R18内容，仅在私聊可用
   - `-t` 或 `--tag`：指定标签，多个标签需要连续使用 `-t 标签1 -t 标签2`
+  - `--switch` 或 `--switch`：切换R18白名单，仅超级用户可用
   - `数量`：获取的图片数量，默认1张，最多不超过配置的`setu_max`值
   - `关键词`：搜索关键词，匹配标题、作者或标签
 - 注意：
@@ -128,8 +132,4 @@ setu [-r|--r18] [-t|--tag 标签] [数量] [关键词]
 - 当前版本群聊中暂不支持 R18 内容
 
 > 注：白名单相关功能正在开发中，敬请期待后续更新
-
-# 在吗？
-
-- 色图 `on_regex` 而不是 `on_command`（不需要带命令前缀）
 
