@@ -11,11 +11,7 @@ from nonebot.exception import ActionFailed
 from nonebot.log import logger
 from nonebot.params import Depends
 from nonebot.plugin import PluginMetadata
-from nonebot_plugin_alconna import (
-    Arparma,
-    UniMessage,
-    on_alconna,
-)
+from nonebot_plugin_alconna import Arparma, CommandMeta, UniMessage, on_alconna
 from nonebot_plugin_uninfo import Uninfo
 from PIL import UnidentifiedImageError
 
@@ -45,13 +41,28 @@ global_speedlimiter = SpeedLimiter()
 
 setu_matcher = on_alconna(
     Alconna(
-        "setu",
+        ["setu", "色图", "来点色图", "色色", "涩涩", "来点色色"],
         Args["num", int, 1],
         Args["key", str, ""],
-        Option("-r|--r18", action=action.store_true, default=False),
-        Option("-t|--tag", Args["tag", str, ""], action=action.append),
+        Option(
+            "-r|--r18",
+            action=action.store_true,
+            default=False,
+            help_text="是否获取R18内容",
+        ),
+        Option(
+            "-t|--tag",
+            Args["tag", str, ""],
+            action=action.append,
+            help_text="标签, 多个标签需要连续使用 -t aaa -t bbb 分隔",
+        ),
+        meta=CommandMeta(
+            description=(
+                "获取色图, 格式 setu [-r|--r18] [-t|--tag 标签] [数量] [关键词]"
+                "建议使用 -t 标签 来获取指定标签的色图，不建议使用关键词来获取色图。"
+            )
+        ),
     ),
-    aliases={"来点色图", "色色", "涩涩", "来点色色"},
 )
 
 
