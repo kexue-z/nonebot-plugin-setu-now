@@ -3,12 +3,11 @@ from pathlib import Path
 from random import choice, randint
 from typing import Callable, Union
 
-from nonebot.adapters.onebot.v11 import MessageSegment
 from nonebot.log import logger
 from PIL import Image, ImageFilter
 
-from .config import SEND_AS_BYTES
-from .perf_timer import PerfTimer
+# from .config import SEND_AS_BYTES
+# from .perf_timer import PerfTimer
 
 
 def image_param_converter(source: Union[Path, Image.Image, bytes]) -> Image.Image:
@@ -116,30 +115,30 @@ def do_nothing(img: Path | Image.Image | bytes) -> Image.Image:
     return image_param_converter(img)
 
 
-def image_segment_convert(img: Union[Path, Image.Image, bytes]) -> MessageSegment:
-    if isinstance(img, Path):
-        # 将图片读取
-        if SEND_AS_BYTES:
-            img = Image.open(img)
-        else:
-            return MessageSegment.image(img)
-    elif isinstance(img, bytes):
-        img = Image.open(BytesIO(img))
-    elif isinstance(img, Image.Image):
-        pass
-    else:
-        raise ValueError(f"Unsopported image type: {type(img)}")
-    image_bytesio = BytesIO()
-    save_timer = PerfTimer.start(f"Save bytes {img.width} x {img.height}")
-    if img.mode != "RGB":
-        img = img.convert("RGB")
-    img.save(
-        image_bytesio,
-        format="JPEG",
-        quality="keep" if img.format in ("JPEG", "JPG") else 95,
-    )
-    save_timer.stop()
-    return MessageSegment.image(image_bytesio)  # type: ignore
+# def image_segment_convert(img: Union[Path, Image.Image, bytes]) -> MessageSegment:
+#     if isinstance(img, Path):
+#         # 将图片读取
+#         if SEND_AS_BYTES:
+#             img = Image.open(img)
+#         else:
+#             return MessageSegment.image(img)
+#     elif isinstance(img, bytes):
+#         img = Image.open(BytesIO(img))
+#     elif isinstance(img, Image.Image):
+#         pass
+#     else:
+#         raise ValueError(f"Unsopported image type: {type(img)}")
+#     image_bytesio = BytesIO()
+#     save_timer = PerfTimer.start(f"Save bytes {img.width} x {img.height}")
+#     if img.mode != "RGB":
+#         img = img.convert("RGB")
+#     img.save(
+#         image_bytesio,
+#         format="JPEG",
+#         quality="keep" if img.format in ("JPEG", "JPG") else 95,
+#     )
+#     save_timer.stop()
+#     return MessageSegment.image(image_bytesio)  # type: ignore
 
 
 def pil2bytes(img: Image.Image) -> BytesIO:

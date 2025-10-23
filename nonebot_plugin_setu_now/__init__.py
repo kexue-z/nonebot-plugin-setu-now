@@ -26,7 +26,8 @@ from .database import MessageInfo, SetuInfo, auto_upgrade_setuinfo, bind_message
 from .img_utils import EFFECT_FUNC_LIST, pil2bytes
 from .models import Setu, SetuNotFindError
 from .perf_timer import PerfTimer
-from .r18_whitelist import get_group_white_list_record
+
+# from .r18_whitelist import get_group_white_list_record
 from .utils import SpeedLimiter
 
 usage_msg = """TL;DR: 色图 或 看文档"""
